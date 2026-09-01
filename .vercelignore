@@ -1,0 +1,45 @@
+# =============================================================================
+# .vercelignore — Monorepo root
+# =============================================================================
+# Vercel reads this file from the repo root to decide which files are synced
+# to the build container (across ALL Vercel projects from this repo).
+#
+# WHY root-level placement matters:
+# - Vercel syncs the ENTIRE repo to the build container first, then applies
+#   Root Directory filter. Without .vercelignore, huge folders like
+#   server/, node_modules, dist/, .obsidian/ would be uploaded — wasting
+#   sync time and potentially hitting Vercel's 100 MB source limit.
+# - A root-level file covers both UserUI and DashboardUI Vercel projects.
+# - Subfolder .vercelignore files are NOT read by Vercel; only root matters.
+# =============================================================================
+
+# ----- Dependencies (huge; always reinstalled by Vercel's npm install) -----
+node_modules/
+
+# ----- Build output (rebuilt by Vercel; local dist/ is stale) -----
+dist/
+
+# ----- Server backend (NOT part of frontend deploy; very large) -----
+server/
+
+# ----- Environment / secrets (never deploy) -----
+.env
+.env.*
+
+# ----- Editor / IDE config -----
+.obsidian/
+.opencode/
+.vscode/
+.idea/
+
+# ----- Documentation / non-code -----
+memory/
+*.md
+
+# ----- OS artifacts -----
+.DS_Store
+Thumbs.db
+
+# ----- Test / coverage -----
+coverage/
+*.log

@@ -1,4 +1,50 @@
+# =============================================================================
+# Root .gitignore — projectKarangTaruna (monorepo)
+# =============================================================================
+
+# ----- Non-code / pipeline docs (keep out of VCS) -----
 .obsidian
 .opencode
 memory
 README.md
+
+# ----- node_modules di SEMUA subfolder (node_modules/ tanpa slash-) -----
+# (tanpa slash di awal/akhir agar cocok di level mana pun)
+node_modules
+
+# ----- Build output di semua subfolder -----
+dist
+dist-ssr
+
+# ----- Environment variables — JANGAN commit secret -----
+.env
+.env.*
+!.env.example
+*.local
+
+# ----- OS / editor artifacts -----
+.DS_Store
+Thumbs.db
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ----- Logs & test coverage -----
+*.log
+npm-debug.log*
+coverage
+
+# ---------------------------------------------------------------------------
+# CATATAN:
+# 1. `server/` TIDAK dikecualikan utuh — backend wajib ikut commit supaya bisa
+#    di-deploy nanti. Hanya `server/node_modules` & `server/.env*` yang
+#    dikecualikan lewat pola `node_modules` & `.env.*` di atas (berlaku global).
+# 2. `shared/` TIDAK boleh dikecualikan — folder ini adalah single source of
+#    truth data pengurus yang di-import kedua frontend via alias `@shared`.
+#    Tanpa `shared/` di commit, build Vercel UserUI & DashboardUI GAGAL resolve
+#    alias. (File konfigurasi deploy terpisah; lihat README / memory/10-deploy.md)
+# ---------------------------------------------------------------------------
