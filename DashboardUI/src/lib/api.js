@@ -14,7 +14,7 @@
 //   - Single -> data (objek)
 // ============================================================================
 
-const API_BASE = String(import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '')
+const API_BASE = String(import.meta.env.VITE_API_URL || 'https://karangtaruna-website-server.vercel.app/api').replace(/\/+$/, '')
 
 // --- Token di memori (non-persistent) ---------------------------------------
 let accessToken = null
