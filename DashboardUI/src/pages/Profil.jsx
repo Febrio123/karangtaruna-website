@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Save,
   Plus,
@@ -13,10 +13,15 @@ import {
   Youtube,
   Music2,
   Building2,
+  Eye,
 } from 'lucide-react'
 import Badge from '../components/ui/Badge.jsx'
 import Modal from '../components/ui/Modal.jsx'
 import EmptyState from '../components/ui/EmptyState.jsx'
+import LoadingState from '../components/ui/LoadingState.jsx'
+import InlineNotice from '../components/ui/InlineNotice.jsx'
+import { apiFetch } from '../lib/api'
+import { siteConfigAdapter } from '../lib/adapters.js'
 import { profil as initialProfil, socialLinks as initialSocial, statsProfil, infoUmum as initialInfo } from '../data/profil.js'
 
 const socialIconMap = {
@@ -31,28 +36,90 @@ const emptySocial = { platform: 'Instagram', handle: '', url: '' }
 
 export default function Profil() {
   const [profil, setProfil] = useState(initialProfil)
+  const [misiText, setMisiText] = useState('') // di-edit sebagai teks (1 baris = 1 poin)
   const [social, setSocial] = useState(initialSocial)
   const [info, setInfo] = useState(initialInfo)
+  const [statsForm, setStatsForm] = useState(statsProfil)
   const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [fallback, setFallback] = useState(false)
   const [infoModal, setInfoModal] = useState(false)
   const [editingInfo, setEditingInfo] = useState(null)
   const [infoForm, setInfoForm] = useState(emptyInfo)
   const [socialModal, setSocialModal] = useState(false)
   const [socialForm, setSocialForm] = useState(emptySocial)
 
+  async function loadData() {
+    setLoading(true)
+    try {
+      const raw = await apiFetch('/site-config')
+      const doc = raw?.data || raw || {}
+      const f = siteConfigAdapter.toFrontend(doc)
+      setProfil((p) => ({ ...p, ...f }))
+      setMisiText(f.misi.length ? f.misi.join('\n') : '')
+      setSocial(
+        f.socialLinks.length
+          ? f.socialLinks.map((s, i) => ({ id: i + 1, ...s }))
+          : initialSocial
+      )
+      setInfo(f.infoUmum.length ? f.infoUmum : initialInfo)
+      setStatsForm(
+        f.statsProfil.map((s, i) => ({
+          id: i + 1,
+          label: s.label,
+          nilai: s.nilai,
+        }))
+      )
+      setFallback(false)
+    } catch (err) {
+      console.log('[api] fallback: site-config', err)
+      setFallback(true)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [])
+
   function handleProfileChange(e) {
     const { name, value } = e.target
     setProfil((p) => ({ ...p, [name]: value }))
     setSaved(false)
+    setSaveError('')
   }
 
-  function handleSave(e) {
+  async function handleSave(e) {
     e.preventDefault()
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2500)
+    setSaving(true)
+    setSaveError('')
+    try {
+      const body = siteConfigAdapter.toBody({
+        ...profil,
+        socialLinks: social.map((s) => ({
+          platform: s.platform,
+          handle: s.handle || '',
+          url: s.url && s.url !== '#' ? s.url : s.handle || '',
+        })),
+        statsProfil: statsForm,
+        infoUmum: info,
+        misi: misiText.split('\n').map((m) => m.trim()).filter(Boolean),
+      })
+      await apiFetch('/site-config', { method: 'PUT', body })
+      await loadData()
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2500)
+    } catch (err) {
+      setSaveError(err?.message || 'Gagal menyimpan profil.')
+    } finally {
+      setSaving(false)
+    }
   }
 
-  // Info umum handlers
+  // ---- Info umum handlers (lokal; tersimpan saat salah satu form "Simpan" dikirim)
   function openInfoAdd() {
     setEditingInfo(null)
     setInfoForm(emptyInfo)
@@ -72,8 +139,8 @@ export default function Profil() {
     if (editingInfo) {
       setInfo((list) => list.map((i) => (i.id === editingInfo ? { ...i, ...infoForm } : i)))
     } else {
-      const newId = Math.max(...info.map((i) => i.id)) + 1
-      setInfo((list) => [{ id: newId, ...infoForm }, ...list])
+      const maxId = info.reduce((m, i) => (Number.isFinite(Number(i.id)) ? Math.max(m, Number(i.id)) : m), 0)
+      setInfo((list) => [{ id: String(maxId + 1), ...infoForm }, ...list])
     }
     setInfoModal(false)
   }
@@ -81,15 +148,15 @@ export default function Profil() {
     setInfo((list) => list.filter((i) => i.id !== id))
   }
 
-  // Social handlers
+  // ---- Social handlers
   function openSocialAdd() {
     setSocialForm(emptySocial)
     setSocialModal(true)
   }
   function handleSocialSave(e) {
     e.preventDefault()
-    const newId = Math.max(...social.map((s) => s.id)) + 1
-    setSocial((list) => [...list, { id: newId, ...socialForm, url: socialForm.url || '#' }])
+    const maxId = social.reduce((m, s) => (Number.isFinite(Number(s.id)) ? Math.max(m, Number(s.id)) : m), 0)
+    setSocial((list) => [...list, { id: maxId + 1, ...socialForm, url: socialForm.url || '#' }])
     setSocialModal(false)
   }
   function handleSocialDelete(id) {
@@ -100,14 +167,30 @@ export default function Profil() {
     setSocialForm((f) => ({ ...f, [name]: value }))
   }
 
+  function handleStatsChange(idx, value) {
+    setStatsForm((list) => list.map((s, i) => (i === idx ? { ...s, nilai: value } : s)))
+    setSaved(false)
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <p className="text-caption text-text-muted">
           Kelola profil organisasi dan informasi yang tampil di website.
         </p>
-        {saved && <Badge variant="success" dot>Perubahan tersimpan</Badge>}
+        <div className="flex items-center gap-2">
+          {saved && <Badge variant="success" dot>Perubahan tersimpan</Badge>}
+          {saveError && <InlineNotice>{saveError}</InlineNotice>}
+        </div>
       </div>
+
+      {fallback && !loading && (
+        <InlineNotice variant="warning">
+          Server tidak dapat diakses — menampilkan data cadangan lokal, perubahan tidak tersimpan.
+        </InlineNotice>
+      )}
+
+      {loading && <LoadingState label="Memuat profil organisasi..." className="py-8" />}
 
       {/* Profil organisasi */}
       <form onSubmit={handleSave} className="card p-5 space-y-4">
@@ -132,10 +215,27 @@ export default function Profil() {
             <label className="label" htmlFor="tentang">Tentang Organisasi</label>
             <textarea id="tentang" name="tentang" rows="3" className="input resize-none" value={profil.tentang} onChange={handleProfileChange} />
           </div>
+          <div>
+            <label className="label" htmlFor="visi">Visi</label>
+            <textarea id="visi" name="visi" rows="2" className="input resize-none" value={profil.visi || ''} onChange={handleProfileChange} />
+          </div>
+          <div>
+            <label className="label" htmlFor="misi">Misi</label>
+            <textarea
+              id="misi"
+              name="misiText"
+              rows="3"
+              className="input resize-none"
+              value={misiText}
+              onChange={(e) => setMisiText(e.target.value)}
+              placeholder="Satu misi per baris"
+            />
+            <p className="text-xs text-text-muted mt-1">Tulis satu misi dalam satu baris.</p>
+          </div>
         </div>
         <div className="flex justify-end">
-          <button type="submit" className="btn-primary">
-            <Save size={17} aria-hidden="true" /> Simpan Profil
+          <button type="submit" className="btn-primary" disabled={saving}>
+            <Save size={17} aria-hidden="true" /> {saving ? 'Menyimpan...' : 'Simpan Profil'}
           </button>
         </div>
       </form>
@@ -186,8 +286,8 @@ export default function Profil() {
           </div>
         </div>
         <div className="flex justify-end">
-          <button type="submit" className="btn-primary">
-            <Save size={17} aria-hidden="true" /> Simpan Kontak
+          <button type="submit" className="btn-primary" disabled={saving}>
+            <Save size={17} aria-hidden="true" /> {saving ? 'Menyimpan...' : 'Simpan Kontak'}
           </button>
         </div>
       </form>
@@ -198,11 +298,12 @@ export default function Profil() {
           <h3 className="font-heading font-semibold text-h3 text-text">Statistik Website</h3>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {statsProfil.map((s) => (
+          {statsForm.map((s, idx) => (
             <div key={s.id} className="flex items-center gap-3 p-3 rounded-md border border-border-light">
               <input
                 type="text"
-                defaultValue={s.nilai}
+                value={s.nilai}
+                onChange={(e) => handleStatsChange(idx, e.target.value)}
                 className="w-16 text-center font-heading font-bold text-h3 text-primary bg-primary-light rounded-md py-2 focus:outline-none focus:ring-2 focus:ring-primary"
                 aria-label={`Nilai ${s.label}`}
               />
@@ -213,6 +314,9 @@ export default function Profil() {
             </div>
           ))}
         </div>
+        <p className="text-xs text-text-muted mt-3">
+          Statistik ikut tersimpan saat tombol <strong>Simpan Profil</strong> / <strong>Simpan Kontak</strong> ditekan.
+        </p>
       </div>
 
       {/* Media sosial */}
@@ -233,7 +337,7 @@ export default function Profil() {
                 </span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-text">{s.platform}</p>
-                  <p className="text-xs text-text-muted truncate">{s.handle}</p>
+                  <p className="text-xs text-text-muted truncate">{s.handle || s.url}</p>
                 </div>
                 <Badge variant="neutral">Terhubung</Badge>
                 <button
@@ -292,6 +396,9 @@ export default function Profil() {
             ))}
           </div>
         )}
+        <p className="text-xs text-text-muted mt-3 inline-flex items-center gap-1">
+          <Eye size={13} aria-hidden="true" /> Perubahan section terkirim saat salah satu tombol "Simpan" ditekan.
+        </p>
       </div>
 
       {/* Info modal */}

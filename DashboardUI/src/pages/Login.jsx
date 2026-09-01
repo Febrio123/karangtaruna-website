@@ -1,10 +1,11 @@
-// Halaman Login — mockup frontend-only.
-// Full-page split layout: panel kiri branding biru gelap + panel kanan form.
-// Submit apa saja (email/password wajib isi) → set localStorage 'kt-auth' → masuk.
+// Halaman Login — terhubung ke backend (POST /api/auth/login).
+// Alur captcha: coba login tanpa captcha → jika server balas error
+// ber-code CAPTCHA_INVALID → ambil GET /api/auth/captcha → tampilkan SVG →
+// submit ulang dengan captchaId + kode yang diketik.
 import { useState } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import {
-  Mail,
+  User,
   Lock,
   Eye,
   EyeOff,
@@ -14,7 +15,10 @@ import {
   Wallet,
   CalendarDays,
   Users,
+  RefreshCw,
 } from 'lucide-react'
+import { apiFetch } from '../lib/api'
+import { useAuth } from '../context/AuthContext.jsx'
 
 const benefits = [
   { icon: ShieldCheck, text: 'Akses aman & terbatas untuk pengurus organisasi' },
@@ -24,27 +28,57 @@ const benefits = [
 ]
 
 export default function Login() {
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [remember, setRemember] = useState(true)
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [captcha, setCaptcha] = useState(null) // { id, image } — aktif saat server memintanya
+  const [captchaInput, setCaptchaInput] = useState('')
+  const { login, user, initializing } = useAuth()
   const navigate = useNavigate()
 
-  // Sudah login? Langsung kembali ke dashboard.
-  if (localStorage.getItem('kt-auth') === 'true') {
+  // Sudah login (sesi valid)? Langsung kembali ke dashboard.
+  if (!initializing && user) {
     return <Navigate to="/" replace />
   }
 
-  function handleSubmit(e) {
+  async function loadCaptcha() {
+    try {
+      const data = await apiFetch('/auth/captcha')
+      setCaptcha({ id: data?.captchaId, image: data?.image })
+      setCaptchaInput('')
+    } catch {
+      setCaptcha(null) // gagal memuat → biarkan user mencoba tanpa captcha
+    }
+  }
+
+  async function handleSubmit(e) {
     e.preventDefault()
-    if (!email.trim() || !password.trim()) {
-      setError('Email dan password wajib diisi.')
+    if (!username.trim() || !password.trim()) {
+      setError('Username dan password wajib diisi.')
       return
     }
-    localStorage.setItem('kt-auth', 'true')
-    if (remember) localStorage.setItem('kt-remember', 'true')
-    navigate('/')
+    setLoading(true)
+    setError('')
+    try {
+      await login({
+        username: username.trim(),
+        password,
+        remember,
+        ...(captcha ? { captchaId: captcha.id, captcha: captchaInput } : {}),
+      })
+      navigate('/', { replace: true })
+    } catch (err) {
+      setError(err?.message || 'Login gagal. Silakan coba lagi.')
+      if (err?.code === 'CAPTCHA_INVALID') {
+        // Server mewajibkan captcha → minta & tampilkan kode keamanan.
+        await loadCaptcha()
+      }
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -105,35 +139,35 @@ export default function Login() {
 
           <h2 className="font-heading font-bold text-h2 text-text">Masuk ke Dashboard</h2>
           <p className="text-caption text-text-muted mt-1.5">
-            Gunakan akun pengurus untuk mengelola website Karang Taruna.
+            Gunakan username &amp; password akun pengurus untuk mengelola website Karang Taruna.
           </p>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-5" noValidate>
             {error && (
               <div
                 role="alert"
-                className="flex items-center gap-2 rounded-md bg-[#FBE8E6] text-danger text-sm px-3.5 py-2.5"
+                className="flex items-start gap-2 rounded-md bg-[#FBE8E6] text-danger text-sm px-3.5 py-2.5"
               >
-                <Lock size={16} aria-hidden="true" /> {error}
+                <Lock size={16} className="mt-0.5 shrink-0" aria-hidden="true" /> <span>{error}</span>
               </div>
             )}
 
             <div>
-              <label className="label" htmlFor="email">Email</label>
+              <label className="label" htmlFor="username">Username</label>
               <div className="relative">
-                <Mail size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" aria-hidden="true" />
+                <User size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" aria-hidden="true" />
                 <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  value={email}
+                  id="username"
+                  name="username"
+                  type="text"
+                  autoComplete="username"
+                  value={username}
                   onChange={(e) => {
-                    setEmail(e.target.value)
+                    setUsername(e.target.value)
                     setError('')
                   }}
                   className="input pl-11"
-                  placeholder="admin@karangtaruna.id"
+                  placeholder="mis. ketua"
                 />
               </div>
             </div>
@@ -166,6 +200,40 @@ export default function Login() {
               </div>
             </div>
 
+            {captcha && captcha.id && (
+              <div className="rounded-md border border-border-light p-3 space-y-3">
+                <p className="text-xs text-text-muted">
+                  Server meminta kode keamanan. Ketik ulang kode pada gambar di bawah.
+                </p>
+                <div className="flex items-center gap-2">
+                  <img
+                    src={captcha.image}
+                    alt="Kode keamanan"
+                    className="h-12 rounded-sm border border-border-light"
+                  />
+                  <button
+                    type="button"
+                    onClick={loadCaptcha}
+                    className="btn-icon"
+                    aria-label="Muat ulang kode keamanan"
+                    title="Muat ulang kode"
+                  >
+                    <RefreshCw size={16} />
+                  </button>
+                </div>
+                <input
+                  id="captcha"
+                  name="captcha"
+                  type="text"
+                  autoComplete="off"
+                  value={captchaInput}
+                  onChange={(e) => setCaptchaInput(e.target.value)}
+                  className="input"
+                  placeholder="Ketik kode di gambar"
+                />
+              </div>
+            )}
+
             <div className="flex items-center gap-3">
               <label className="inline-flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
                 <input
@@ -178,13 +246,14 @@ export default function Login() {
               </label>
             </div>
 
-            <button type="submit" className="btn-primary w-full !min-h-[48px]">
-              <LogIn size={18} aria-hidden="true" /> Masuk
+            <button type="submit" disabled={loading} className="btn-primary w-full !min-h-[48px]">
+              <LogIn size={18} aria-hidden="true" />
+              {loading ? 'Memproses...' : 'Masuk'}
             </button>
           </form>
 
           <p className="text-xs text-text-muted mt-6 text-center leading-relaxed">
-            Demo: isi email &amp; password apa saja untuk masuk.
+            Hanya akun pengurus aktif yang dapat masuk. Akses dipantau (RBAC).
           </p>
         </div>
       </div>

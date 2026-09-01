@@ -1,10 +1,11 @@
 import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
 import Card from '../components/ui/Card';
-import { siteConfig } from '../data/siteConfig';
+import useSiteConfig from '../hooks/useSiteConfig';
 import useSeo from '../hooks/useSeo';
 
 export default function ProfileVision() {
+  const { data: siteConfig } = useSiteConfig();
   useSeo({
     title: 'Visi & Misi',
     description: 'Visi dan misi Karang Taruna Mekar Jaya dalam membangun pemuda yang beriman, kreatif, dan bertanggung jawab bagi masyarakat.',

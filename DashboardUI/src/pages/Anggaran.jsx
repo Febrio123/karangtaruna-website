@@ -1,9 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Plus, Pencil, Trash2, Wallet, TrendingUp, TrendingDown, ChevronDown, Search } from 'lucide-react'
 import Badge from '../components/ui/Badge.jsx'
 import Modal from '../components/ui/Modal.jsx'
 import EmptyState from '../components/ui/EmptyState.jsx'
+import LoadingState from '../components/ui/LoadingState.jsx'
+import InlineNotice from '../components/ui/InlineNotice.jsx'
 import KasChartCard from '../components/ui/KasChartCard.jsx'
+import { apiFetch } from '../lib/api'
+import { transaksiAdapter } from '../lib/adapters.js'
 import { anggaranByTahun, getTahunList, tahunBerjalan } from '../data/anggaran.js'
 import { formatCurrency, formatDateShort } from '../utils/format.js'
 
@@ -36,48 +40,86 @@ const emptyForm = (jenis) => ({
 export default function Anggaran() {
   const [tahun, setTahun] = useState(tahunBerjalan)
   const [tab, setTab] = useState('pemasukan')
-  const [data, setData] = useState(anggaranByTahun)
+  const [tahunList, setTahunList] = useState(getTahunList())
+  const [data, setData] = useState(anggaranByTahun) // {tahun:{pemasukan[],pengeluaran[]}}
+  const [ringkasan, setRingkasan] = useState({}) // {tahun:{totalPemasukan,totalPengeluaran,saldo}}
+  const [loading, setLoading] = useState(false)
+  const [fallback, setFallback] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [form, setForm] = useState(emptyForm('pemasukan'))
   const [filterBulan, setFilterBulan] = useState('semua')
   const [cari, setCari] = useState('')
+  const [saveError, setSaveError] = useState('')
+  const [saving, setSaving] = useState(false)
 
-  // Daftar tahun dibangun dinamis dari data yang tersedia + tahun berjalan,
-  // diurutkan menurun (terbaru dulu). Tahun berjalan dijamin selalu ada.
-  const tahunList = getTahunList()
+  // Proteksi race condition saat user cepat berpindah tahun.
+  const reqSeq = useRef(0)
+
+  async function loadTahun(t) {
+    const seq = ++reqSeq.current
+    setLoading(true)
+    try {
+      const [ring, list] = await Promise.all([
+        apiFetch(`/transaksi-anggaran/ringkasan?tahun=${t}`),
+        apiFetch(`/transaksi-anggaran?tahun=${t}&limit=200`),
+      ])
+      if (seq !== reqSeq.current) return
+      const items = (Array.isArray(list) ? list : list?.items || []).map(transaksiAdapter.toFrontend)
+      const grouped = {
+        pemasukan: items.filter((i) => i.jenis === 'pemasukan'),
+        pengeluaran: items.filter((i) => i.jenis === 'pengeluaran'),
+      }
+      setData((d) => ({ ...d, [t]: grouped }))
+      setRingkasan((m) => ({ ...m, [t]: ring || {} }))
+      setTahunList((l) =>
+        l.includes(String(t)) ? l : [...l, String(t)].sort((a, b) => Number(b) - Number(a))
+      )
+      setFallback(false)
+    } catch (err) {
+      if (seq !== reqSeq.current) return
+      console.log('[api] fallback: transaksi-anggaran', err)
+      setFallback(true)
+    } finally {
+      if (seq === reqSeq.current) setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadTahun(tahun)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tahun])
 
   const current = data[tahun] || { pemasukan: [], pengeluaran: [] }
-  const totalMasuk = current.pemasukan.reduce((s, i) => s + i.jumlah, 0)
-  const totalKeluar = current.pengeluaran.reduce((s, i) => s + i.jumlah, 0)
-  const saldo = totalMasuk - totalKeluar
+  const ring = ringkasan[tahun] || {}
 
-  // Data chart: agregat per bulan (Jan-Des) — otomatis mengikuti state `data`
-  // sehingga ikut berubah saat user menambah/mengedit/menghapus transaksi.
+  // Total prioritas dari endpoint ringkasan; fallback agregat dari list.
+  const totalMasuk =
+    ring.totalPemasukan ?? current.pemasukan.reduce((s, i) => s + i.jumlah, 0)
+  const totalKeluar =
+    ring.totalPengeluaran ?? current.pengeluaran.reduce((s, i) => s + i.jumlah, 0)
+  const saldo = ring.saldo ?? totalMasuk - totalKeluar
+
+  // Data chart: agregat per bulan dari transaksi (konsisten dengan tabel).
   const pemasukanBulan = aggregatePerBulan(current.pemasukan)
   const pengeluaranBulan = aggregatePerBulan(current.pengeluaran)
-
-  function setTahunWithData(t) {
-    if (!data[t]) {
-      setData((d) => ({ ...d, [t]: { pemasukan: [], pengeluaran: [] } }))
-    }
-    setTahun(t)
-  }
 
   function openAdd() {
     setEditingId(null)
     setForm(emptyForm(tab))
+    setSaveError('')
     setModalOpen(true)
   }
 
   function openEdit(item) {
     setEditingId(item.id)
     setForm({
-      jenis: tab,
+      jenis: item.jenis || tab,
       tanggal: item.tanggal,
       keterangan: item.keterangan,
       jumlah: String(item.jumlah),
     })
+    setSaveError('')
     setModalOpen(true)
   }
 
@@ -86,31 +128,35 @@ export default function Anggaran() {
     setForm((f) => ({ ...f, [name]: value }))
   }
 
-  function handleSave(e) {
+  async function handleSave(e) {
     e.preventDefault()
-    const listKey = form.jenis
-    const payload = { ...form, jumlah: Number(form.jumlah) }
-    setData((d) => {
-      const yearData = { ...d[tahun], [listKey]: [...d[tahun][listKey]] }
+    if (!form.keterangan.trim() || form.jumlah === '') return
+    setSaving(true)
+    setSaveError('')
+    const body = transaksiAdapter.toBody({ ...form, tahun }, tahun, form.jenis)
+    try {
       if (editingId) {
-        yearData[listKey] = yearData[listKey].map((i) =>
-          i.id === editingId ? { ...i, ...payload } : i
-        )
+        await apiFetch(`/transaksi-anggaran/${editingId}`, { method: 'PUT', body })
       } else {
-        const newId = Math.max(0, ...yearData[listKey].map((i) => i.id)) + 1
-        yearData[listKey] = [{ id: newId, ...payload }, ...yearData[listKey]]
+        await apiFetch('/transaksi-anggaran', { method: 'POST', body })
       }
-      return { ...d, [tahun]: yearData }
-    })
-    setModalOpen(false)
+      setModalOpen(false)
+      await loadTahun(tahun)
+    } catch (err) {
+      setSaveError(err?.message || 'Gagal menyimpan transaksi.')
+    } finally {
+      setSaving(false)
+    }
   }
 
-  function handleDelete(id) {
-    const listKey = tab
-    setData((d) => {
-      const yearData = { ...d[tahun], [listKey]: d[tahun][listKey].filter((i) => i.id !== id) }
-      return { ...d, [tahun]: yearData }
-    })
+  async function handleDelete(id) {
+    if (!window.confirm('Hapus transaksi ini?')) return
+    try {
+      await apiFetch(`/transaksi-anggaran/${id}`, { method: 'DELETE' })
+      await loadTahun(tahun)
+    } catch (err) {
+      window.alert(err?.message || 'Gagal menghapus transaksi.')
+    }
   }
 
   const rows = tab === 'pemasukan' ? current.pemasukan : current.pengeluaran
@@ -139,7 +185,7 @@ export default function Anggaran() {
           <button
             key={t}
             type="button"
-            onClick={() => setTahunWithData(t)}
+            onClick={() => setTahun(t)}
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
               tahun === t
                 ? 'bg-primary text-white shadow-sm'
@@ -153,7 +199,7 @@ export default function Anggaran() {
           <select
             className="select pr-9 w-auto"
             value={tahun}
-            onChange={(e) => setTahunWithData(e.target.value)}
+            onChange={(e) => setTahun(e.target.value)}
             aria-label="Pilih periode lain"
           >
             {tahunList.map((t) => (
@@ -163,6 +209,12 @@ export default function Anggaran() {
           <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" aria-hidden="true" />
         </div>
       </div>
+
+      {fallback && !loading && (
+        <InlineNotice variant="warning">
+          Server tidak dapat diakses — menampilkan data cadangan lokal, perubahan tidak tersimpan.
+        </InlineNotice>
+      )}
 
       {/* Summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -283,73 +335,79 @@ export default function Anggaran() {
           )}
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-border-light bg-bg-alt/50">
-                <th className="px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide">Tanggal</th>
-                <th className="px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide">Keterangan</th>
-                <th className="px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide text-right">Jumlah (Rp)</th>
-                <th className="px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border-light">
-              {rowsFiltered.map((item) => (
-                <tr key={item.id} className="hover:bg-primary-light/30 transition-colors">
-                  <td className="px-4 py-3 text-sm text-text-secondary whitespace-nowrap">{formatDateShort(item.tanggal)}</td>
-                  <td className="px-4 py-3 text-sm text-text">{item.keterangan}</td>
-                  <td className={`px-4 py-3 text-sm font-medium text-right whitespace-nowrap ${
-                    tab === 'pemasukan' ? 'text-primary' : 'text-danger'
-                  }`}>
-                    {tab === 'pemasukan' ? '+' : '-'}{formatCurrency(item.jumlah)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1">
-                      <button type="button" className="btn-icon w-9 h-9" onClick={() => openEdit(item)} aria-label={`Edit transaksi ${item.keterangan}`}>
-                        <Pencil size={16} />
-                      </button>
-                      <button
-                        type="button"
-                        className="btn-icon w-9 h-9 hover:text-danger hover:bg-[#FBE8E6]"
-                        onClick={() => handleDelete(item.id)}
-                        aria-label={`Hapus transaksi ${item.keterangan}`}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr className="border-t-2 border-border bg-bg-alt/50 font-medium">
-                <td className="px-4 py-3 text-sm text-text" colSpan="2">Total {tab === 'pemasukan' ? 'Pemasukan' : 'Pengeluaran'} {tahun}</td>
-                <td className={`px-4 py-3 text-sm font-semibold text-right ${tab === 'pemasukan' ? 'text-primary' : 'text-danger'}`}>{formatCurrency(totalFiltered)}</td>
-                <td className="px-4 py-3"></td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
+        {loading ? (
+          <LoadingState label={`Memuat data kas ${tahun}...`} />
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-border-light bg-bg-alt/50">
+                    <th className="px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide">Tanggal</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide">Keterangan</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide text-right">Jumlah (Rp)</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide text-right">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border-light">
+                  {rowsFiltered.map((item) => (
+                    <tr key={item.id} className="hover:bg-primary-light/30 transition-colors">
+                      <td className="px-4 py-3 text-sm text-text-secondary whitespace-nowrap">{formatDateShort(item.tanggal)}</td>
+                      <td className="px-4 py-3 text-sm text-text">{item.keterangan}</td>
+                      <td className={`px-4 py-3 text-sm font-medium text-right whitespace-nowrap ${
+                        tab === 'pemasukan' ? 'text-primary' : 'text-danger'
+                      }`}>
+                        {tab === 'pemasukan' ? '+' : '-'}{formatCurrency(item.jumlah)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-end gap-1">
+                          <button type="button" className="btn-icon w-9 h-9" onClick={() => openEdit(item)} aria-label={`Edit transaksi ${item.keterangan}`}>
+                            <Pencil size={16} />
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-icon w-9 h-9 hover:text-danger hover:bg-[#FBE8E6]"
+                            onClick={() => handleDelete(item.id)}
+                            aria-label={`Hapus transaksi ${item.keterangan}`}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr className="border-t-2 border-border bg-bg-alt/50 font-medium">
+                    <td className="px-4 py-3 text-sm text-text" colSpan="2">Total {tab === 'pemasukan' ? 'Pemasukan' : 'Pengeluaran'} {tahun}</td>
+                    <td className={`px-4 py-3 text-sm font-semibold text-right ${tab === 'pemasukan' ? 'text-primary' : 'text-danger'}`}>{formatCurrency(totalFiltered)}</td>
+                    <td className="px-4 py-3"></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
 
-        {rowsFiltered.length === 0 && rows.length > 0 && (
-          <div className="px-4 py-12 text-center">
-            <p className="text-sm text-text-secondary">Tidak ada hasil untuk filter ini.</p>
-            <button type="button" className="btn-secondary mt-3" onClick={clearFilter}>
-              Reset filter
-            </button>
-          </div>
-        )}
+            {rowsFiltered.length === 0 && rows.length > 0 && (
+              <div className="px-4 py-12 text-center">
+                <p className="text-sm text-text-secondary">Tidak ada hasil untuk filter ini.</p>
+                <button type="button" className="btn-secondary mt-3" onClick={clearFilter}>
+                  Reset filter
+                </button>
+              </div>
+            )}
 
-        {rows.length === 0 && (
-          <EmptyState
-            title={`Belum ada data ${tab}`}
-            description="Tambahkan transaksi untuk memulai pencatatan kas tahun ini."
-            action={
-              <button type="button" className="btn-primary" onClick={openAdd}>
-                <Plus size={18} aria-hidden="true" /> Tambah {tab === 'pemasukan' ? 'Pemasukan' : 'Pengeluaran'}
-              </button>
-            }
-          />
+            {rows.length === 0 && (
+              <EmptyState
+                title={`Belum ada data ${tab}`}
+                description="Tambahkan transaksi untuk memulai pencatatan kas tahun ini."
+                action={
+                  <button type="button" className="btn-primary" onClick={openAdd}>
+                    <Plus size={18} aria-hidden="true" /> Tambah {tab === 'pemasukan' ? 'Pemasukan' : 'Pengeluaran'}
+                  </button>
+                }
+              />
+            )}
+          </>
         )}
       </div>
 
@@ -361,6 +419,7 @@ export default function Anggaran() {
         subtitle={`Pencatatan kas periode ${tahun}.`}
       >
         <form onSubmit={handleSave} className="space-y-4">
+          {saveError && <InlineNotice>{saveError}</InlineNotice>}
           <div>
             <label className="label">Jenis Transaksi</label>
             <div className="flex gap-2">
@@ -400,7 +459,9 @@ export default function Anggaran() {
 
           <div className="flex items-center justify-end gap-3 pt-2">
             <button type="button" className="btn-secondary" onClick={() => setModalOpen(false)}>Batal</button>
-            <button type="submit" className="btn-primary">{editingId ? 'Simpan Perubahan' : 'Simpan Transaksi'}</button>
+            <button type="submit" className="btn-primary" disabled={saving}>
+              {saving ? 'Menyimpan...' : editingId ? 'Simpan Perubahan' : 'Simpan Transaksi'}
+            </button>
           </div>
         </form>
       </Modal>

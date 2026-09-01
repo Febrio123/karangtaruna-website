@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   TrendingUp,
@@ -8,46 +8,163 @@ import {
   ChevronDown,
   Info,
   HandCoins,
+  Plus,
+  X,
 } from 'lucide-react'
 import Badge from '../components/ui/Badge.jsx'
+import LoadingState from '../components/ui/LoadingState.jsx'
+import InlineNotice from '../components/ui/InlineNotice.jsx'
 import {
-  historiAnggaranEvent,
-  parameterEkonomi,
-  getDaftarEvent,
+  historiAnggaranEvent as fallbackHistori,
+  parameterEkonomi as fallbackParameter,
+  getDaftarEvent as getFallbackDaftar,
 } from '../data/prediksi.js'
 import { prediksiEvent } from '../lib/prediksiAnggaran.js'
+import { apiFetch } from '../lib/api'
+import { anggaranEventAdapter, parameterAdapter } from '../lib/adapters.js'
 import { formatCurrency } from '../utils/format.js'
 
-// Inflasi yang dipakai = tahun terbaru dari parameterEkonomi, fallback 2.8%.
-function inflasiTerkini(parameterEkonomi) {
-  if (!parameterEkonomi || parameterEkonomi.length === 0) return 2.8
-  return parameterEkonomi.reduce((a, b) => (a.tahun > b.tahun ? a : b)).persentase
+// Inflasi yang dipakai = tahun terbaru dari parameter-ekonomi, fallback 2.8%.
+function inflasiTerkini(list) {
+  if (!list || list.length === 0) return 2.8
+  return list.reduce((a, b) => (a.tahun > b.tahun ? a : b)).persentase
+}
+
+// Pastikan bentuk hasil prediksi API sama dengan hasil lib lokal.
+function normalizeHasil(d) {
+  const hd = Array.isArray(d?.histori_digunakan)
+    ? d.histori_digunakan.map((x, i) => ({
+        tahun: x.tahun,
+        anggaran: Number(x.anggaran || 0),
+        bobot: Number(x.bobot ?? i + 1),
+      }))
+    : []
+  return {
+    ...d,
+    histori_digunakan: hd,
+    jumlah_bobot: Number(d?.jumlah_bobot ?? hd.reduce((s, x) => s + x.bobot, 0)),
+  }
 }
 
 export default function PrediksiEvent() {
-  const daftarEvent = getDaftarEvent()
-  const [selectedEvent, setSelectedEvent] = useState(daftarEvent[0] || '')
+  const [historiList, setHistoriList] = useState(fallbackHistori)
+  const [parameter, setParameter] = useState(fallbackParameter)
+  const [daftarEvent, setDaftarEvent] = useState(getFallbackDaftar())
+  const [selectedEvent, setSelectedEvent] = useState('')
+  const [apiHasil, setApiHasil] = useState(null)
+  const [apiErrorMsg, setApiErrorMsg] = useState('')
+  const [loadingRef, setLoadingRef] = useState(true)
+  const [predLoading, setPredLoading] = useState(false)
+  const [fallback, setFallback] = useState(false)
+  const [showRumus, setShowRumus] = useState(false)
+  const [showInput, setShowInput] = useState(false)
+  const [historiForm, setHistoriForm] = useState({
+    tahun: String(new Date().getFullYear()),
+    anggaran: '',
+  })
+  const [formError, setFormError] = useState('')
+  const [savingHistori, setSavingHistori] = useState(false)
 
-  // Cari histori untuk event terpilih.
-  const eventData = useMemo(
-    () => historiAnggaranEvent.find((e) => e.nama_event === selectedEvent) || null,
-    [selectedEvent]
-  )
-
-  const histori = eventData?.histori || []
-
-  // Tahun yang diprediksi = tahun berjalan + 1.
   const tahunBerjalan = new Date().getFullYear()
   const tahunPrediksi = tahunBerjalan + 1
 
-  const inflasi = inflasiTerkini(parameterEkonomi)
+  async function loadReferences() {
+    setLoadingRef(true)
+    try {
+      const [hist, names, params] = await Promise.all([
+        apiFetch('/anggaran-event'),
+        apiFetch('/anggaran-event/nama'),
+        apiFetch('/parameter-ekonomi'),
+      ])
+      const h = Array.isArray(hist) ? hist : hist?.items || []
+      if (h.length) setHistoriList(h)
 
-  const hasil = useMemo(
-    () => prediksiEvent(histori, inflasi, tahunPrediksi),
-    [histori, inflasi, tahunPrediksi]
+      const nameList = Array.isArray(names)
+        ? names
+        : Array.isArray(names?.nama_event)
+          ? names.nama_event
+          : names?.items || []
+      if (nameList.length) setDaftarEvent(nameList)
+
+      const p = Array.isArray(params) ? params : params?.items || []
+      setParameter(p.length ? p.map(parameterAdapter.toFrontend) : fallbackParameter)
+      setFallback(false)
+    } catch (err) {
+      console.log('[api] fallback: anggaran-event/parameter', err)
+      setFallback(true)
+    } finally {
+      setLoadingRef(false)
+    }
+  }
+
+  useEffect(() => {
+    loadReferences()
+  }, [])
+
+  useEffect(() => {
+    if (!selectedEvent && daftarEvent.length) setSelectedEvent(daftarEvent[0])
+  }, [daftarEvent, selectedEvent])
+
+  const histori = useMemo(
+    () => historiList.find((e) => e.nama_event === selectedEvent)?.histori || [],
+    [historiList, selectedEvent]
   )
 
-  const [showRumus, setShowRumus] = useState(false)
+  const inflasi = inflasiTerkini(parameter)
+
+  // Ambil hasil prediksi dari server setiap event berubah.
+  useEffect(() => {
+    if (!selectedEvent) return
+    let active = true
+    setPredLoading(true)
+    setApiHasil(null)
+    setApiErrorMsg('')
+    apiFetch(`/prediksi-anggaran/${encodeURIComponent(selectedEvent)}?tahun_prediksi=${tahunPrediksi}`)
+      .then((data) => {
+        if (active) setApiHasil(normalizeHasil(data))
+      })
+      .catch((err) => {
+        if (active) setApiErrorMsg(err?.message || 'Perhitungan prediksi gagal.')
+      })
+      .finally(() => {
+        if (active) setPredLoading(false)
+      })
+    return () => {
+      active = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedEvent, histori.length])
+
+  // Jika sedang proses prediksi API → hash hasil kosong; fallback ke perhitungan lokal
+  // (memakai histori dari server, atau data cadangan bila API histori gagal).
+  const hasil = useMemo(() => {
+    if (apiHasil) return apiHasil
+    if (predLoading) return null
+    return prediksiEvent(histori, inflasi, tahunPrediksi)
+  }, [apiHasil, predLoading, histori, inflasi, tahunPrediksi])
+
+  async function handleSimpanHistori(e) {
+    e.preventDefault()
+    if (!historiForm.tahun || !historiForm.anggaran) {
+      setFormError('Tahun dan anggaran wajib diisi.')
+      return
+    }
+    setSavingHistori(true)
+    setFormError('')
+    try {
+      await apiFetch('/anggaran-event', {
+        method: 'POST',
+        body: anggaranEventAdapter.toBody({ nama_event: selectedEvent, ...historiForm }),
+      })
+      setShowInput(false)
+      setHistoriForm({ tahun: String(new Date().getFullYear()), anggaran: '' })
+      await loadReferences()
+    } catch (err) {
+      setFormError(err?.message || 'Gagal menyimpan anggaran historis.')
+    } finally {
+      setSavingHistori(false)
+    }
+  }
 
   const tahunHistori =
     histori.length > 0
@@ -72,6 +189,12 @@ export default function PrediksiEvent() {
         </Link>
       </div>
 
+      {fallback && (
+        <InlineNotice variant="warning">
+          Server tidak dapat diakses — menampilkan data cadangan lokal (hasil perhitungan mungkin tidak mutakhir).
+        </InlineNotice>
+      )}
+
       {/* Memilih event */}
       <div className="card p-5">
         <div className="flex flex-col sm:flex-row sm:items-end gap-4">
@@ -85,6 +208,7 @@ export default function PrediksiEvent() {
                 className="select pr-9 w-full"
                 value={selectedEvent}
                 onChange={(e) => setSelectedEvent(e.target.value)}
+                disabled={loadingRef && daftarEvent.length === 0}
               >
                 {daftarEvent.map((nama) => (
                   <option key={nama} value={nama}>{nama}</option>
@@ -97,7 +221,7 @@ export default function PrediksiEvent() {
               />
             </div>
           </div>
-          {eventData && (
+          {histori.length > 0 && (
             <Badge variant="primary" dot>
               {histori.length} tahun historis{tahunHistori}
             </Badge>
@@ -105,7 +229,9 @@ export default function PrediksiEvent() {
         </div>
       </div>
 
-      {hasil.error ? (
+      {predLoading && !apiHasil ? (
+        <LoadingState label="Menghitung prediksi anggaran..." />
+      ) : hasil?.error ? (
         /* Kasus < 2 data historis */
         <div className="card p-5">
           <div className="flex flex-col items-center text-center py-6">
@@ -116,17 +242,70 @@ export default function PrediksiEvent() {
               Data historis belum cukup
             </h3>
             <p className="text-caption text-text-muted mt-1.5 max-w-md">
-              {hasil.error}. Event &ldquo;{selectedEvent}&rdquo; baru tercatat pada{' '}
-              {histori[0]?.tahun} dengan anggaran{' '}
-              {formatCurrency(histori[0]?.anggaran)}.
+              {apiErrorMsg || hasil.error}.
+              {histori.length > 0 && (
+                <>
+                  {' '}Event &ldquo;{selectedEvent}&rdquo; baru tercatat pada{' '}
+                  {histori[0]?.tahun} dengan anggaran{' '}
+                  {formatCurrency(histori[0]?.anggaran)}.
+                </>
+              )}
             </p>
             <div className="mt-5 inline-flex items-center gap-2 text-sm text-text-secondary">
               <HandCoins size={16} aria-hidden="true" />
-              Anda masih bisa menginput anggaran secara manual (mockup).
+              Anda bisa menambahkan anggaran historis untuk event ini secara manual.
             </div>
+
+            <button
+              type="button"
+              className="btn-secondary mt-5 inline-flex items-center gap-2"
+              onClick={() => {
+                setShowInput((s) => !s)
+                setFormError('')
+              }}
+            >
+              {showInput ? <X size={16} aria-hidden="true" /> : <Plus size={16} aria-hidden="true" />}
+              {showInput ? 'Batalkan Input' : 'Input Anggaran Manual'}
+            </button>
+
+            {showInput && (
+              <form onSubmit={handleSimpanHistori} className="mt-5 w-full max-w-sm space-y-3 text-left">
+                {formError && <InlineNotice>{formError}</InlineNotice>}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="label" htmlFor="hist-tahun">Tahun</label>
+                    <input
+                      id="hist-tahun"
+                      type="number"
+                      min="2000"
+                      required
+                      className="input"
+                      value={historiForm.tahun}
+                      onChange={(e) => setHistoriForm((f) => ({ ...f, tahun: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <label className="label" htmlFor="hist-anggaran">Anggaran (Rp)</label>
+                    <input
+                      id="hist-anggaran"
+                      type="number"
+                      min="0"
+                      required
+                      className="input"
+                      value={historiForm.anggaran}
+                      onChange={(e) => setHistoriForm((f) => ({ ...f, anggaran: e.target.value }))}
+                      placeholder="cth: 2500000"
+                    />
+                  </div>
+                </div>
+                <button type="submit" className="btn-primary w-full" disabled={savingHistori}>
+                  {savingHistori ? 'Menyimpan...' : 'Simpan Anggaran Historis'}
+                </button>
+              </form>
+            )}
           </div>
         </div>
-      ) : (
+      ) : !hasil ? null : (
         <>
           {/* Summary besar: prediksi final */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

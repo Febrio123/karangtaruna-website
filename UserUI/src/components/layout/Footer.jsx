@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, ExternalLink } from 'lucide-react';
 import Container from './Container';
-import { siteConfig } from '../../data/siteConfig';
+import useSiteConfig from '../../hooks/useSiteConfig';
 
 const footerLinks = [
   { label: 'Profil', href: '/profil' },
@@ -13,6 +13,7 @@ const footerLinks = [
 ];
 
 export default function Footer() {
+  const { data: siteConfig } = useSiteConfig();
   const currentYear = new Date().getFullYear();
 
   return (

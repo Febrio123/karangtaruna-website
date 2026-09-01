@@ -4,12 +4,20 @@ import { Users, FileText, Calendar, Phone, ChevronRight, ChevronDown } from 'luc
 import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
 import Card from '../components/ui/Card';
-import { siteConfig } from '../data/siteConfig';
+import useSiteConfig from '../hooks/useSiteConfig';
+import { siteConfig as staticSiteConfig } from '../data/siteConfig';
 import useSeo from '../hooks/useSeo';
 
 const iconMap = { Users, FileText, Calendar, Phone };
 
 export default function Information() {
+  const { data: siteConfig } = useSiteConfig();
+  // Live API mungkin belum mengisi `information[]`; fallback ke data statis
+  // supaya halaman Informasi tidak kosong.
+  const information =
+    siteConfig.information && siteConfig.information.length > 0
+      ? siteConfig.information
+      : staticSiteConfig.information;
   useSeo({
     title: 'Informasi Umum',
     description: 'Berbagai informasi penting tentang keanggotaan, AD/ART, program kerja, dan layanan masyarakat Karang Taruna Mekar Jaya.',
@@ -41,7 +49,7 @@ export default function Information() {
 
       <Section>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {siteConfig.information.map((info) => {
+          {information.map((info) => {
             const Icon = iconMap[info.icon] || FileText;
             const isExpanded = expandedId === info.id;
 

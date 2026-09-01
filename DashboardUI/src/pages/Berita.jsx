@@ -1,8 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FilePlus, Pencil, Trash2, Search, Eye, FileText } from 'lucide-react'
 import Badge from '../components/ui/Badge.jsx'
 import Modal from '../components/ui/Modal.jsx'
 import EmptyState from '../components/ui/EmptyState.jsx'
+import LoadingState from '../components/ui/LoadingState.jsx'
+import InlineNotice from '../components/ui/InlineNotice.jsx'
+import { apiFetch } from '../lib/api'
+import { artikelAdapter } from '../lib/adapters.js'
 import { berita as initialData, beritaKategori } from '../data/berita.js'
 import { formatDate } from '../utils/format.js'
 
@@ -12,15 +16,42 @@ const emptyForm = {
   penulis: '',
   tanggal: '',
   status: 'draft',
+  excerpt: '',
+  content: '',
+  slug: '',
 }
 
 export default function Berita() {
   const [berita, setBerita] = useState(initialData)
+  const [loading, setLoading] = useState(true)
+  const [fallback, setFallback] = useState(false)
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('all')
   const [modalOpen, setModalOpen] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [form, setForm] = useState(emptyForm)
+  const [saveError, setSaveError] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  async function loadData() {
+    setLoading(true)
+    try {
+      // published=false → kembalikan artikel TARBIT & DRAF (konten admin).
+      const data = await apiFetch('/articles?published=false&limit=100')
+      const list = Array.isArray(data) ? data : data?.items || []
+      setBerita(list.map(artikelAdapter.toFrontend))
+      setFallback(false)
+    } catch (err) {
+      console.log('[api] fallback: articles', err)
+      setFallback(true)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [])
 
   const filtered = berita.filter((b) => {
     const matchSearch =
@@ -36,6 +67,7 @@ export default function Berita() {
   function openAdd() {
     setEditingId(null)
     setForm({ ...emptyForm, tanggal: new Date().toISOString().slice(0, 10) })
+    setSaveError('')
     setModalOpen(true)
   }
 
@@ -47,7 +79,11 @@ export default function Berita() {
       penulis: item.penulis,
       tanggal: item.tanggal,
       status: item.status,
+      excerpt: '',
+      content: item.content || '',
+      slug: item.slug || '',
     })
+    setSaveError('')
     setModalOpen(true)
   }
 
@@ -56,19 +92,39 @@ export default function Berita() {
     setForm((f) => ({ ...f, [name]: value }))
   }
 
-  function handleSave(e) {
+  async function handleSave(e) {
     e.preventDefault()
-    if (editingId) {
-      setBerita((list) => list.map((b) => (b.id === editingId ? { ...b, ...form } : b)))
-    } else {
-      const newId = Math.max(...berita.map((b) => b.id)) + 1
-      setBerita((list) => [{ id: newId, views: 0, ...form }, ...list])
+    if (!form.judul.trim()) return
+    if (!form.content.trim()) {
+      setSaveError('Konten berita wajib diisi (minimal satu kalimat).')
+      return
     }
-    setModalOpen(false)
+    setSaving(true)
+    setSaveError('')
+    const body = artikelAdapter.toBody(form, form)
+    try {
+      if (editingId) {
+        await apiFetch(`/articles/${editingId}`, { method: 'PUT', body })
+      } else {
+        await apiFetch('/articles', { method: 'POST', body })
+      }
+      setModalOpen(false)
+      await loadData()
+    } catch (err) {
+      setSaveError(err?.message || 'Gagal menyimpan berita.')
+    } finally {
+      setSaving(false)
+    }
   }
 
-  function handleDelete(id) {
-    setBerita((list) => list.filter((b) => b.id !== id))
+  async function handleDelete(id, judul) {
+    if (!window.confirm(`Hapus berita "${judul}"?`)) return
+    try {
+      await apiFetch(`/articles/${id}`, { method: 'DELETE' })
+      setBerita((list) => list.filter((b) => b.id !== id))
+    } catch (err) {
+      window.alert(err?.message || 'Gagal menghapus berita.')
+    }
   }
 
   return (
@@ -81,6 +137,12 @@ export default function Berita() {
           <FilePlus size={18} aria-hidden="true" /> Tulis Berita Baru
         </button>
       </div>
+
+      {fallback && !loading && (
+        <InlineNotice variant="warning">
+          Server tidak dapat diakses — menampilkan data cadangan lokal, perubahan tidak tersimpan.
+        </InlineNotice>
+      )}
 
       {/* Filter + search */}
       <div className="flex flex-col md:flex-row gap-3">
@@ -119,77 +181,83 @@ export default function Berita() {
 
       {/* Table */}
       <div className="card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-border-light bg-bg-alt/50">
-                <th className="px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide">Judul</th>
-                <th className="px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide hidden sm:table-cell">Kategori</th>
-                <th className="px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide hidden lg:table-cell">Penulis</th>
-                <th className="px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide hidden sm:table-cell">Tanggal</th>
-                <th className="px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide hidden md:table-cell">Dilihat</th>
-                <th className="px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide">Status</th>
-                <th className="px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border-light">
-              {filtered.map((b) => (
-                <tr key={b.id} className="hover:bg-primary-light/30 transition-colors">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <FileText size={17} className="text-accent shrink-0" aria-hidden="true" />
-                      <p className="font-medium text-text text-sm line-clamp-2">{b.judul}</p>
-                    </div>
-                    <p className="text-xs text-text-muted sm:hidden mt-1">
-                      {b.kategori} · {formatDate(b.tanggal)}
-                    </p>
-                  </td>
-                  <td className="px-4 py-3 hidden sm:table-cell">
-                    <Badge variant="neutral">{b.kategori}</Badge>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-text-secondary hidden lg:table-cell">{b.penulis}</td>
-                  <td className="px-4 py-3 text-sm text-text-secondary hidden sm:table-cell">{formatDate(b.tanggal)}</td>
-                  <td className="px-4 py-3 hidden md:table-cell">
-                    <span className="inline-flex items-center gap-1 text-sm text-text-secondary">
-                      <Eye size={14} aria-hidden="true" /> {b.views.toLocaleString('id-ID')}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge variant={b.status === 'published' ? 'success' : 'neutral'} dot>
-                      {b.status === 'published' ? 'Terbit' : 'Draft'}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1">
-                      <button type="button" className="btn-icon w-9 h-9" onClick={() => openEdit(b)} aria-label={`Edit ${b.judul}`}>
-                        <Pencil size={16} />
-                      </button>
-                      <button
-                        type="button"
-                        className="btn-icon w-9 h-9 hover:text-danger hover:bg-[#FBE8E6]"
-                        onClick={() => handleDelete(b.id)}
-                        aria-label={`Hapus ${b.judul}`}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {loading ? (
+          <LoadingState label="Memuat berita..." />
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-border-light bg-bg-alt/50">
+                    <th className="px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide">Judul</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide hidden sm:table-cell">Kategori</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide hidden lg:table-cell">Penulis</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide hidden sm:table-cell">Tanggal</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide hidden md:table-cell">Dilihat</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide">Status</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide text-right">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border-light">
+                  {filtered.map((b) => (
+                    <tr key={b.id} className="hover:bg-primary-light/30 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <FileText size={17} className="text-accent shrink-0" aria-hidden="true" />
+                          <p className="font-medium text-text text-sm line-clamp-2">{b.judul}</p>
+                        </div>
+                        <p className="text-xs text-text-muted sm:hidden mt-1">
+                          {b.kategori} · {formatDate(b.tanggal)}
+                        </p>
+                      </td>
+                      <td className="px-4 py-3 hidden sm:table-cell">
+                        <Badge variant="neutral">{b.kategori}</Badge>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-text-secondary hidden lg:table-cell">{b.penulis}</td>
+                      <td className="px-4 py-3 text-sm text-text-secondary hidden sm:table-cell">{formatDate(b.tanggal)}</td>
+                      <td className="px-4 py-3 hidden md:table-cell">
+                        <span className="inline-flex items-center gap-1 text-sm text-text-secondary">
+                          <Eye size={14} aria-hidden="true" /> {b.views > 0 ? b.views.toLocaleString('id-ID') : '—'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge variant={b.status === 'published' ? 'success' : 'neutral'} dot>
+                          {b.status === 'published' ? 'Terbit' : 'Draft'}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-end gap-1">
+                          <button type="button" className="btn-icon w-9 h-9" onClick={() => openEdit(b)} aria-label={`Edit ${b.judul}`}>
+                            <Pencil size={16} />
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-icon w-9 h-9 hover:text-danger hover:bg-[#FBE8E6]"
+                            onClick={() => handleDelete(b.id, b.judul)}
+                            aria-label={`Hapus ${b.judul}`}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-        {filtered.length === 0 && (
-          <EmptyState
-            title={search || filter !== 'all' ? 'Berita tidak ditemukan' : 'Belum ada berita'}
-            description="Tulis berita pertama untuk memperbarui konten website."
-            action={
-              <button type="button" className="btn-primary" onClick={openAdd}>
-                <FilePlus size={18} aria-hidden="true" /> Tulis Berita
-              </button>
-            }
-          />
+            {filtered.length === 0 && (
+              <EmptyState
+                title={search || filter !== 'all' ? 'Berita tidak ditemukan' : 'Belum ada berita'}
+                description="Tulis berita pertama untuk memperbarui konten website."
+                action={
+                  <button type="button" className="btn-primary" onClick={openAdd}>
+                    <FilePlus size={18} aria-hidden="true" /> Tulis Berita
+                  </button>
+                }
+              />
+            )}
+          </>
         )}
       </div>
 
@@ -202,6 +270,7 @@ export default function Berita() {
         size="lg"
       >
         <form onSubmit={handleSave} className="space-y-4">
+          {saveError && <InlineNotice>{saveError}</InlineNotice>}
           <div>
             <label className="label" htmlFor="judul">Judul Berita</label>
             <input
@@ -234,6 +303,31 @@ export default function Berita() {
             </div>
           </div>
           <div>
+            <label className="label" htmlFor="excerpt">Ringkasan (opsional)</label>
+            <textarea
+              id="excerpt"
+              name="excerpt"
+              rows={2}
+              className="input resize-y"
+              value={form.excerpt}
+              onChange={handleChange}
+              placeholder="Ringkasan singkat untuk kartu berita di halaman publik"
+            />
+          </div>
+          <div>
+            <label className="label" htmlFor="content">Konten Berita</label>
+            <textarea
+              id="content"
+              name="content"
+              rows={6}
+              required
+              className="input resize-y"
+              value={form.content}
+              onChange={handleChange}
+              placeholder="Tulis isi berita di sini..."
+            />
+          </div>
+          <div>
             <label className="label">Status</label>
             <div className="flex gap-3">
               {[
@@ -257,7 +351,9 @@ export default function Berita() {
 
           <div className="flex items-center justify-end gap-3 pt-2">
             <button type="button" className="btn-secondary" onClick={() => setModalOpen(false)}>Batal</button>
-            <button type="submit" className="btn-primary">{editingId ? 'Simpan Perubahan' : 'Terbitkan Berita'}</button>
+            <button type="submit" className="btn-primary" disabled={saving}>
+              {saving ? 'Menyimpan...' : editingId ? 'Simpan Perubahan' : 'Terbitkan Berita'}
+            </button>
           </div>
         </form>
       </Modal>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ExternalLink,
@@ -11,6 +11,10 @@ import {
 } from 'lucide-react'
 import Modal from '../components/ui/Modal.jsx'
 import EmptyState from '../components/ui/EmptyState.jsx'
+import LoadingState from '../components/ui/LoadingState.jsx'
+import InlineNotice from '../components/ui/InlineNotice.jsx'
+import { apiFetch } from '../lib/api'
+import { parameterAdapter } from '../lib/adapters.js'
 import { parameterEkonomi as dummyParameter } from '../data/prediksi.js'
 import { formatDateShort } from '../utils/format.js'
 
@@ -18,16 +22,40 @@ const BI_INFLASI_URL = 'https://www.bi.go.id/id/statistik/indikator/data-inflasi
 
 export default function ParameterEkonomi() {
   const [daftar, setDaftar] = useState(dummyParameter)
+  const [loading, setLoading] = useState(true)
+  const [fallback, setFallback] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [form, setForm] = useState({ tahun: '', persentase: '' })
   const [errors, setErrors] = useState({})
   const [successMsg, setSuccessMsg] = useState('')
+  const [saveError, setSaveError] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  async function loadData() {
+    setLoading(true)
+    try {
+      const data = await apiFetch('/parameter-ekonomi')
+      const list = Array.isArray(data) ? data : data?.items || []
+      setDaftar(list.map(parameterAdapter.toFrontend))
+      setFallback(false)
+    } catch (err) {
+      console.log('[api] fallback: parameter-ekonomi', err)
+      setFallback(true)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [])
 
   function openAdd() {
     setEditingId(null)
     setForm({ tahun: '', persentase: '' })
     setErrors({})
+    setSaveError('')
     setModalOpen(true)
   }
 
@@ -35,6 +63,7 @@ export default function ParameterEkonomi() {
     setEditingId(item.id)
     setForm({ tahun: String(item.tahun), persentase: String(item.persentase) })
     setErrors({})
+    setSaveError('')
     setModalOpen(true)
   }
 
@@ -51,33 +80,44 @@ export default function ParameterEkonomi() {
     return errs
   }
 
-  function handleSave(e) {
+  async function handleSave(e) {
     e.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length > 0) {
       setErrors(errs)
       return
     }
-    const year = Number(form.tahun)
-    const persen = Number(form.persentase)
-    if (editingId) {
-      setDaftar((d) =>
-        d.map((i) => (i.id === editingId ? { ...i, tahun: year, persentase: persen } : i))
-      )
-    } else {
-      const newId = Math.max(0, ...daftar.map((i) => i.id)) + 1
-      setDaftar((d) => [
-        { id: newId, tahun: year, persentase: persen, createdAt: new Date().toISOString().slice(0, 10) },
-        ...d,
-      ])
+    setSaving(true)
+    setSaveError('')
+    const body = parameterAdapter.toBody(form)
+    try {
+      if (editingId) {
+        await apiFetch(`/parameter-ekonomi/${editingId}`, { method: 'PUT', body })
+      } else {
+        await apiFetch('/parameter-ekonomi', { method: 'POST', body })
+      }
+      await loadData()
+      setModalOpen(false)
+      setSuccessMsg(editingId ? 'Data inflasi berhasil diperbarui.' : 'Data inflasi berhasil disimpan.')
+      setTimeout(() => setSuccessMsg(''), 3000)
+    } catch (err) {
+      setSaveError(err?.message || 'Gagal menyimpan data inflasi.')
+    } finally {
+      setSaving(false)
     }
-    setModalOpen(false)
-    setSuccessMsg(editingId ? 'Data inflasi berhasil diperbarui.' : 'Data inflasi berhasil disimpan.')
-    setTimeout(() => setSuccessMsg(''), 3000)
   }
 
-  function handleDelete(id) {
-    setDaftar((d) => d.filter((i) => i.id !== id))
+  async function handleDelete(id) {
+    if (!window.confirm('Hapus parameter inflasi ini?')) return
+    try {
+      await apiFetch(`/parameter-ekonomi/${id}`, { method: 'DELETE' })
+      setDaftar((d) => d.filter((i) => i.id !== id))
+      setSuccessMsg('Data inflasi berhasil dihapus.')
+      setTimeout(() => setSuccessMsg(''), 3000)
+    } catch (err) {
+      setSuccessMsg('')
+      window.alert(err?.message || 'Gagal menghapus data inflasi.')
+    }
   }
 
   return (
@@ -128,6 +168,12 @@ export default function ParameterEkonomi() {
         </div>
       </div>
 
+      {fallback && (
+        <InlineNotice variant="warning">
+          Server tidak dapat diakses — menampilkan data cadangan lokal. Perubahan tidak akan tersimpan.
+        </InlineNotice>
+      )}
+
       {successMsg && (
         <div className="card p-4 bg-[#E7F4EC] border border-primary/20 text-primary flex items-center gap-2 text-sm font-medium">
           <CheckCircle2 size={18} aria-hidden="true" /> {successMsg}
@@ -139,61 +185,65 @@ export default function ParameterEkonomi() {
         <div className="px-5 pt-4 pb-3 border-b border-border-light">
           <h3 className="font-heading font-semibold text-h3 text-text">Riwayat Inflasi</h3>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-border-light bg-bg-alt/50">
-                <th className="px-5 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide">Tahun</th>
-                <th className="px-5 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide">Persentase</th>
-                <th className="px-5 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide">Tanggal Input</th>
-                <th className="px-5 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border-light">
-              {[...daftar]
-                .sort((a, b) => Number(b.tahun) - Number(a.tahun))
-                .map((item) => (
-                  <tr key={item.id} className="hover:bg-primary-light/30 transition-colors">
-                    <td className="px-5 py-3 text-sm text-text">{item.tahun}</td>
-                    <td className="px-5 py-3 text-sm font-medium text-text">
-                      {String(item.persentase).replace('.', ',')}%
-                    </td>
-                    <td className="px-5 py-3 text-sm text-text-secondary">{formatDateShort(item.createdAt)}</td>
-                    <td className="px-5 py-3">
-                      <div className="flex items-center justify-end gap-1">
-                        <button
-                          type="button"
-                          className="btn-icon w-9 h-9"
-                          onClick={() => openEdit(item)}
-                          aria-label={`Edit inflasi tahun ${item.tahun}`}
-                        >
-                          <Pencil size={16} />
-                        </button>
-                        <button
-                          type="button"
-                          className="btn-icon w-9 h-9 hover:text-danger hover:bg-[#FBE8E6]"
-                          onClick={() => handleDelete(item.id)}
-                          aria-label={`Hapus inflasi tahun ${item.tahun}`}
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
-        {daftar.length === 0 && (
-          <EmptyState
-            title="Belum ada data inflasi"
-            description="Tambahkan parameter inflasi untuk memperhitungkan prediksi anggaran event."
-            action={
-              <button type="button" className="btn-primary" onClick={openAdd}>
-                <Plus size={18} aria-hidden="true" /> Tambah Inflasi
-              </button>
-            }
-          />
+        {loading ? (
+          <LoadingState label="Memuat data inflasi..." />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-border-light bg-bg-alt/50">
+                  <th className="px-5 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide">Tahun</th>
+                  <th className="px-5 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide">Persentase</th>
+                  <th className="px-5 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide">Tanggal Input</th>
+                  <th className="px-5 py-3 text-xs font-semibold text-text-muted uppercase tracking-wide text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border-light">
+                {[...daftar]
+                  .sort((a, b) => Number(b.tahun) - Number(a.tahun))
+                  .map((item) => (
+                    <tr key={item.id} className="hover:bg-primary-light/30 transition-colors">
+                      <td className="px-5 py-3 text-sm text-text">{item.tahun}</td>
+                      <td className="px-5 py-3 text-sm font-medium text-text">
+                        {String(item.persentase).replace('.', ',')}%
+                      </td>
+                      <td className="px-5 py-3 text-sm text-text-secondary">{formatDateShort(item.createdAt)}</td>
+                      <td className="px-5 py-3">
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            type="button"
+                            className="btn-icon w-9 h-9"
+                            onClick={() => openEdit(item)}
+                            aria-label={`Edit inflasi tahun ${item.tahun}`}
+                          >
+                            <Pencil size={16} />
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-icon w-9 h-9 hover:text-danger hover:bg-[#FBE8E6]"
+                            onClick={() => handleDelete(item.id)}
+                            aria-label={`Hapus inflasi tahun ${item.tahun}`}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+            {daftar.length === 0 && (
+              <EmptyState
+                title="Belum ada data inflasi"
+                description="Tambahkan parameter inflasi untuk memperhitungkan prediksi anggaran event."
+                action={
+                  <button type="button" className="btn-primary" onClick={openAdd}>
+                    <Plus size={18} aria-hidden="true" /> Tambah Inflasi
+                  </button>
+                }
+              />
+            )}
+          </div>
         )}
       </div>
 
@@ -205,6 +255,7 @@ export default function ParameterEkonomi() {
         subtitle="Asumsi inflasi tahunan untuk perhitungan prediksi anggaran."
       >
         <form onSubmit={handleSave} className="space-y-4">
+          {saveError && <InlineNotice>{saveError}</InlineNotice>}
           <div>
             <label className="label" htmlFor="tahun">Tahun</label>
             <input
@@ -240,8 +291,8 @@ export default function ParameterEkonomi() {
 
           <div className="flex items-center justify-end gap-3 pt-2">
             <button type="button" className="btn-secondary" onClick={() => setModalOpen(false)}>Batal</button>
-            <button type="submit" className="btn-primary">
-              {editingId ? 'Simpan Perubahan' : 'Simpan'}
+            <button type="submit" className="btn-primary" disabled={saving}>
+              {saving ? 'Menyimpan...' : editingId ? 'Simpan Perubahan' : 'Simpan'}
             </button>
           </div>
         </form>

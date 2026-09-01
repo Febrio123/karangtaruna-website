@@ -7,40 +7,88 @@ import ArticleCard from '../components/content/ArticleCard';
 import Section from '../components/layout/Section';
 import Container from '../components/layout/Container';
 import Card from '../components/ui/Card';
-import { articles } from '../data/articles';
-import { events } from '../data/events';
-import { galleryItems } from '../data/gallery';
-import { budgetData } from '../data/budget';
-import { siteConfig } from '../data/siteConfig';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
+import ErrorBanner from '../components/ui/ErrorBanner';
+import { articles as staticArticles } from '../data/articles';
+import { events as staticEvents } from '../data/events';
+import { galleryItems as staticGallery } from '../data/gallery';
+import { budgetData as staticBudget } from '../data/budget';
 import { formatRupiah } from '../utils/formatCurrency';
 import GalleryItem from '../components/content/GalleryItem';
+import useApiData from '../hooks/useApiData';
+import useSiteConfig from '../hooks/useSiteConfig';
+import { adaptArticleList, adaptEventList, adaptGalleryList, adaptPrediksi } from '../lib/adapters';
 import useSeo, { SITE_URL } from '../hooks/useSeo';
 
 const ITEMS_PER_PAGE = 3;
 
 export default function Home() {
+  const { data: siteConfig } = useSiteConfig();
+
+  // LIVE articles -> 3 terbaru (fallback: statis)
+  const articles = useApiData({
+    url: '/articles?published=true',
+    fallback: staticArticles,
+    adapter: adaptArticleList,
+  });
+
+  // LIVE events -> pengumuman/event 'Mendatang' (fallback: statis)
+  const events = useApiData({
+    url: '/events?published=true',
+    fallback: staticEvents,
+    adapter: adaptEventList,
+  });
+
+  // LIVE galeri -> 8 teratas (fallback: statis; API saat ini total 0)
+  const gallery = useApiData({
+    url: '/galeri',
+    fallback: staticGallery,
+    adapter: adaptGalleryList,
+  });
+
+  // LIVE ringkasan anggaran 2026 (fallback: statis budgetData[2026])
+  const budget = useApiData({
+    url: '/transaksi-anggaran/ringkasan?tahun=2026',
+    fallback: () => {
+      const d = staticBudget[2026];
+      if (!d) return null;
+      return {
+        totalPemasukan: d.income.reduce((s, i) => s + i.amount, 0),
+        totalPengeluaran: d.expenses.reduce((s, i) => s + i.amount, 0),
+      };
+    },
+    adapter: (raw) =>
+      raw
+        ? {
+            totalPemasukan: Number(raw.totalPemasukan) || 0,
+            totalPengeluaran: Number(raw.totalPengeluaran) || 0,
+          }
+        : null,
+  });
+
   const latestArticles = useMemo(
     () =>
-      [...articles]
+      [...(articles.data || [])]
         .sort((a, b) => new Date(b.date) - new Date(a.date))
         .slice(0, ITEMS_PER_PAGE),
-    []
+    [articles.data]
   );
 
   const latestEvents = useMemo(
-    () => events.filter((e) => e.status === 'Mendatang').slice(0, 2),
-    []
+    () => (events.data || []).filter((e) => e.status === 'Mendatang').slice(0, 2),
+    [events.data]
   );
 
-  const latestGallery = useMemo(() => galleryItems.slice(0, 8), []);
+  const latestGallery = useMemo(() => (gallery.data || []).slice(0, 8), [gallery.data]);
 
-  const budgetSummary = useMemo(() => {
-    const data = budgetData[2026];
-    if (!data) return null;
-    const totalIncome = data.income.reduce((sum, item) => sum + item.amount, 0);
-    const totalExpenses = data.expenses.reduce((sum, item) => sum + item.amount, 0);
-    return { totalIncome, totalExpenses };
-  }, []);
+  const budgetSummary = budget.data;
+
+  // LIVE prediksi anggaran "17 Agustusan" (WMA + inflasi).
+  const prediksi = useApiData({
+    url: `/prediksi-anggaran/${encodeURIComponent('17 Agustusan')}`,
+    fallback: null,
+    adapter: adaptPrediksi,
+  });
 
   // SEO: home page uses site name as title (no suffix)
   const jsonLd = useMemo(() => [
@@ -121,11 +169,18 @@ export default function Home() {
             <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
+        {articles.error && (
+          <ErrorBanner message={articles.error} onRetry={articles.retry} className="mb-4" />
+        )}
+        {articles.loading ? (
+          <LoadingSpinner label="Memuat kegiatan..." />
+        ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {latestArticles.map((article) => (
             <ArticleCard key={article.id} article={article} />
           ))}
         </div>
+        )}
       </Section>
 
       {/* Gallery preview */}
@@ -140,6 +195,12 @@ export default function Home() {
             <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
+        {gallery.error && (
+          <ErrorBanner message={gallery.error} onRetry={gallery.retry} className="mb-4" />
+        )}
+        {gallery.loading ? (
+          <LoadingSpinner label="Memuat galeri..." />
+        ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
           {latestGallery.map((item) => (
             <Link key={item.id} to="/galeri">
@@ -147,6 +208,7 @@ export default function Home() {
             </Link>
           ))}
         </div>
+        )}
       </Section>
 
       {/* Budget preview */}
@@ -186,6 +248,51 @@ export default function Home() {
           </div>
         </Section>
       )}
+
+      {/* Prediksi anggaran (live) */}
+      <Section>
+        <h2 className="font-heading text-h2 text-text mb-4">
+          Prediksi Anggaran Event
+        </h2>
+        {prediksi.loading ? (
+          <LoadingSpinner label="Menghitung prediksi..." />
+        ) : prediksi.error ? (
+          <Card>
+            <p className="font-body text-body-base text-text-secondary mb-2">
+              {prediksi.data && prediksi.data.prediksi_final != null ? (
+                <span>
+                  Estimasi anggaran event "17 Agustusan" tahun{' '}
+                  {prediksi.data.tahun_prediksi}:{' '}
+                  <strong className="text-primary">{formatRupiah(prediksi.data.prediksi_final)}</strong>
+                </span>
+              ) : (
+                <span>Data prediksi anggaran belum tersedia saat ini.</span>
+              )}
+            </p>
+            <ErrorBanner message={prediksi.error} onRetry={prediksi.retry} />
+          </Card>
+        ) : prediksi.data && prediksi.data.prediksi_final != null ? (
+          <Card>
+            <p className="font-body text-body-lg text-text-secondary mb-2">
+              Estimasi anggaran event <strong>17 Agustusan</strong> tahun{' '}
+              {prediksi.data.tahun_prediksi}:
+            </p>
+            <p className="font-heading text-h2 text-primary mb-2">
+              {formatRupiah(prediksi.data.prediksi_final)}
+            </p>
+            <p className="font-body text-caption text-text-muted">
+              Berbasis WMA (pembobotan 3 tahun terakhir) & inflasi{' '}
+              {prediksi.data.persentase_inflasi_digunakan}%.
+            </p>
+          </Card>
+        ) : (
+          <Card>
+            <p className="font-body text-body-base text-text-secondary">
+              Data prediksi anggaran belum tersedia saat ini.
+            </p>
+          </Card>
+        )}
+      </Section>
     </>
   );
 }

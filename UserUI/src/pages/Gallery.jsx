@@ -4,10 +4,19 @@ import Section from '../components/layout/Section';
 import GalleryItem from '../components/content/GalleryItem';
 import CategoryFilter from '../components/ui/CategoryFilter';
 import Lightbox from '../components/special/Lightbox';
-import { galleryItems, galleryCategories } from '../data/gallery';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
+import ErrorBanner from '../components/ui/ErrorBanner';
+import useApiData from '../hooks/useApiData';
+import { adaptGalleryList } from '../lib/adapters';
+import { galleryItems as staticGallery, galleryCategories } from '../data/gallery';
 import useSeo from '../hooks/useSeo';
 
 export default function Gallery() {
+  const { data: galleryItems, loading, error, retry } = useApiData({
+    url: '/galeri',
+    fallback: staticGallery,
+    adapter: adaptGalleryList,
+  });
   useSeo({
     title: 'Galeri',
     description: 'Dokumentasi foto dan video kegiatan Karang Taruna Mekar Jaya — momen kerja bakti, turnamen olahraga, dan program sosial.',
@@ -27,11 +36,12 @@ export default function Gallery() {
   const [lightboxItem, setLightboxItem] = useState(null);
 
   const filteredItems = useMemo(() => {
-    if (activeCategory === 'Semua') return galleryItems;
-    return galleryItems.filter(
+    const items = galleryItems || [];
+    if (activeCategory === 'Semua') return items;
+    return items.filter(
       (item) => item.category === activeCategory || item.year === activeCategory
     );
-  }, [activeCategory]);
+  }, [activeCategory, galleryItems]);
 
   return (
     <>
@@ -48,7 +58,10 @@ export default function Gallery() {
           onChange={setActiveCategory}
         />
 
-        {filteredItems.length === 0 ? (
+        {error && <ErrorBanner message={error} onRetry={retry} className="my-4" />}
+        {loading ? (
+          <LoadingSpinner label="Memuat galeri..." />
+        ) : filteredItems.length === 0 ? (
           <div className="text-center py-12">
             <p className="font-body text-body-lg text-text-muted">
               Tidak ada item galeri dalam kategori ini.

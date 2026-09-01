@@ -1,7 +1,15 @@
-import { siteConfig } from '../../data/siteConfig';
+import useSiteConfig from '../../hooks/useSiteConfig';
+import { siteConfig as staticSiteConfig } from '../../data/siteConfig';
 
 export default function LocationMap() {
-  const { lat, lng, zoom } = siteConfig.map;
+  const { data: siteConfig } = useSiteConfig();
+  const staticMap = staticSiteConfig.map;
+  // Fallback ke koordinat statis bila API belum mengisi lat/lng.
+  const map =
+    siteConfig.map && typeof siteConfig.map.lat === 'number'
+      ? siteConfig.map
+      : staticMap;
+  const { lat, lng, zoom } = map;
 
   const bbox = `${lng - 0.01},${lat - 0.01},${lng + 0.01},${lat + 0.01}`;
   const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik&marker=${lat},${lng}`;

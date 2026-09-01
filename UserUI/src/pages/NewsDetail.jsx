@@ -6,14 +6,34 @@ import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
 import ArticleCard from '../components/content/ArticleCard';
 import CloudinaryImage from '../components/content/CloudinaryImage';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
+import ErrorBanner from '../components/ui/ErrorBanner';
 import Badge from '../components/ui/Badge';
-import { articles } from '../data/articles';
+import useApiData from '../hooks/useApiData';
+import { adaptArticle, adaptArticleList } from '../lib/adapters';
+import { articles as staticArticles } from '../data/articles';
 import { formatDateIndonesian } from '../utils/formatDate';
 import useSeo, { SITE_URL } from '../hooks/useSeo';
 
 export default function NewsDetail() {
   const { slug } = useParams();
-  const article = articles.find((a) => a.slug === slug);
+
+  // Detail menarik `content` (HTML) dari endpoint detail by slug.
+  // Fallback: artikel statis dengan slug yang sama (http 404 / offline).
+  const fallbackArticle = staticArticles.find((a) => a.slug === slug) ?? null;
+  const { data: article, loading, error, retry } = useApiData({
+    url: `/articles/slug/${encodeURIComponent(slug || '')}`,
+    fallback: fallbackArticle,
+    adapter: adaptArticle,
+  });
+
+  // Daftar penuh untuk "Artikel Terkait" (list tidak membawa `content`).
+  const list = useApiData({
+    url: '/articles?published=true',
+    fallback: staticArticles,
+    adapter: adaptArticleList,
+  });
+  const articles = list.data || [];
 
   // SEO: set meta tags per article, or "not found" if slug is invalid
   const jsonLd = useMemo(() => {
@@ -63,6 +83,23 @@ export default function NewsDetail() {
     jsonLd,
   });
 
+  if (loading) {
+    return (
+      <>
+        <PageHeader
+          title=""
+          breadcrumbs={[
+            { label: 'Berita', href: '/berita' },
+            { label: 'Memuat...' },
+          ]}
+        />
+        <Section>
+          <LoadingSpinner label="Memuat artikel..." />
+        </Section>
+      </>
+    );
+  }
+
   if (!article) {
     return (
       <>
@@ -75,6 +112,7 @@ export default function NewsDetail() {
           ]}
         />
         <Section>
+          {error && <ErrorBanner message={error} onRetry={retry} className="mb-4" />}
           <Link
             to="/berita"
             className="inline-flex items-center gap-1 text-body-base font-body font-semibold text-primary hover:text-primary-hover transition-colors duration-150"
@@ -108,6 +146,7 @@ export default function NewsDetail() {
       />
 
       <Section>
+        {error && <ErrorBanner message={error} onRetry={retry} className="mb-4" />}
         <article className="max-w-content mx-auto">
           {/* Meta */}
           <div className="flex items-center gap-3 mb-4">

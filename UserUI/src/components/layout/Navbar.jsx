@@ -4,7 +4,7 @@ import { Menu, X, ChevronDown } from 'lucide-react';
 import { clsx } from 'clsx';
 import Container from './Container';
 import MobileDrawer from './MobileDrawer';
-import { siteConfig } from '../../data/siteConfig';
+import useSiteConfig from '../../hooks/useSiteConfig';
 
 const navItems = [
   { label: 'Beranda', href: '/' },
@@ -26,6 +26,7 @@ const navItems = [
 ];
 
 export default function Navbar() {
+  const { data: siteConfig } = useSiteConfig();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);

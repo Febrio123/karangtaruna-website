@@ -1,8 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { CalendarPlus, Pencil, Trash2, MapPin, Clock, Wallet, Megaphone, CalendarDays } from 'lucide-react'
 import Badge from '../components/ui/Badge.jsx'
 import Modal from '../components/ui/Modal.jsx'
 import EmptyState from '../components/ui/EmptyState.jsx'
+import LoadingState from '../components/ui/LoadingState.jsx'
+import InlineNotice from '../components/ui/InlineNotice.jsx'
+import { apiFetch } from '../lib/api'
+import { eventAdapter } from '../lib/adapters.js'
 import { events as initialData, eventCategories } from '../data/event.js'
 import { formatDate, formatCurrency } from '../utils/format.js'
 
@@ -14,20 +18,46 @@ const emptyForm = {
   lokasi: '',
   status: 'Mendatang',
   anggaran: '',
+  deskripsi: '',
 }
 
 export default function Event() {
   const [events, setEvents] = useState(initialData)
+  const [loading, setLoading] = useState(true)
+  const [fallback, setFallback] = useState(false)
   const [filter, setFilter] = useState('all')
   const [modalOpen, setModalOpen] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [form, setForm] = useState(emptyForm)
+  const [saveError, setSaveError] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  async function loadData() {
+    setLoading(true)
+    try {
+      // published=false → ambil semua event (publik + draf) untuk admin.
+      const data = await apiFetch('/events?published=false&limit=100')
+      const list = Array.isArray(data) ? data : data?.items || []
+      setEvents(list.map(eventAdapter.toFrontend))
+      setFallback(false)
+    } catch (err) {
+      console.log('[api] fallback: events', err)
+      setFallback(true)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [])
 
   const filtered = events.filter((e) => filter === 'all' || e.tipe === filter)
 
   function openAdd() {
     setEditingId(null)
     setForm({ ...emptyForm, tanggal: new Date().toISOString().slice(0, 10) })
+    setSaveError('')
     setModalOpen(true)
   }
 
@@ -41,7 +71,9 @@ export default function Event() {
       lokasi: item.lokasi,
       status: item.status,
       anggaran: String(item.anggaran || ''),
+      deskripsi: '',
     })
+    setSaveError('')
     setModalOpen(true)
   }
 
@@ -50,23 +82,35 @@ export default function Event() {
     setForm((f) => ({ ...f, [name]: value }))
   }
 
-  function handleSave(e) {
+  async function handleSave(e) {
     e.preventDefault()
-    const payload = {
-      ...form,
-      anggaran: form.tipe === 'Pengumuman' ? 0 : Number(form.anggaran || 0),
+    if (!form.judul.trim()) return
+    setSaving(true)
+    setSaveError('')
+    const body = eventAdapter.toBody(form, form)
+    try {
+      if (editingId) {
+        await apiFetch(`/events/${editingId}`, { method: 'PUT', body })
+      } else {
+        await apiFetch('/events', { method: 'POST', body })
+      }
+      setModalOpen(false)
+      await loadData()
+    } catch (err) {
+      setSaveError(err?.message || 'Gagal menyimpan event.')
+    } finally {
+      setSaving(false)
     }
-    if (editingId) {
-      setEvents((list) => list.map((ev) => (ev.id === editingId ? { ...ev, ...payload } : ev)))
-    } else {
-      const newId = Math.max(...events.map((ev) => ev.id)) + 1
-      setEvents((list) => [{ id: newId, ...payload }, ...list])
-    }
-    setModalOpen(false)
   }
 
-  function handleDelete(id) {
-    setEvents((list) => list.filter((ev) => ev.id !== id))
+  async function handleDelete(id, judul) {
+    if (!window.confirm(`Hapus event/pengumuman "${judul}"?`)) return
+    try {
+      await apiFetch(`/events/${id}`, { method: 'DELETE' })
+      setEvents((list) => list.filter((ev) => ev.id !== id))
+    } catch (err) {
+      window.alert(err?.message || 'Gagal menghapus event.')
+    }
   }
 
   const totalAnggaran = events.filter((e) => e.tipe === 'Event').reduce((sum, e) => sum + e.anggaran, 0)
@@ -81,6 +125,12 @@ export default function Event() {
           <CalendarPlus size={18} aria-hidden="true" /> Tambah Event
         </button>
       </div>
+
+      {fallback && !loading && (
+        <InlineNotice variant="warning">
+          Server tidak dapat diakses — menampilkan data cadangan lokal, perubahan tidak tersimpan.
+        </InlineNotice>
+      )}
 
       {/* Filter */}
       <div className="flex items-center gap-1.5">
@@ -105,7 +155,9 @@ export default function Event() {
       </div>
 
       {/* Event list */}
-      {filtered.length === 0 ? (
+      {loading ? (
+        <LoadingState label="Memuat event..." />
+      ) : filtered.length === 0 ? (
         <EmptyState
           title="Belum ada event"
           description="Jadwalkan event atau buat pengumuman untuk pengunjung."
@@ -141,7 +193,7 @@ export default function Event() {
                   <button
                     type="button"
                     className="btn-icon w-9 h-9 hover:text-danger hover:bg-[#FBE8E6]"
-                    onClick={() => handleDelete(ev.id)}
+                    onClick={() => handleDelete(ev.id, ev.judul)}
                     aria-label={`Hapus ${ev.judul}`}
                   >
                     <Trash2 size={16} />
@@ -184,6 +236,7 @@ export default function Event() {
         size="lg"
       >
         <form onSubmit={handleSave} className="space-y-4">
+          {saveError && <InlineNotice>{saveError}</InlineNotice>}
           <div>
             <label className="label" htmlFor="judul">Judul</label>
             <input id="judul" name="judul" type="text" required className="input" value={form.judul} onChange={handleChange} placeholder="Judul event atau pengumuman" />
@@ -226,7 +279,9 @@ export default function Event() {
 
           <div className="flex items-center justify-end gap-3 pt-2">
             <button type="button" className="btn-secondary" onClick={() => setModalOpen(false)}>Batal</button>
-            <button type="submit" className="btn-primary">{editingId ? 'Simpan Perubahan' : 'Simpan Event'}</button>
+            <button type="submit" className="btn-primary" disabled={saving}>
+              {saving ? 'Menyimpan...' : editingId ? 'Simpan Perubahan' : 'Simpan Event'}
+            </button>
           </div>
         </form>
       </Modal>

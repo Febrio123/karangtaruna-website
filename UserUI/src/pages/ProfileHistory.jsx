@@ -1,10 +1,11 @@
 import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
 import TimelineItem from '../components/content/TimelineItem';
-import { siteConfig } from '../data/siteConfig';
+import useSiteConfig from '../hooks/useSiteConfig';
 import useSeo from '../hooks/useSeo';
 
 export default function ProfileHistory() {
+  const { data: siteConfig } = useSiteConfig();
   useSeo({
     title: 'Sejarah',
     description: 'Perjalanan Karang Taruna Mekar Jaya dari awal berdiri pada tahun 2018 hingga saat ini. Organisasi pemuda yang terus berkembang.',

@@ -3,10 +3,19 @@ import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
 import OrgChart from '../components/special/OrgChart';
 import Card from '../components/ui/Card';
-import { teamMembers } from '../data/team';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
+import ErrorBanner from '../components/ui/ErrorBanner';
+import useApiData from '../hooks/useApiData';
+import { adaptTeamList } from '../lib/adapters';
+import { teamMembers as staticTeam } from '../data/team';
 import useSeo from '../hooks/useSeo';
 
 export default function ProfileStructure() {
+  const { data: teamMembers, loading, error, retry } = useApiData({
+    url: '/pengurus',
+    fallback: staticTeam,
+    adapter: adaptTeamList,
+  });
   const periode = teamMembers[0]?.period ?? '2025-2027';
   useSeo({
     title: 'Struktur Organisasi',
@@ -44,6 +53,10 @@ export default function ProfileStructure() {
       {/* Team list table */}
       <Section className="bg-surface">
         <h2 className="font-heading text-h2 text-text mb-6">Daftar Pengurus</h2>
+        {error && <ErrorBanner message={error} onRetry={retry} className="mb-4" />}
+        {loading ? (
+          <LoadingSpinner label="Memuat daftar pengurus..." />
+        ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
@@ -92,6 +105,7 @@ export default function ProfileStructure() {
             </tbody>
           </table>
         </div>
+        )}
       </Section>
     </>
   );

@@ -4,10 +4,11 @@ import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
 import TimelineItem from '../components/content/TimelineItem';
 import OrgChart from '../components/special/OrgChart';
-import { siteConfig } from '../data/siteConfig';
+import useSiteConfig from '../hooks/useSiteConfig';
 import useSeo from '../hooks/useSeo';
 
 export default function Profile() {
+  const { data: siteConfig } = useSiteConfig();
   useSeo({
     title: 'Profil',
     description: 'Mengenal lebih dekat Karang Taruna Mekar Jaya — sejarah, visi, misi, dan struktur organisasi pemuda di Kelurahan Mekar Jaya, Depok.',

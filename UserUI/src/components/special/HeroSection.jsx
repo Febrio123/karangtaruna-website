@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
 import Button from '../ui/Button';
 import Container from '../layout/Container';
-import { siteConfig } from '../../data/siteConfig';
+import useSiteConfig from '../../hooks/useSiteConfig';
 
 export default function HeroSection() {
+  const { data: siteConfig } = useSiteConfig();
   return (
     <section className="bg-surface border-b border-border-light">
       <Container>

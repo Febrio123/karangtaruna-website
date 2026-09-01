@@ -10,7 +10,8 @@
     "seed": "node src/seed/seed.js",
     "seed:reset": "node src/seed/seed.js --reset",
     "test": "node --test",
-    "test:watch": "node --test --watch test/"
+    "test:watch": "node --test --watch test/",
+    "set-role": "node src/scripts/setRole.js"
   },
   "keywords": [
     "karang-taruna",

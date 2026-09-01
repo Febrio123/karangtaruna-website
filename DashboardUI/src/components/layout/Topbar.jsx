@@ -1,14 +1,19 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { Menu, Bell, ChevronDown, Search, LogOut } from 'lucide-react'
+import { useAuth } from '../../context/AuthContext.jsx'
+import { getInitials } from '../../utils/format.js'
+import { roles } from '../../data/pengurus.js'
 
 export default function Topbar({ onMenuClick, pageTitle }) {
   const [menuOpen, setMenuOpen] = useState(false)
-  const navigate = useNavigate()
+  const { user, logout } = useAuth()
+
+  const displayName = user?.nama || user?.username || 'Pengurus'
+  const roleLabel = roles.find((r) => r.value === user?.role)?.label || user?.role || 'Anggota'
 
   function handleLogout() {
-    localStorage.removeItem('kt-auth')
-    navigate('/login')
+    setMenuOpen(false)
+    logout() // POST /auth/logout → bersihkan cookie refresh + redirect /login
   }
 
   return (
@@ -58,11 +63,11 @@ export default function Topbar({ onMenuClick, pageTitle }) {
             aria-label="Menu akun"
           >
             <span className="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center font-heading font-semibold text-sm">
-              AF
+              {getInitials(displayName)}
             </span>
             <span className="hidden sm:block text-left leading-tight">
-              <span className="block text-sm font-medium text-text">Ahmad Fauzi</span>
-              <span className="block text-xs text-text-muted">Ketua</span>
+              <span className="block text-sm font-medium text-text truncate max-w-[11rem]">{displayName}</span>
+              <span className="block text-xs text-text-muted">{roleLabel}</span>
             </span>
             <ChevronDown
               size={16}
@@ -84,8 +89,10 @@ export default function Topbar({ onMenuClick, pageTitle }) {
                 className="absolute right-0 top-full mt-2 w-60 card shadow-lg z-20 overflow-hidden"
               >
                 <div className="px-4 py-3 border-b border-border-light">
-                  <p className="text-sm font-medium text-text">Ahmad Fauzi</p>
-                  <p className="text-xs text-text-muted mt-0.5">Ketua Karang Taruna Sukamaju</p>
+                  <p className="text-sm font-medium text-text truncate">{displayName}</p>
+                  <p className="text-xs text-text-muted mt-0.5 truncate">
+                    {roleLabel} Karang Taruna Sukamaju
+                  </p>
                 </div>
                 <button
                   type="button"

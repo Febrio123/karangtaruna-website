@@ -1,5 +1,7 @@
 import { User } from 'lucide-react';
-import { orgStructure } from '../../data/team';
+import useApiData from '../../hooks/useApiData';
+import { orgStructure as staticOrgStructure } from '../../data/team';
+import { adaptOrgStructure } from '../../lib/adapters';
 
 function OrgNode({ name, position, isTop = false }) {
   return (
@@ -16,6 +18,15 @@ function OrgNode({ name, position, isTop = false }) {
 }
 
 export default function OrgChart() {
+  // LIVE pengurus -> bagan. Rendered seketika memakai data statis, lalu
+  // diperbarui dari API; kalau gagal tetap pakai statis (graceful fallback).
+  const { data: orgStructure } = useApiData({
+    url: '/pengurus',
+    initial: staticOrgStructure,
+    fallback: staticOrgStructure,
+    adapter: (raw) => adaptOrgStructure(raw),
+  });
+
   return (
     <div className="overflow-x-auto py-4">
       <div className="min-w-[640px] flex flex-col items-center">

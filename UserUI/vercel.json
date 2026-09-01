@@ -35,7 +35,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://res.cloudinary.com https://*.cloudinary.com https://*.tile.openstreetmap.org; media-src 'self' https://res.cloudinary.com https://*.cloudinary.com; frame-src https://*.openstreetmap.org; connect-src 'self' https://res.cloudinary.com https://*.cloudinary.com https://formspree.io; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://res.cloudinary.com https://*.cloudinary.com https://*.tile.openstreetmap.org; media-src 'self' https://res.cloudinary.com https://*.cloudinary.com; frame-src https://*.openstreetmap.org; connect-src 'self' https://res.cloudinary.com https://*.cloudinary.com https://formspree.io https://karangtaruna-website-server.vercel.app; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
         }
       ]
     },

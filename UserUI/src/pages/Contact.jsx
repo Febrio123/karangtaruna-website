@@ -4,10 +4,11 @@ import Section from '../components/layout/Section';
 import Card from '../components/ui/Card';
 import ContactForm from '../components/special/ContactForm';
 import LocationMap from '../components/special/LocationMap';
-import { siteConfig } from '../data/siteConfig';
+import useSiteConfig from '../hooks/useSiteConfig';
 import useSeo, { SITE_URL } from '../hooks/useSeo';
 
 export default function Contact() {
+  const { data: siteConfig } = useSiteConfig();
   useSeo({
     title: 'Kontak',
     description: 'Hubungi Karang Taruna Mekar Jaya — alamat, telepon, email, dan peta lokasi sekretariat di Kelurahan Mekar Jaya, Depok.',

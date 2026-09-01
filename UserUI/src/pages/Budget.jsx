@@ -1,18 +1,83 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { clsx } from 'clsx';
 import { ChevronDown } from 'lucide-react';
 import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
 import BudgetSummary from '../components/special/BudgetSummary';
 import BudgetTable from '../components/content/BudgetTable';
-import { budgetData, getBudgetSummary } from '../data/budget';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
+import ErrorBanner from '../components/ui/ErrorBanner';
+import useApiData from '../hooks/useApiData';
+import { adaptBudgetSummaryRaw, adaptTransaksiToBudget } from '../lib/adapters';
+import { budgetData as staticBudget } from '../data/budget';
 import useSeo from '../hooks/useSeo';
 
-const years = Object.keys(budgetData)
+// Tahun yang tersedia: dari data statis + tahun yang ditemukan saat fetch.
+const staticYears = Object.keys(staticBudget)
   .map(Number)
   .sort((a, b) => b - a);
 
+// Hitung ringkasan dari baris transaksi (fallback bila endpoint ringkasan gagal).
+function deriveSummaryFromTransaksi(data, year) {
+  const income = data?.income || [];
+  const expenses = data?.expenses || [];
+  const totalIncome = income.reduce((s, i) => s + (Number(i.amount) || 0), 0);
+  const totalExpenses = expenses.reduce((s, i) => s + (Number(i.amount) || 0), 0);
+  return {
+    year,
+    period: `Periode tahun ${year}`,
+    totalIncome,
+    totalExpenses,
+    balance: totalIncome - totalExpenses,
+    incomeCount: income.length,
+    expenseCount: expenses.length,
+  };
+}
+
 export default function Budget() {
+  const [selectedYear, setSelectedYear] = useState(staticYears[0]);
+
+  // Ringkasan (total/saldo/perBulan/perKategori) dari endpoint ringkasan.
+  const summaryApi = useApiData({
+    url: `/transaksi-anggaran/ringkasan?tahun=${selectedYear}`,
+    fallback: () => {
+      const d = staticBudget[selectedYear];
+      return d
+        ? {
+            tahun: d.year,
+            totalIncome: d.income.reduce((s, i) => s + i.amount, 0),
+            totalExpenses: d.expenses.reduce((s, i) => s + i.amount, 0),
+            balance: d.income.reduce((s, i) => s + i.amount, 0) - d.expenses.reduce((s, i) => s + i.amount, 0),
+            incomeCount: d.income.length,
+            expenseCount: d.expenses.length,
+          }
+        : null;
+    },
+    adapter: (raw) => {
+      if (!raw) return null;
+      return {
+        tahun: raw.tahun,
+        totalIncome: Number(raw.totalPemasukan) || 0,
+        totalExpenses: Number(raw.totalPengeluaran) || 0,
+        balance: Number(raw.saldo) || 0,
+        incomeCount: Number(raw.jumlahPemasukan) || 0,
+        expenseCount: Number(raw.jumlahPengeluaran) || 0,
+        perBulan: raw.perBulan,
+        perKategori: raw.perKategori,
+      };
+    },
+  });
+
+  // Detail baris (untuk tabel Pemasukan/Pengeluaran) dari endpoint list.
+  const transaksi = useApiData({
+    url: `/transaksi-anggaran?tahun=${selectedYear}&limit=100`,
+    fallback: () => {
+      const d = staticBudget[selectedYear];
+      return d ? { income: d.income, expenses: d.expenses } : { income: [], expenses: [] };
+    },
+    adapter: adaptTransaksiToBudget,
+  });
+
   useSeo({
     title: 'Transparansi Keuangan',
     description: 'Laporan pemasukan dan pengeluaran kas Karang Taruna Mekar Jaya untuk transparansi anggaran organisasi.',
@@ -28,7 +93,6 @@ export default function Budget() {
       },
     ],
   });
-  const [selectedYear, setSelectedYear] = useState(years[0]);
   const [activeTab, setActiveTab] = useState('income');
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -50,8 +114,43 @@ export default function Budget() {
     };
   }, []);
 
-  const summary = getBudgetSummary(selectedYear);
-  const yearData = budgetData[selectedYear];
+  // Deret tahun yang tersedia = gabungan statis + tahun live (dari transaksi).
+  const years = useMemo(() => {
+    const set = new Set(staticYears);
+    (transaksi.data?.income || []).forEach((r) => {});
+    const liveYears = [];
+    // Transaksi tidak membawa tahun per baris; cukup pakai tahun statis,
+    // dan tambahkan tahun dari summary ringkasan bila berbeda.
+    if (summaryApi.data?.tahun) set.add(summaryApi.data.tahun);
+    return [...set].sort((a, b) => b - a);
+  }, [summaryApi.data, transaksi.data, staticYears]);
+
+  // Ringkasan: pakai live ringkasan; fallback derive dari baris transaksi.
+  const summary = summaryApi.data
+    ? {
+        year: summaryApi.data.tahun,
+        period: `Periode tahun ${selectedYear} (live)`,
+        totalIncome: summaryApi.data.totalIncome,
+        totalExpenses: summaryApi.data.totalExpenses,
+        balance: summaryApi.data.balance,
+        incomeCount: summaryApi.data.incomeCount,
+        expenseCount: summaryApi.data.expenseCount,
+      }
+    : deriveSummaryFromTransaksi(transaksi.data, selectedYear);
+
+  const yearData = {
+    year: selectedYear,
+    period: `Periode tahun ${selectedYear}`,
+    income: transaksi.data?.income || [],
+    expenses: transaksi.data?.expenses || [],
+  };
+
+  const loading = summaryApi.loading || transaksi.loading;
+  const error = summaryApi.error || transaksi.error;
+  const retry = () => {
+    summaryApi.retry();
+    transaksi.retry();
+  };
 
   return (
     <>
@@ -119,6 +218,12 @@ export default function Budget() {
           )}
         </div>
 
+        {error && <ErrorBanner message={error} onRetry={retry} className="mb-6" />}
+
+        {loading ? (
+          <LoadingSpinner label="Memuat data anggaran..." />
+        ) : (
+        <>
         {/* Period info */}
         {summary && (
           <p className="font-body text-body-base text-text-secondary mb-6">
@@ -175,6 +280,8 @@ export default function Budget() {
               )}
             </div>
           </div>
+        )}
+        </>
         )}
       </Section>
     </>
