@@ -19,6 +19,9 @@ const emptyForm = {
 }
 
 const ACCEPT = 'image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm,video/ogg'
+// Batas aman < 4.5 MB (limit body request Vercel serverless) — 4 MB agar tidak
+// kena 502 Bad Gateway. Selalu dicek SEBELUM request dikirim.
+const MAX_FILE_SIZE = 4 * 1024 * 1024 // 4 MB
 
 export default function Galeri() {
   const [galeri, setGaleri] = useState(initialData)
@@ -70,16 +73,31 @@ export default function Galeri() {
 
   function handleFileChange(e) {
     const selected = e.target.files?.[0] || null
-    setFile(selected)
     setSaveError('')
-    if (selected) {
-      const objectUrl = URL.createObjectURL(selected)
-      setPreview(objectUrl)
-      // Tentukan tipe media dari MIME file
-      setForm((f) => ({ ...f, tipe: selected.type.startsWith('video') ? 'video' : 'image' }))
-    } else {
+    if (!selected) {
+      setFile(null)
       setPreview('')
+      return
     }
+    // Tolak segera bila melebihi batas platform (Vercel memblokir body >4.5 MB
+    // → HTTP 502 sebelum multer). Jangan kirim request ke server.
+    if (selected.size > MAX_FILE_SIZE) {
+      setFile(null)
+      setPreview('')
+      e.target.value = '' // izinkan memilih file yang sama lagi di lain waktu
+      const isVideo = selected.type.startsWith('video')
+      setSaveError(
+        isVideo
+          ? 'Ukuran video melebihi 4 MB (batas platform). Pilih video yang lebih kecil atau kompres dulu — video biasanya mudah melebihi 4 MB.'
+          : 'Ukuran file maksimal 4 MB (batas platform). Pilih file lebih kecil.'
+      )
+      return
+    }
+    setFile(selected)
+    const objectUrl = URL.createObjectURL(selected)
+    setPreview(objectUrl)
+    // Tentukan tipe media dari MIME file
+    setForm((f) => ({ ...f, tipe: selected.type.startsWith('video') ? 'video' : 'image' }))
   }
 
   async function handleSave(e) {
@@ -89,8 +107,14 @@ export default function Galeri() {
       setSaveError('Pilih file foto/video terlebih dahulu.')
       return
     }
-    if (file.size > 10 * 1024 * 1024) {
-      setSaveError('Ukuran file maksimal 10 MB.')
+    // Jaga-jaga: tetap validasi di sini walau sudah dicek saat memilih file.
+    if (file.size > MAX_FILE_SIZE) {
+      const isVideo = file.type.startsWith('video')
+      setSaveError(
+        isVideo
+          ? 'Ukuran video melebihi 4 MB (batas platform). Pilih video yang lebih kecil atau kompres dulu — video biasanya mudah melebihi 4 MB.'
+          : 'Ukuran file maksimal 4 MB (batas platform). Pilih file lebih kecil.'
+      )
       return
     }
     setUploading(true)
@@ -103,7 +127,15 @@ export default function Galeri() {
       setSuccessMsg('Foto berhasil diunggah ke galeri.')
       setTimeout(() => setSuccessMsg(''), 3000)
     } catch (err) {
-      setSaveError(err?.message || 'Gagal mengunggah media ke galeri.')
+      // Halaman "502 Bad Gateway" Vercel (body >4.5 MB diblokir sebelum multer)
+      // tidak punya pesan bermanfaat — ganti dengan penjelasan yang jelas.
+      if (err?.status === 502) {
+        setSaveError(
+          'Upload gagal: server menolak file (batas platform ±4.5 MB). Gunakan media berukuran maksimal 4 MB atau kompres file Anda terlebih dahulu.'
+        )
+      } else {
+        setSaveError(err?.message || 'Gagal mengunggah media ke galeri.')
+      }
     } finally {
       setUploading(false)
     }
@@ -256,7 +288,8 @@ export default function Galeri() {
               <ImagePlus size={28} className="mx-auto text-text-muted mb-2" aria-hidden="true" />
             )}
             <p className="text-sm text-text-secondary mt-2">Pilih file foto atau video</p>
-            <p className="text-xs text-text-muted mt-1">PNG, JPG, WebP, GIF, MP4. Maks. 10 MB.</p>
+            <p className="text-xs text-text-muted mt-1">PNG, JPG, WebP, GIF, MP4. Maks. 4 MB.</p>
+            <p className="text-xs text-text-muted mt-0.5">Video biasanya melebihi 4 MB — disarankan pakai foto atau kompres videonya.</p>
             <input
               id="file"
               name="file"

@@ -34,13 +34,15 @@ export function hashToken(token) {
 }
 
 function baseCookieOptions() {
-  // Di production (HTTPS) paksa SameSite=Strict & secure=true untuk pertahanan CSRF
-  // yang lebih kuat. Di dev, ikuti env (default lax).
   const isProd = process.env.NODE_ENV === 'production';
   return {
     httpOnly: true,
-    secure: isProd ? true : process.env.COOKIE_SECURE === 'true',
-    sameSite: isProd ? 'strict' : (process.env.COOKIE_SAMESITE || 'lax'),
+    // Cross-site (dashboard.vercel.app → server.vercel.app) WAJIB SameSite=None + secure.
+    // SameSite=Strict/Lax menahan cookie pada request cross-site → sesi tidak bertahan.
+    // secure: true selalu — HTTPS dipakai di semua env (dev & prod Vercel), dan browser
+    // menolak cookie SameSite=None tanpa Secure.
+    secure: true,
+    sameSite: isProd ? 'none' : (process.env.COOKIE_SAMESITE || 'lax'),
     path: '/',
   };
 }

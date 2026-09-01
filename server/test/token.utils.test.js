@@ -188,9 +188,9 @@ describe('setRefreshCookie & clearRefreshCookie', () => {
   });
 });
 
-// ---- Cookie options: secure di production ----
+// ---- Cookie options: secure & SameSite ----
 describe('Cookie options (production vs development)', () => {
-  test('di production: sameSite=strict, secure=true', () => {
+  test('di production: sameSite=none (cross-site Vercel), secure=true', () => {
     process.env.NODE_ENV = 'production';
     const cookies = [];
     const res = {
@@ -198,13 +198,13 @@ describe('Cookie options (production vs development)', () => {
       clearCookie() {},
     };
     setRefreshCookie(res, 'tok', 1000);
-    assert.equal(cookies[0].sameSite, 'strict');
+    assert.equal(cookies[0].sameSite, 'none');
     assert.equal(cookies[0].secure, true);
     // Reset
     process.env.NODE_ENV = 'development';
   });
 
-  test('di development: sameSite=lax, secure=false', () => {
+  test('di development: sameSite=lax (default), secure=true selalu (HTTPS)', () => {
     process.env.NODE_ENV = 'development';
     const cookies = [];
     const res = {
@@ -213,7 +213,7 @@ describe('Cookie options (production vs development)', () => {
     };
     setRefreshCookie(res, 'tok', 1000);
     assert.equal(cookies[0].sameSite, 'lax');
-    assert.equal(cookies[0].secure, false);
+    assert.equal(cookies[0].secure, true);
   });
 });
 
