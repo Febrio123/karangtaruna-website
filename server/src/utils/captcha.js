@@ -87,6 +87,12 @@ export function verifyCaptcha(captchaId, answer) {
   return entry.code.toLowerCase() === String(answer).trim().toLowerCase();
 }
 
+/**
+ * Cek apakah captcha aktif (OPT-IN secara default).
+ * Captcha NONAKTIF kecuali env `CAPTCHA_ENABLED` eksplisit `'true'`.
+ * Berguna untuk tahap uji coba/live: captcha tidak mengganggu sampai
+ * sengaja diaktifkan (mis. `CAPTCHA_ENABLED=true` di Vercel).
+ */
 export function isCaptchaEnabled() {
-  return process.env.CAPTCHA_ENABLED !== 'false';
+  return process.env.CAPTCHA_ENABLED === 'true';
 }
