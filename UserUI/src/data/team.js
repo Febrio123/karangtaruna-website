@@ -1,0 +1,72 @@
+// ============================================================================
+// UserUI/src/data/team.js — Derivasi dari shared/team.js (SINGLE SOURCE)
+// ============================================================================
+// Jangan edit data di sini; edit di shared/team.js.
+// File ini mengkonversi format pengurus (dashboard) ke format yang dibutuhkan
+// UserUI: teamMembers dan orgStructure.
+// ============================================================================
+
+import { pengurus, roles } from '@shared/team.js';
+
+// --- Helper: map role value ke label division untuk pengurus inti ---
+const intiDivisionMap = {
+  ketua: 'Ketua Umum',
+  'wakil-ketua': 'Wakil Ketua Umum',
+  sekretaris: 'Sekretariat',
+  bendahara: 'Bendahara',
+};
+
+// --- Dummy member count per bidang (untuk org chart) ---
+const dummyMemberCounts = {
+  Keagamaan: 15,
+  'Sosial & Kemanusiaan': 20,
+  Olahraga: 25,
+  'Seni & Budaya': 18,
+  Pendidikan: 12,
+  Kewirausahaan: 14,
+  Kesehatan: 16,
+};
+
+/**
+ * teamMembers — daftar pengurus dalam format yang dipakai UserUI.
+ *
+ * Field: id, name, position, division, period, phone, photo, photoAlt
+ */
+export const teamMembers = pengurus.map((p) => ({
+  id: p.id,
+  name: p.nama,
+  position: p.jabatan,
+  division: p.bidang === '-' ? (intiDivisionMap[p.role] || p.jabatan) : p.bidang,
+  period: p.periode,
+  phone: p.telepon,
+  photo: null,
+  photoAlt: `Foto profil ${p.nama} sebagai ${p.jabatan} Karang Taruna`,
+}));
+
+/**
+ * orgStructure — struktur organisasi untuk visualisasi org chart.
+ *
+ * Field: ketua, wakil, sekretaris, bendahara (masing-masing {name, position}),
+ *        bidang (array of {name, leader, members})
+ */
+function findPengurus(roleValue) {
+  const p = pengurus.find((item) => item.role === roleValue);
+  return p ? { name: p.nama, position: p.jabatan } : { name: '-', position: '-' };
+}
+
+// Kumpulkan data bidang dari pengurus role 'anggota' (Koordinator Bidang)
+const bidangData = pengurus
+  .filter((p) => p.role === 'anggota' && p.bidang !== '-')
+  .map((p) => ({
+    name: p.bidang,
+    leader: p.nama,
+    members: dummyMemberCounts[p.bidang] || 15,
+  }));
+
+export const orgStructure = {
+  ketua: findPengurus('ketua'),
+  wakil: findPengurus('wakil-ketua'),
+  sekretaris: findPengurus('sekretaris'),
+  bendahara: findPengurus('bendahara'),
+  bidang: bidangData,
+};

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Beranda -->
+  <url>
+    <loc>https://kt-mekarjaya.vercel.app/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Profil -->
+  <url>
+    <loc>https://kt-mekarjaya.vercel.app/profil</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Profil > Sejarah -->
+  <url>
+    <loc>https://kt-mekarjaya.vercel.app/profil/sejarah</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Profil > Visi & Misi -->
+  <url>
+    <loc>https://kt-mekarjaya.vercel.app/profil/visi-misi</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Profil > Struktur Organisasi -->
+  <url>
+    <loc>https://kt-mekarjaya.vercel.app/profil/struktur-organisasi</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Berita -->
+  <url>
+    <loc>https://kt-mekarjaya.vercel.app/berita</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Berita Detail (sample articles — update when real articles are published) -->
+  <url>
+    <loc>https://kt-mekarjaya.vercel.app/berita/pengajian-bulan-ramadhan-2026</loc>
+    <lastmod>2026-03-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kt-mekarjaya.vercel.app/berita/turnamen-futsal-piala-karang-taruna-2026</loc>
+    <lastmod>2026-02-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kt-mekarjaya.vercel.app/berita/bakti-sosial-pemberian-sembako</loc>
+    <lastmod>2026-02-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kt-mekarjaya.vercel.app/berita/pemilihan-pengurus-baru-2026</loc>
+    <lastmod>2026-01-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kt-mekarjaya.vercel.app/berita/program-penanaman-pohon-seribu-pohon</loc>
+    <lastmod>2025-12-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kt-mekarjaya.vercel.app/berita/bimbingan-belajar-anak-meningkat</loc>
+    <lastmod>2025-11-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Galeri -->
+  <url>
+    <loc>https://kt-mekarjaya.vercel.app/galeri</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Pengumuman -->
+  <url>
+    <loc>https://kt-mekarjaya.vercel.app/pengumuman</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Informasi -->
+  <url>
+    <loc>https://kt-mekarjaya.vercel.app/informasi</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Anggaran -->
+  <url>
+    <loc>https://kt-mekarjaya.vercel.app/anggaran</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Kontak -->
+  <url>
+    <loc>https://kt-mekarjaya.vercel.app/kontak</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
+  </url>
+</urlset>

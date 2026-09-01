@@ -1,0 +1,90 @@
+import { User } from 'lucide-react';
+import { orgStructure } from '../../data/team';
+
+function OrgNode({ name, position, isTop = false }) {
+  return (
+    <div className={`flex flex-col items-center ${isTop ? 'mb-2' : ''}`}>
+      <div className="w-16 h-16 rounded-full bg-primary-light flex items-center justify-center mb-1 border-2 border-primary/20">
+        <User className="w-7 h-7 text-primary" />
+      </div>
+      <p className="font-heading text-body-base font-semibold text-text text-center leading-tight">
+        {name}
+      </p>
+      <p className="font-body text-caption text-primary text-center">{position}</p>
+    </div>
+  );
+}
+
+export default function OrgChart() {
+  return (
+    <div className="overflow-x-auto py-4">
+      <div className="min-w-[640px] flex flex-col items-center">
+        {/* Ketua */}
+        <OrgNode
+          name={orgStructure.ketua.name}
+          position={orgStructure.ketua.position}
+          isTop
+        />
+
+        {/* Vertical line from ketua */}
+        <div className="w-0.5 h-6 bg-border" />
+
+        {/* Level 2: Wakil, Sekretaris, Bendahara */}
+        <div className="relative w-full max-w-lg">
+          {/* Horizontal line */}
+          <div className="absolute top-0 left-[20%] right-[20%] h-0.5 bg-border" />
+
+          <div className="flex justify-between px-4 pt-6">
+            <OrgNode
+              name={orgStructure.wakil.name}
+              position={orgStructure.wakil.position}
+            />
+            <OrgNode
+              name={orgStructure.sekretaris.name}
+              position={orgStructure.sekretaris.position}
+            />
+            <OrgNode
+              name={orgStructure.bendahara.name}
+              position={orgStructure.bendahara.position}
+            />
+          </div>
+
+          {/* Vertical lines down */}
+          <div className="absolute top-0 left-[20%] w-0.5 h-6 bg-border" />
+          <div className="absolute top-0 left-1/2 w-0.5 h-6 bg-border -translate-x-0.5" />
+          <div className="absolute top-0 right-[20%] w-0.5 h-6 bg-border" />
+        </div>
+
+        {/* Vertical lines to bidang */}
+        <div className="w-0.5 h-6 bg-border" />
+
+        {/* Level 3: Bidang-bidang */}
+        <div className="relative w-full max-w-3xl">
+          <div className="absolute top-0 left-[10%] right-[10%] h-0.5 bg-border" />
+
+          <div className="flex justify-between px-2 pt-6">
+            {orgStructure.bidang.map((bidang) => (
+              <div
+                key={bidang.name}
+                className="flex flex-col items-center text-center"
+              >
+                <div className="w-12 h-12 rounded-full bg-accent-light flex items-center justify-center mb-1 border-2 border-accent/20">
+                  <User className="w-5 h-5 text-accent" />
+                </div>
+                <p className="font-heading text-caption font-semibold text-text leading-tight">
+                  {bidang.name}
+                </p>
+                <p className="font-body text-[11px] text-text-muted">
+                  {bidang.leader}
+                </p>
+                <p className="font-body text-[11px] text-text-muted">
+                  {bidang.members} anggota
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Environment — jangan pernah commit secret
+.env
+.env.local
+.env.production
+
+# Upload lokal (jika memakai disk storage)
+uploads/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Test coverage
+coverage/

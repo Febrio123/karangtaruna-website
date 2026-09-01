@@ -1,0 +1,87 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+/* Base styles */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  font-family: 'Work Sans', sans-serif;
+  color: #1A1A1A;
+  background-color: #F6F5F1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Focus visible styles */
+*:focus-visible {
+  outline: 2px solid #1B5E3B;
+  outline-offset: 2px;
+}
+
+/* Skip to content link */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1B5E3B;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 0 0 8px 8px;
+  z-index: 100;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Mobile drawer transition */
+.drawer-enter {
+  transform: translateX(-100%);
+}
+.drawer-enter-active {
+  transform: translateX(0);
+  transition: transform 200ms ease-out;
+}
+.drawer-exit-active {
+  transform: translateX(-100%);
+  transition: transform 200ms ease-out;
+}
+
+/* Lightbox animation */
+@keyframes lightboxFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes lightboxScaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.lightbox-backdrop {
+  animation: lightboxFadeIn 200ms ease-out;
+}
+
+.lightbox-content {
+  animation: lightboxScaleIn 200ms ease-out;
+}

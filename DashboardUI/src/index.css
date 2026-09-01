@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-bg text-text font-body;
+    font-feature-settings: 'ss01' on;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+
+  ::selection {
+    @apply bg-primary-light text-primary;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md text-button transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 min-h-touch px-4;
+  }
+  .btn-primary {
+    @apply btn bg-primary text-white hover:bg-primary-hover;
+  }
+  .btn-secondary {
+    @apply btn bg-white text-primary border border-border hover:border-primary hover:bg-primary-light;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent text-text-secondary hover:bg-bg-alt hover:text-text;
+  }
+  .btn-danger {
+    @apply btn bg-danger text-white hover:bg-danger/90;
+  }
+  .btn-icon {
+    @apply inline-flex items-center justify-center rounded-md min-w-touch min-h-touch w-10 h-10 text-text-secondary hover:bg-bg-alt hover:text-text transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary;
+  }
+
+  .card {
+    @apply bg-surface rounded-lg shadow-sm border border-border-light;
+  }
+
+  .input {
+    @apply w-full rounded-md border border-border bg-white px-3 py-2.5 text-base text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors;
+  }
+
+  .label {
+    @apply block text-caption font-medium text-text-secondary mb-1.5;
+  }
+
+  .select {
+    @apply input appearance-none pr-9 cursor-pointer;
+  }
+}
+
+/* Custom scrollbar for sidebar nav */
+.no-scrollbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

@@ -1,0 +1,11 @@
+# robots.txt — Karang Taruna Mekar Jaya
+# https://kt-mekarjaya.vercel.app/robots.txt
+
+User-agent: *
+Allow: /
+
+# Disallow non-public routes (if any are added in the future)
+Disallow: /api/
+
+# Sitemaps
+Sitemap: https://kt-mekarjaya.vercel.app/sitemap.xml
