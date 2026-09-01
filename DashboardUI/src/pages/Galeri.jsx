@@ -19,8 +19,10 @@ const emptyForm = {
 }
 
 const ACCEPT = 'image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm,video/ogg'
-// Batas aman < 4.5 MB (limit body request Vercel serverless) — 4 MB agar tidak
-// kena 502 Bad Gateway. Selalu dicek SEBELUM request dikirim.
+// Batas aman < 4.5 MB (limit body request Vercel serverless) — 4 MB agar
+// request tidak ditolak prematur. CATATAN: 502 tidak selalu = body terlalu
+// besar; bisa juga dari gagal upload ke Cloudinary (backend mengirim detail
+// asli lewat err.message). Batas ini tetap dicek SEBELUM request dikirim.
 const MAX_FILE_SIZE = 4 * 1024 * 1024 // 4 MB
 
 export default function Galeri() {
@@ -79,8 +81,9 @@ export default function Galeri() {
       setPreview('')
       return
     }
-    // Tolak segera bila melebihi batas platform (Vercel memblokir body >4.5 MB
-    // → HTTP 502 sebelum multer). Jangan kirim request ke server.
+    // Tolak segera saat file melebihi batas 4 MB — jangan kirim request besar
+    // ke server (Vercel bisa menolak payload besar). Batas ini bagian dari
+    // validasi UX; bukan penentu satu-satunya penyebab 502 (lihat catch upload).
     if (selected.size > MAX_FILE_SIZE) {
       setFile(null)
       setPreview('')
@@ -127,11 +130,14 @@ export default function Galeri() {
       setSuccessMsg('Foto berhasil diunggah ke galeri.')
       setTimeout(() => setSuccessMsg(''), 3000)
     } catch (err) {
-      // Halaman "502 Bad Gateway" Vercel (body >4.5 MB diblokir sebelum multer)
-      // tidak punya pesan bermanfaat — ganti dengan penjelasan yang jelas.
-      if (err?.status === 502) {
+      // Tampilkan pesan error ASLI dari backend — untuk 502, backend melempar
+      // ApiError(502, 'Upload media gagal: <detail Cloudinary>'). JANGAN timpa
+      // dengan teks generik agar detail sebenarnya bisa didiagnosa.
+      if (err?.status === 502 && err?.message) {
+        setSaveError(`Gagal mengunggah ke layanan media: ${err.message}`)
+      } else if (err?.status === 413) {
         setSaveError(
-          'Upload gagal: server menolak file (batas platform ±4.5 MB). Gunakan media berukuran maksimal 4 MB atau kompres file Anda terlebih dahulu.'
+          'File terlalu besar (HTTP 413): server menolak payload. Gunakan media berukuran maksimal 4 MB atau kompres file Anda terlebih dahulu.'
         )
       } else {
         setSaveError(err?.message || 'Gagal mengunggah media ke galeri.')
