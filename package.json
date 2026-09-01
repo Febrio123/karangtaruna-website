@@ -1,0 +1,8 @@
+{
+  "name": "karang-taruna-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Monorepo root — menandai seluruh .js di root (incl. shared/) sebagai ESM.",
+  "license": "MIT"
+}

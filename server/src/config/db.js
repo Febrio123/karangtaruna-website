@@ -1,4 +1,4 @@
-# Konfigurasi koneksi MongoDB (mongoose)
+// Konfigurasi koneksi MongoDB (mongoose)
 
 import mongoose from 'mongoose';
 
