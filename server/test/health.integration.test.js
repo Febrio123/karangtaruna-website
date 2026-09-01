@@ -11,7 +11,6 @@ import assert from 'node:assert/strict';
 process.env.JWT_ACCESS_SECRET = 'test_access_secret_for_integration_testing_32ch';
 process.env.JWT_REFRESH_SECRET = 'test_refresh_secret_for_integration_testing32ch';
 process.env.NODE_ENV = 'development';
-process.env.CAPTCHA_ENABLED = 'false';
 
 const { default: request } = await import('supertest');
 const { default: app } = await import('../src/app.js');

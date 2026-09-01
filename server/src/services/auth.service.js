@@ -4,7 +4,6 @@
 // Login/logout, rotasi & revoke refresh token, manajemen percobaan gagal.
 // Service TIDAK menyentuh HTTP response — controller yang set cookie.
 
-import { isCaptchaEnabled, verifyCaptcha } from '../utils/captcha.js';
 import { ApiError } from '../utils/ApiError.js';
 import { RefreshToken } from '../models/refreshToken.model.js';
 import { User } from '../models/user.model.js';
@@ -47,15 +46,13 @@ async function registerFailedAttempt(user) {
 /**
  * Login: verifikasi username+password (+locked), issue token pair,
  * simpan refresh token (hash) ke koleksi refresh_tokens.
+ * Client hanya mengirim username, password, dan remember.
+ * @param {string} username — di-trim & di-lowercase sebelum dicari
+ * @param {string} password — dibandingkan lewat bcrypt
+ * @param {boolean} [remember=false] — true → refresh token umur panjang (30d)
  * @returns {{ user, accessToken, refreshToken, expiresInMs }}
  */
-export async function login({ username, password, remember = false, captchaId = null, captcha = null }) {
-  if (isCaptchaEnabled()) {
-    if (!verifyCaptcha(captchaId, captcha)) {
-      throw new ApiError(400, 'Captcha salah atau kedaluwarsa. Silakan muat ulang dan coba lagi.', { code: 'CAPTCHA_INVALID' });
-    }
-  }
-
+export async function login({ username, password, remember = false }) {
   const user = await User.findOne({ username: String(username).trim().toLowerCase() }).select('+passwordHash');
   if (!user) {
     // Anti user-enumeration (timing) + anti-enumeration pesan:
@@ -181,5 +178,3 @@ export async function revokeRefreshToken(refreshToken) {
   );
 }
 
-/** Hash generator untuk captcha (re-export agar controller cukup memanggil service ini) */
-export { generateCaptcha } from '../utils/captcha.js';

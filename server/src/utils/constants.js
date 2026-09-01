@@ -19,9 +19,6 @@ export const TRANSAKSI_JENIS = ['pemasukan', 'pengeluaran'];
 
 export const COOKIE_NAME = process.env.COOKIE_REFRESH_NAME || 'rt_refresh_token';
 
-export const CAPTCHA_TTL_MS = 5 * 60 * 1000; // 5 menit
-export const CAPTCHA_LENGTH = 5;
-
 // Akses token expire -> kode agar frontend tahu harus refresh
 export const TOKEN_EXPIRED_CODE = 'TOKEN_EXPIRED';
 

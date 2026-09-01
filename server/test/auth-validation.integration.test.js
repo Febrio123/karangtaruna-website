@@ -2,7 +2,6 @@
 // test/auth-validation.integration.test.js
 // Integration test — validasi input pada endpoint auth (tanpa DB)
 //   - POST /api/auth/login tanpa body -> 400 (validasi gagal)
-//   - POST /api/auth/login tanpa captcha -> 400 CAPTCHA_INVALID
 //   - POST /api/auth/register tanpa auth -> 401 TOKEN_MISSING
 //   - POST /api/auth/refresh tanpa cookie -> 401 REFRESH_MISSING
 //   - GET /api/auth/me tanpa token -> 401 TOKEN_MISSING
@@ -15,7 +14,6 @@ import assert from 'node:assert/strict';
 process.env.JWT_ACCESS_SECRET = 'test_access_secret_for_integration_testing_32ch';
 process.env.JWT_REFRESH_SECRET = 'test_refresh_secret_for_integration_testing32ch';
 process.env.NODE_ENV = 'development';
-process.env.CAPTCHA_ENABLED = 'false';
 
 const { default: request } = await import('supertest');
 const { default: app } = await import('../src/app.js');

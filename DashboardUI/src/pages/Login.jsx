@@ -1,7 +1,4 @@
 // Halaman Login — terhubung ke backend (POST /api/auth/login).
-// Alur captcha: coba login tanpa captcha → jika server balas error
-// ber-code CAPTCHA_INVALID → ambil GET /api/auth/captcha → tampilkan SVG →
-// submit ulang dengan captchaId + kode yang diketik.
 import { useState } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import {
@@ -15,9 +12,7 @@ import {
   Wallet,
   CalendarDays,
   Users,
-  RefreshCw,
 } from 'lucide-react'
-import { apiFetch } from '../lib/api'
 import { useAuth } from '../context/AuthContext.jsx'
 
 const benefits = [
@@ -35,24 +30,12 @@ export default function Login() {
   const [error, setError] = useState('')
   const [errorDetails, setErrorDetails] = useState([]) // daftar detail error (mis. per-field)
   const [loading, setLoading] = useState(false)
-  const [captcha, setCaptcha] = useState(null) // { id, image } — aktif saat server memintanya
-  const [captchaInput, setCaptchaInput] = useState('')
   const { login, user, initializing } = useAuth()
   const navigate = useNavigate()
 
   // Sudah login (sesi valid)? Langsung kembali ke dashboard.
   if (!initializing && user) {
     return <Navigate to="/" replace />
-  }
-
-  async function loadCaptcha() {
-    try {
-      const data = await apiFetch('/auth/captcha')
-      setCaptcha({ id: data?.captchaId, image: data?.image })
-      setCaptchaInput('')
-    } catch {
-      setCaptcha(null) // gagal memuat → biarkan user mencoba tanpa captcha
-    }
   }
 
   async function handleSubmit(e) {
@@ -69,7 +52,6 @@ export default function Login() {
         username: username.trim(),
         password,
         remember,
-        ...(captcha ? { captchaId: captcha.id, captcha: captchaInput } : {}),
       })
       navigate('/', { replace: true })
     } catch (err) {
@@ -87,11 +69,6 @@ export default function Login() {
       // Gabungkan message + detail ke error; detail juga dirender sebagai daftar kecil.
       setError(detailTexts.length > 0 ? `${message} ${detailTexts.join('; ')}` : message)
       setErrorDetails(detailTexts)
-
-      if (err?.code === 'CAPTCHA_INVALID') {
-        // Server mewajibkan captcha → minta & tampilkan kode keamanan.
-        await loadCaptcha()
-      }
     } finally {
       setLoading(false)
     }
@@ -227,40 +204,6 @@ export default function Login() {
                 </button>
               </div>
             </div>
-
-            {captcha && captcha.id && (
-              <div className="rounded-md border border-border-light p-3 space-y-3">
-                <p className="text-xs text-text-muted">
-                  Server meminta kode keamanan. Ketik ulang kode pada gambar di bawah.
-                </p>
-                <div className="flex items-center gap-2">
-                  <img
-                    src={captcha.image}
-                    alt="Kode keamanan"
-                    className="h-12 rounded-sm border border-border-light"
-                  />
-                  <button
-                    type="button"
-                    onClick={loadCaptcha}
-                    className="btn-icon"
-                    aria-label="Muat ulang kode keamanan"
-                    title="Muat ulang kode"
-                  >
-                    <RefreshCw size={16} />
-                  </button>
-                </div>
-                <input
-                  id="captcha"
-                  name="captcha"
-                  type="text"
-                  autoComplete="off"
-                  value={captchaInput}
-                  onChange={(e) => setCaptchaInput(e.target.value)}
-                  className="input"
-                  placeholder="Ketik kode di gambar"
-                />
-              </div>
-            )}
 
             <div className="flex items-center gap-3">
               <label className="inline-flex items-center gap-2 text-sm text-text-secondary cursor-pointer">

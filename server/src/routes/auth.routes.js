@@ -10,9 +10,6 @@ import { ROLES, ROLE_REGISTER } from '../utils/constants.js';
 
 const router = Router();
 
-/** GET /api/auth/captcha — publik */
-router.get('/captcha', authController.captcha);
-
 /** POST /api/auth/register — protected (ketua/wakil-ketua) */
 router.post(
   '/register',
@@ -35,8 +32,6 @@ router.post(
     body('username').trim().notEmpty().withMessage('Username wajib diisi'),
     body('password').notEmpty().withMessage('Password wajib diisi'),
     body('remember').optional().isBoolean().withMessage('remember harus boolean'),
-    body('captchaId').optional().isString().withMessage('captchaId harus string'),
-    body('captcha').optional().isString().withMessage('captcha harus string'),
   ]),
   authController.login
 );

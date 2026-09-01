@@ -19,8 +19,6 @@ import {
   GALERI_TYPE,
   TRANSAKSI_JENIS,
   TOKEN_EXPIRED_CODE,
-  CAPTCHA_LENGTH,
-  CAPTCHA_TTL_MS,
 } from '../src/utils/constants.js';
 
 describe('ROLES', () => {
@@ -101,16 +99,8 @@ describe('Enum constants', () => {
   });
 });
 
-describe('Captcha & token constants', () => {
+describe('Token constants', () => {
   test('TOKEN_EXPIRED_CODE = TOKEN_EXPIRED', () => {
     assert.equal(TOKEN_EXPIRED_CODE, 'TOKEN_EXPIRED');
-  });
-
-  test('CAPTCHA_LENGTH = 5', () => {
-    assert.equal(CAPTCHA_LENGTH, 5);
-  });
-
-  test('CAPTCHA_TTL_MS = 5 menit', () => {
-    assert.equal(CAPTCHA_TTL_MS, 5 * 60 * 1000);
   });
 });

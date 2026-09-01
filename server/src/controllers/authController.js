@@ -1,21 +1,14 @@
-// controllers/authController.js — captcha, register, login, refresh, logout, me
+// controllers/authController.js — register, login, refresh, logout, me
 
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { ApiError } from '../utils/ApiError.js';
 import { setRefreshCookie, clearRefreshCookie, parseDurationToMs } from '../utils/token.js';
-import { generateCaptcha } from '../utils/captcha.js';
 import * as authService from '../services/auth.service.js';
 import { User } from '../models/user.model.js';
 import { ROLES } from '../utils/constants.js';
 
 const COOKIE_REFRESH_NAME = process.env.COOKIE_REFRESH_NAME || 'rt_refresh_token';
-
-/** GET /api/auth/captcha — teks acak (SVG data-URI) + captchaId sekali pakai */
-export const captcha = asyncHandler(async (_req, res) => {
-  const { captchaId, image } = generateCaptcha();
-  return ApiResponse.success(res, { captchaId, image }, 'Captcha dihasilkan, berlaku 5 menit.');
-});
 
 /**
  * POST /api/auth/register — buat akun admin.
@@ -56,17 +49,11 @@ export const register = asyncHandler(async (req, res) => {
   return ApiResponse.created(res, { user: user.toPublicJSON() }, 'Akun berhasil dibuat.');
 });
 
-/** POST /api/auth/login — username + password + captcha + ingat saya */
+/** POST /api/auth/login — username + password + ingat saya (remember) */
 export const login = asyncHandler(async (req, res) => {
-  const { username, password, remember = false, captchaId = null, captcha: captchaAnswer = null } = req.body;
+  const { username, password, remember = false } = req.body;
 
-  const result = await authService.login({
-    username,
-    password,
-    remember,
-    captchaId,
-    captcha: captchaAnswer,
-  });
+  const result = await authService.login({ username, password, remember });
 
   // Refresh token hanya lewat cookie httpOnly — TIDAK dikirim di body
   setRefreshCookie(res, result.refreshToken, result.expiresInMs);

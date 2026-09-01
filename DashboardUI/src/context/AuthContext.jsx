@@ -23,10 +23,10 @@ export function AuthProvider({ children }) {
   }, [navigate])
 
   const login = useCallback(
-    async ({ username, password, remember = false, captchaId = null, captcha = '' }) => {
+    async ({ username, password, remember = false }) => {
       const data = await apiFetch('/auth/login', {
         method: 'POST',
-        body: { username, password, remember, captchaId, captcha },
+        body: { username, password, remember },
       })
       setAccessToken(data?.accessToken || null)
       setUser(data?.user || null)
