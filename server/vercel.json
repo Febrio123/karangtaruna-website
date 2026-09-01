@@ -1,10 +1,14 @@
 {
   "version": 2,
   "functions": {
-    "api/[...slug].js": {
+    "api/index.js": {
       "maxDuration": 10
     }
   },
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api" },
+    { "source": "/", "destination": "/api" }
+  ],
   "headers": [
     {
       "source": "/api/(.*)",
