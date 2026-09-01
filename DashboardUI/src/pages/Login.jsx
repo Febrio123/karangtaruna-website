@@ -33,6 +33,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [remember, setRemember] = useState(true)
   const [error, setError] = useState('')
+  const [errorDetails, setErrorDetails] = useState([]) // daftar detail error (mis. per-field)
   const [loading, setLoading] = useState(false)
   const [captcha, setCaptcha] = useState(null) // { id, image } — aktif saat server memintanya
   const [captchaInput, setCaptchaInput] = useState('')
@@ -62,6 +63,7 @@ export default function Login() {
     }
     setLoading(true)
     setError('')
+    setErrorDetails([])
     try {
       await login({
         username: username.trim(),
@@ -71,7 +73,21 @@ export default function Login() {
       })
       navigate('/', { replace: true })
     } catch (err) {
-      setError(err?.message || 'Login gagal. Silakan coba lagi.')
+      // Pesan utama: selalu non-kosong (fallback bila backend tidak mengirim message).
+      const message = (err?.message && err.message.trim()) || 'Login gagal. Silakan coba lagi.'
+      // Detail tambahan (mis. {field, message} per kolom dari validasi backend).
+      const details = Array.isArray(err?.details) ? err.details : []
+      const detailTexts = details
+        .map((d) => {
+          const text = typeof d === 'string' ? d : d?.message ?? d?.msg
+          return typeof text === 'string' ? text.trim() : ''
+        })
+        .filter(Boolean)
+
+      // Gabungkan message + detail ke error; detail juga dirender sebagai daftar kecil.
+      setError(detailTexts.length > 0 ? `${message} ${detailTexts.join('; ')}` : message)
+      setErrorDetails(detailTexts)
+
       if (err?.code === 'CAPTCHA_INVALID') {
         // Server mewajibkan captcha → minta & tampilkan kode keamanan.
         await loadCaptcha()
@@ -148,7 +164,17 @@ export default function Login() {
                 role="alert"
                 className="flex items-start gap-2 rounded-md bg-[#FBE8E6] text-danger text-sm px-3.5 py-2.5"
               >
-                <Lock size={16} className="mt-0.5 shrink-0" aria-hidden="true" /> <span>{error}</span>
+                <Lock size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
+                <div className="min-w-0 flex-1 space-y-1">
+                  <p>{error}</p>
+                  {errorDetails.length > 0 && (
+                    <ul className="list-disc pl-4 space-y-0.5">
+                      {errorDetails.map((detail, i) => (
+                        <li key={`${detail}-${i}`}>{detail}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </div>
             )}
 
@@ -165,6 +191,7 @@ export default function Login() {
                   onChange={(e) => {
                     setUsername(e.target.value)
                     setError('')
+                    setErrorDetails([])
                   }}
                   className="input pl-11"
                   placeholder="mis. ketua"
@@ -185,6 +212,7 @@ export default function Login() {
                   onChange={(e) => {
                     setPassword(e.target.value)
                     setError('')
+                    setErrorDetails([])
                   }}
                   className="input pl-11 pr-12"
                   placeholder="••••••••"

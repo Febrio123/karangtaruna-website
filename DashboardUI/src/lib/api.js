@@ -45,6 +45,33 @@ export class ApiClientError extends Error {
   }
 }
 
+/**
+ * Bangun pesan error satu kalimat yang jelas dari payload error backend.
+ * Urutan prioritas:
+ *   1. `payload.message` (string non-empty) → dipakai apa adanya (di-trim),
+ *      mis. "Username atau password salah." / "Captcha salah atau kedaluwarsa."
+ *   2. `payload.details` (array non-empty) → gabung tiap item (`.message` /
+ *      `.msg`) dengan pemisah "; " — mis. detail validasi per-field.
+ *   3. Fallback generik yang menyertakan status HTTP — mis. body non-JSON
+ *      atau backend tidak mengirim pesan sama sekali.
+ */
+function readableError(payload, res) {
+  const message = typeof payload?.message === 'string' ? payload.message.trim() : ''
+  if (message) return message
+
+  if (Array.isArray(payload?.details) && payload.details.length > 0) {
+    const parts = payload.details
+      .map((d) => {
+        const text = typeof d === 'string' ? d : d?.message ?? d?.msg
+        return typeof text === 'string' ? text.trim() : ''
+      })
+      .filter(Boolean)
+    if (parts.length > 0) return parts.join('; ')
+  }
+
+  return `Terjadi kesalahan pada server (HTTP ${res?.status ?? '?'}).`
+}
+
 async function parseResponse(res) {
   const text = await res.text()
   if (!text) return {}
@@ -124,10 +151,12 @@ async function request(path, { method = 'GET', body, headers = {}, ...rest } = {
 
   const payload = await parseResponse(res)
   if (!res.ok) {
-    throw new ApiClientError(
-      payload?.message || `Terjadi kesalahan pada server (${res.status}).`,
-      { status: res.status, code: payload?.code || null, details: payload?.details || null }
-    )
+    // Pesan selalu informatif: message backend → details → fallback + status.
+    throw new ApiClientError(readableError(payload, res), {
+      status: res.status,
+      code: payload?.code || null,
+      details: payload?.details || null,
+    })
   }
   return payload
 }
