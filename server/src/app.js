@@ -19,52 +19,62 @@ const app = express();
 // --- trust proxy (rate-limit butuh IP yang benar di belakang reverse proxy) ---
 app.set('trust proxy', 1);
 
-// --- Compression (gzip) — kurangi ukuran respons JSON/teks hingga ~70% ---
-app.use(compression());
+// ============================================================================
+// CORS — HARUS DIPASANG PERTAMA, sebelum helmet / compression / rate-limiter.
+// Alasan: browser mengirim OPTIONS (preflight) sebelum request asli; bila
+// middleware lain dieksekusi lebih dulu, response bisa tidak punya header
+// Access-Control-Allow-Origin dan preflight gagal (CORS blocked).
+// ============================================================================
 
-// --- Security headers ---
-app.use(helmet());
-
-// --- CORS: daftar origin dari env (koma) + fallback domain production ---
-// Urutan prioritas:
-//   1. CORS_ORIGIN env var (Vercel Dashboard / .env) — pisahkan dengan koma
-//   2. PRODUCTION_ORIGINS fallback (domain Vercel yang sudah diketahui)
-//   3. Jika keduanya kosong → dev mode (izinkan semua — hanya lokal)
+// Domain production yang selalu diizinkan (fallback bila env CORS_ORIGIN kosong)
 const PRODUCTION_ORIGINS = [
   'https://karangtaruna-website-dashboard.vercel.app',
   'https://karangtaruna-website.vercel.app',
 ];
 
+// Ambil dari env (Vercel Dashboard → Environment Variables → CORS_ORIGIN)
 const envOrigins = (process.env.CORS_ORIGIN || '')
   .split(',')
   .map((o) => o.trim())
   .filter(Boolean);
 
-// Gabungkan env + fallback production, hilangkan duplikat
-const origins = envOrigins.length > 0
-  ? [...new Set([...envOrigins, ...PRODUCTION_ORIGINS])]
-  : PRODUCTION_ORIGINS;
+// Gabung + deduplicate: env origins selalu include production fallback
+const allowedOrigins = [...new Set([...envOrigins, ...PRODUCTION_ORIGINS])];
 
 const corsOptions = {
-  // Di production: origin harus dari daftar whitelist (jangan pernah '*' dgn credentials).
-  // Di dev (origins kosong setelah fallback): echo origin untuk convenience lokal.
-  origin(origin, cb) {
-    if (!origin) return cb(null, true); // non-browser / curl / server-to-server
-    if (origins.includes(origin)) return cb(null, true);
-    // Origin tidak dikenal — tolak (403).
-    const e = new Error(`Origin tidak diizinkan oleh kebijakan CORS: ${origin}`);
-    e.statusCode = 403;
-    return cb(e);
+  origin(requestOrigin, callback) {
+    // Izinkan request tanpa Origin header (curl, Postman, server-to-server)
+    if (!requestOrigin) return callback(null, true);
+
+    if (allowedOrigins.includes(requestOrigin)) {
+      return callback(null, true);
+    }
+
+    // Izinkan localhost semua port (development lokal)
+    if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(requestOrigin)) {
+      return callback(null, true);
+    }
+
+    const err = new Error(`CORS: origin tidak diizinkan — ${requestOrigin}`);
+    err.statusCode = 403;
+    return callback(err);
   },
-  credentials: true,            // wajib: cookie httpOnly lintas origin
-  methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
-  allowedHeaders: ['Content-Type','Authorization','X-Requested-With'],
+  credentials: true, // wajib: cookie httpOnly refresh token lintas origin
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200, // beberapa browser lama perlu 200 bukan 204
 };
 
-// Jawab preflight OPTIONS SEBELUM middleware lain (termasuk rate-limiter & helmet).
-// Ini penting agar request OPTIONS tidak kena 429 / block oleh helmet.
+// Jawab semua preflight OPTIONS di sini — SEBELUM middleware apapun.
 app.options('*', cors(corsOptions));
+// Terapkan CORS header ke semua response.
 app.use(cors(corsOptions));
+
+// --- Compression (gzip) ---
+app.use(compression());
+
+// --- Security headers (setelah CORS agar helmet tidak menimpa CORS headers) ---
+app.use(helmet());
 
 // --- Body & cookie parsers ---
 app.use(express.json({ limit: '2mb' }));
