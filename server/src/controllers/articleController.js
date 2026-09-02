@@ -10,6 +10,14 @@ import { safeSearchRegex, detectDangerousHtml } from '../utils/sanitize.js';
 
 const PAGE_SIZE_DEFAULT = 12;
 
+/** parse boolean API — dukung string "true"/"false" (FormData) & boolean asli (JSON). */
+function parseBool(v) {
+  if (v === undefined || v === null) return undefined
+  if (typeof v === 'boolean') return v
+  if (String(v).toLowerCase() === 'false' || String(v) === '0') return false
+  return true // "true", "1", dan string lain dianggap true
+}
+
 // Proyeksi list artikel: JANGAN kirim field berat `content` (HTML panjang) ke
 // kartu/list — cukup metadata kartu. Detail diambil via GET /:id & /slug/:slug.
 // Ini memangkas payload hingga puluhan-kali lipat pada list.
@@ -97,7 +105,7 @@ export const create = asyncHandler(async (req, res) => {
       content,
       cover,
       imageAlt,
-      isPublished: isPublished !== undefined ? Boolean(isPublished) : true,
+      isPublished: parseBool(isPublished) !== undefined ? parseBool(isPublished) : true,
     });
     return ApiResponse.created(res, doc, 'Artikel berhasil dibuat.');
   } catch (err) {
@@ -119,10 +127,11 @@ export const update = asyncHandler(async (req, res) => {
     }
   }
 
-  const allowed = ['slug', 'title', 'category', 'date', 'author', 'excerpt', 'content', 'imageAlt', 'isPublished'];
+  const allowed = ['slug', 'title', 'category', 'date', 'author', 'excerpt', 'content', 'imageAlt'];
   allowed.forEach((field) => {
     if (req.body[field] !== undefined) existing[field] = req.body[field];
   });
+  if (req.body.isPublished !== undefined) existing.isPublished = parseBool(req.body.isPublished);
 
   if (req.file) {
     const cover = await uploadBuffer(req.file.buffer, {

@@ -95,6 +95,20 @@ export const artikelAdapter = {
       isPublished: f.status !== 'draft',
     }
   },
+  toFormData(f, file, existing) {
+    const fd = new FormData()
+    if (file) fd.append('cover', file)
+    fd.append('slug', (existing && existing.slug) || slugify(f.judul))
+    fd.append('title', String(f.judul || '').trim())
+    fd.append('category', String(f.kategori || '').trim())
+    fd.append('date', f.tanggal || new Date().toISOString().slice(0, 10))
+    fd.append('author', String(f.penulis || '').trim())
+    fd.append('excerpt', String(f.excerpt || '').trim())
+    fd.append('content', String(f.content || ''))
+    fd.append('imageAlt', String(f.imageAlt || '').trim())
+    fd.append('isPublished', f.status !== 'draft' ? 'true' : 'false')
+    return fd
+  },
 }
 
 // ---------------------------------------------------------------------------

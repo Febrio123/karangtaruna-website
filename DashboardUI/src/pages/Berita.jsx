@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { FilePlus, Pencil, Trash2, Search, Eye, FileText } from 'lucide-react'
+import { FilePlus, Pencil, Trash2, Search, Eye, FileText, ImagePlus } from 'lucide-react'
 import Badge from '../components/ui/Badge.jsx'
 import Modal from '../components/ui/Modal.jsx'
 import EmptyState from '../components/ui/EmptyState.jsx'
@@ -34,6 +34,8 @@ export default function Berita() {
   const [saveError, setSaveError] = useState('')
   const [saving, setSaving] = useState(false)
   const [deletingId, setDeletingId] = useState(null)
+  const [coverFile, setCoverFile] = useState(null)   // File yang dipilih
+  const [coverPreview, setCoverPreview] = useState('') // data URL pratinjau
 
   async function loadData() {
     setLoading(true)
@@ -69,6 +71,8 @@ export default function Berita() {
   function openAdd() {
     setEditingId(null)
     setForm({ ...emptyForm, tanggal: new Date().toISOString().slice(0, 10) })
+    setCoverFile(null)
+    setCoverPreview('')
     setSaveError('')
     setModalOpen(true)
   }
@@ -85,6 +89,8 @@ export default function Berita() {
       content: item.content || '',
       slug: item.slug || '',
     })
+    setCoverFile(null)
+    setCoverPreview('')
     setSaveError('')
     setModalOpen(true)
   }
@@ -92,6 +98,16 @@ export default function Berita() {
   function handleChange(e) {
     const { name, value } = e.target
     setForm((f) => ({ ...f, [name]: value }))
+  }
+
+  function handleCover(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    // validasi tipe gambar & ukuran (mis. ≤ 5MB)
+    if (!file.type.startsWith('image/')) { setSaveError('File harus berupa gambar.'); e.target.value=''; return }
+    if (file.size > 5 * 1024 * 1024) { setSaveError('Ukuran maksimal 5MB.'); e.target.value=''; return }
+    setCoverFile(file)
+    setCoverPreview(URL.createObjectURL(file))
   }
 
   async function handleSave(e) {
@@ -103,13 +119,20 @@ export default function Berita() {
     }
     setSaving(true)
     setSaveError('')
-    const body = artikelAdapter.toBody(form, form)
+    let body
+    if (coverFile) {
+      body = artikelAdapter.toFormData(form, coverFile, { slug: form.slug })
+    } else {
+      body = artikelAdapter.toBody(form, { slug: form.slug })
+    }
     try {
       if (editingId) {
         await apiFetch(`/articles/${editingId}`, { method: 'PUT', body })
       } else {
         await apiFetch('/articles', { method: 'POST', body })
       }
+      setCoverFile(null)
+      setCoverPreview('')
       setModalOpen(false)
       await loadData()
     } catch (err) {
@@ -319,6 +342,34 @@ export default function Berita() {
               onChange={handleChange}
               placeholder="Ringkasan singkat untuk kartu berita di halaman publik"
             />
+          </div>
+          <div>
+            <label className="label">Gambar Cover (opsional)</label>
+            <div className="flex items-start gap-3">
+              <div className="w-28 h-20 rounded-md overflow-hidden bg-bg-alt border border-border-light flex items-center justify-center shrink-0">
+                {coverPreview ? (
+                  <img src={coverPreview} alt="Pratinjau cover" className="w-full h-full object-cover" />
+                ) : (
+                  <ImagePlus size={22} className="text-text-muted" aria-hidden="true" />
+                )}
+              </div>
+              <label className="btn-secondary cursor-pointer inline-flex items-center gap-2">
+                <ImagePlus size={16} aria-hidden="true" />
+                {coverFile ? 'Ganti Gambar' : 'Pilih Gambar'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleCover}
+                />
+              </label>
+              {coverFile && (
+                <button type="button" className="btn-secondary" onClick={() => { setCoverFile(null); setCoverPreview('') }}>
+                  Hapus
+                </button>
+              )}
+            </div>
+            <p className="text-xs text-text-muted mt-1">JPG/PNG/WebP, maks 5MB. Gambar akan disimpan ke Cloudinary dan tampil di halaman berita publik.</p>
           </div>
           <div>
             <label className="label" htmlFor="content">Konten Berita</label>
