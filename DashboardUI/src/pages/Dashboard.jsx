@@ -15,15 +15,8 @@ import {
 import StatCard from '../components/ui/StatCard.jsx'
 import Badge from '../components/ui/Badge.jsx'
 import KasChartCard from '../components/ui/KasChartCard.jsx'
-import InlineNotice from '../components/ui/InlineNotice.jsx'
 import { apiFetch } from '../lib/api'
 import { useAuth } from '../context/AuthContext.jsx'
-import {
-  stats as fallbackStats,
-  kasChart as fallbackChart,
-  recentActivities as fallbackActivities,
-  upcomingEvents as fallbackEvents,
-} from '../data/overview.js'
 import { formatCurrency, formatDateShort } from '../utils/format.js'
 
 const activityIconMap = {
@@ -62,12 +55,6 @@ function relativeTime(iso) {
   return formatDateShort(iso)
 }
 
-const DEFAULT_CHART = {
-  labels: fallbackChart.months.map((m) => m.bulan),
-  pemasukan: fallbackChart.months.map((m) => m.pemasukan),
-  pengeluaran: fallbackChart.months.map((m) => m.pengeluaran),
-}
-
 // Stagger sederhana untuk kartu statistik — durasi pendek + easeOut.
 const statGridVariants = {
   hidden: {},
@@ -80,11 +67,10 @@ const statItemVariants = {
 
 export default function Dashboard() {
   const { user } = useAuth()
-  const [fallback, setFallback] = useState(false)
-  const [stats, setStats] = useState(fallbackStats)
-  const [chart, setChart] = useState(DEFAULT_CHART)
-  const [activities, setActivities] = useState(fallbackActivities)
-  const [upcoming, setUpcoming] = useState(fallbackEvents)
+  const [stats, setStats] = useState({ totalPengurus: 0, totalBerita: 0, totalEvent: 0, saldoKas: 0 })
+  const [chart, setChart] = useState({ labels: BULAN_NAMA, pemasukan: Array(12).fill(0), pengeluaran: Array(12).fill(0) })
+  const [activities, setActivities] = useState([])
+  const [upcoming, setUpcoming] = useState([])
 
   const displayName = user?.nama || user?.username || 'Admin'
 
@@ -160,7 +146,7 @@ export default function Dashboard() {
             waktu: relativeTime(t.tanggal),
           })
         })
-        setActivities(act.length ? act.slice(0, 5) : fallbackActivities)
+        setActivities(act.slice(0, 5))
 
         // Event mendatang (status 'Mendatang'), urut tanggal terdekat.
         const mendatang = procesEvents
@@ -174,14 +160,10 @@ export default function Dashboard() {
             lokasi: e.location || '-',
             status: e.status,
           }))
-        setUpcoming(mendatang.length ? mendatang : fallbackEvents)
+        setUpcoming(mendatang)
 
-        setFallback(false)
-      } catch (err) {
-        if (!active) return
-        console.log('[api] fallback: overview dashboard', err)
-        setFallback(true)
-        // Pertahankan data mock sebagai cadangan.
+      } catch {
+        // API gagal — state tetap default (array kosong / angka nol).
       }
     }
 
@@ -211,12 +193,6 @@ export default function Dashboard() {
         </div>
         <span className="text-caption text-text-muted">{tanggalHariIni}</span>
       </div>
-
-      {fallback && (
-        <InlineNotice variant="warning">
-          Server tidak dapat diakses — menampilkan data cadangan lokal.
-        </InlineNotice>
-      )}
 
       {/* Stat cards */}
       <motion.div
@@ -285,6 +261,9 @@ export default function Dashboard() {
             <span className="inline-flex text-xs text-primary font-medium">Lihat semua</span>
           </div>
           <ul className="space-y-4">
+            {activities.length === 0 && (
+              <li className="text-sm text-text-muted py-2">Belum ada aktivitas.</li>
+            )}
             {activities.map((item) => {
               const Icon = activityIconMap[item.ikon] || Activity
               return (
@@ -315,6 +294,9 @@ export default function Dashboard() {
           </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {upcoming.length === 0 && (
+            <p className="text-sm text-text-muted py-2 col-span-full">Belum ada event mendatang.</p>
+          )}
           {upcoming.map((ev) => (
             <div key={ev.id} className="flex items-start gap-3 p-3 rounded-md border border-border-light hover:border-primary/40 hover:bg-primary-light/40 transition-colors">
               <div className="w-11 h-11 rounded-md bg-accent-light text-accent flex flex-col items-center justify-center shrink-0">
