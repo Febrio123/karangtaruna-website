@@ -1,4 +1,4 @@
-﻿import { useMemo } from 'react';
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ChevronRight, Megaphone } from 'lucide-react';
@@ -96,7 +96,9 @@ export default function Home() {
     {
       '@context': 'https://schema.org',
       '@type': 'NGO',
-      name: siteConfig.name,
+      name: siteConfig.name || 'Karang Taruna Mangga Dua Selatan',
+      alternateName: ['Karang Taruna Mangga Dua', 'KT Mangga Dua Selatan', 'Katar Mangga Dua Selatan'],
+      keywords: 'Karang Taruna Mangga Dua Selatan, Karang Taruna Mangga Dua, Pemuda Mangga Dua Selatan',
       url: SITE_URL,
       logo: `${SITE_URL}/favicon.svg`,
       description: siteConfig.tagline,
