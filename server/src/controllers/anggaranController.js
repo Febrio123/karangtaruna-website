@@ -222,3 +222,25 @@ export const createAnggaranEvent = asyncHandler(async (req, res) => {
   invalidatePrefix(`prediksi:${nama_event.trim()}:`);
   return ApiResponse.success(res, doc, 'Riwayat anggaran event disimpan.');
 });
+
+/**
+ * DELETE /api/anggaran-event — protected (ketua/wakil/bendahara).
+ * Hapus riwayat anggaran event berdasarkan query ?nama_event=&tahun=
+ */
+export const removeAnggaranEvent = asyncHandler(async (req, res) => {
+  const { nama_event, tahun } = req.query;
+  if (!nama_event || !tahun) {
+    throw new ApiError(400, 'nama_event dan tahun wajib diisi.');
+  }
+
+  const deleted = await AnggaranEvent.findOneAndDelete({
+    nama_event: nama_event.trim(),
+    tahun: Number(tahun),
+  });
+
+  if (!deleted) throw new ApiError(404, 'Riwayat anggaran tidak ditemukan.');
+
+  invalidateKey('anggaran-event:nama');
+  invalidatePrefix(`prediksi:${nama_event.trim()}:`);
+  return ApiResponse.success(res, null, 'Riwayat anggaran event berhasil dihapus.');
+});

@@ -76,4 +76,12 @@ anggaranEventRouter.post(
   anggaranController.createAnggaranEvent
 );
 
+/** DELETE /api/anggaran-event — protected; hapus histori { ?nama_event=&tahun= } */
+anggaranEventRouter.delete(
+  '/',
+  verifyAccessToken,
+  roleGuard(...ROLE_ANGGARAN),
+  anggaranController.removeAnggaranEvent
+);
+
 export { transaksiRouter, anggaranEventRouter };
