@@ -13,6 +13,7 @@ import cookieParser from 'cookie-parser';
 import routes from './routes/index.js';
 import { notFound, errorHandler } from './middleware/errorHandler.js';
 import { apiLimiter } from './middleware/rateLimit.js';
+import { connectDB } from './config/db.js';
 
 const app = express();
 
@@ -20,19 +21,46 @@ const app = express();
 app.set('trust proxy', 1);
 
 // ============================================================================
-// CORS: Refleksikan origin request secara dinamis (origin: true) agar
-// selalu menyertakan Access-Control-Allow-Origin & Credentials untuk semua domain.
+// 1. CORS — WAJIB DIPASANG PALING PERTAMA.
+// Refleksikan req.headers.origin secara dinamis + izinkan credentials.
 // ============================================================================
 const corsOptions = {
-  origin: true, // Refleksikan req.headers.origin secara otomatis
-  credentials: true, // Izinkan cookie & header autentikasi lintas origin
+  origin: true,
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   optionsSuccessStatus: 200,
 };
 
-// Pasang CORS middleware di posisi paling atas
 app.use(cors(corsOptions));
+
+// ============================================================================
+// 2. KONEKSI DB (Serverless Lazy Connection)
+// Dipasang SETELAH CORS agar jika koneksi DB error/timeout, header CORS
+// sudah terpasang di response dan browser menerima JSON 500 yang valid.
+// ============================================================================
+let connPromise = null;
+function ensureDb() {
+  if (!connPromise) {
+    connPromise = connectDB().catch((e) => {
+      connPromise = null;
+      throw e;
+    });
+  }
+  return connPromise;
+}
+
+app.use(async (req, res, next) => {
+  // OPTIONS request (CORS preflight) langsung lewat tanpa perlu DB
+  if (req.method === 'OPTIONS') return next();
+  
+  try {
+    await ensureDb();
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 
 // --- Compression (gzip) ---
 app.use(compression());
