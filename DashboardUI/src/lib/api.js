@@ -14,15 +14,24 @@
 //   - Single -> data (objek)
 // ============================================================================
 
+import { getCookie, ACCESS_COOKIE } from './cookies.js'
+import { setAccessCookie } from './http.js'
+import http from './http.js' // axios instance (dipakai untuk /auth/refresh)
+
 const API_BASE = String(import.meta.env.VITE_API_URL || 'https://karangtaruna-website-server.vercel.app/api').replace(/\/+$/, '')
 
-// --- Token di memori (non-persistent) ---------------------------------------
-let accessToken = null
+// --- Token: seed dari cookie (persist antar refresh) ------------------------
+// Access token disimpan BAIK di memori (fast-path) MAUPUN di cookie browser
+// (jwt_access_token) agar sesi tidak hilang saat halaman di-reload. `setAccessToken`
+// selalu sinkronkan cookie; `setAccessCookie` dari http.js memastikan satu titik
+// set/clear cookie agar axios (http.js) juga kebagian token yang sama.
+let accessToken = getCookie(ACCESS_COOKIE) || null
 let refreshPromise = null
 let onUnauthorized = null
 
 export function setAccessToken(token) {
   accessToken = token || null
+  setAccessCookie(accessToken) // tulis/hapus cookie jwt_access_token
 }
 
 export function getAccessToken() {
@@ -83,29 +92,28 @@ async function parseResponse(res) {
 }
 
 function forceLogout() {
-  accessToken = null
+  setAccessToken(null) // clear memori + cookie jwt_access_token
   if (typeof onUnauthorized === 'function') onUnauthorized()
 }
 
-/** Refresh access token memakai refresh cookie (httpOnly). Single-flight. */
+/** Refresh access token memakai refresh cookie (httpOnly). Single-flight.
+ *  Request refresh dilewatkan ke axios instance (http.js) yang mengirim cookie
+ *  httpOnly secara otomatis (withCredentials). Token baru di-set via
+ *  setAccessToken agar cookie browser ikut ter-update. */
 async function refreshAccessToken() {
   if (refreshPromise) return refreshPromise
   refreshPromise = (async () => {
     try {
-      const res = await fetch(`${API_BASE}/auth/refresh`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { Accept: 'application/json' },
-      })
-      const payload = await parseResponse(res)
-      if (!res.ok || !payload?.data?.accessToken) {
-        accessToken = null
+      const { data } = await http.post('/auth/refresh')
+      const token = data?.data?.accessToken
+      if (!token) {
+        setAccessToken(null)
         return false
       }
-      accessToken = payload.data.accessToken
+      setAccessToken(token)
       return true
     } catch {
-      accessToken = null
+      setAccessToken(null)
       return false
     } finally {
       refreshPromise = null
