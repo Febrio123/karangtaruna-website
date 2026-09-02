@@ -4,7 +4,7 @@ export const siteConfig = {
   tagline: "Membangun generasi muda yang aktif, kreatif, dan bertanggung jawab.",
   address: "Jl. Pisang Batu 29, RT.3/RW.10, Mangga Dua Sel., Kecamatan Sawah Besar, Kota Jakarta Pusat, Daerah Khusus Ibukota Jakarta 10730",
   phone: "0812-3456-7890",
-  email: "kt.mekarjaya@gmail.com",
+  email: "kt.mangga-dua-selatan@gmail.com",
   operatingHours: "Senin - Jumat, 08:00 - 17:00 WIB",
   socialMedia: {
     instagram: "https://instagram.com/katar010.mds",

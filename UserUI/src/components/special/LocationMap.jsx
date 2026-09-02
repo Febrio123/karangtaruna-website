@@ -11,8 +11,7 @@ export default function LocationMap() {
       : staticMap;
   const { lat, lng, zoom } = map;
 
-  const bbox = `${lng - 0.01},${lat - 0.01},${lng + 0.01},${lat + 0.01}`;
-  const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik&marker=${lat},${lng}`;
+  const mapUrl = `https://maps.google.com/maps?q=${encodeURIComponent(`${lat},${lng}`)}&z=${zoom}&output=embed`;
 
   return (
     <div className="relative w-full aspect-video rounded-md overflow-hidden border border-border-light">
@@ -24,7 +23,7 @@ export default function LocationMap() {
         loading="lazy"
         referrerPolicy="no-referrer"
         title="Lokasi Sekretariat Karang Taruna Mangga Dua Selatan"
-        sandbox="allow-scripts allow-same-origin"
+        sandbox="allow-scripts allow-same-origin allow-popups allow-top-navigation"
       />
     </div>
   );

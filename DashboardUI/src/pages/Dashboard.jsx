@@ -206,7 +206,7 @@ export default function Dashboard() {
         <div>
           <h2 className="font-heading font-bold text-h1 text-text">Selamat datang, {displayName}</h2>
           <p className="text-caption text-text-muted mt-1">
-            Ringkasan kegiatan dan keuangan Karang Taruna Sukamaju hari ini.
+            Ringkasan kegiatan dan keuangan Karang Taruna Mangga Dua Selatan hari ini.
           </p>
         </div>
         <span className="text-caption text-text-muted">{tanggalHariIni}</span>

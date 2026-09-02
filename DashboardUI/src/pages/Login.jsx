@@ -88,7 +88,7 @@ export default function Login() {
             <TreeDeciduous size={24} strokeWidth={1.6} aria-hidden="true" />
           </div>
           <div className="leading-tight">
-            <p className="text-white font-heading font-bold text-lg">Karang Taruna Sukamaju</p>
+            <p className="text-white font-heading font-bold text-lg">Karang Taruna Mangga Dua Selatan</p>
             <p className="text-white/50 text-xs tracking-wide">Dashboard Pengelolaan</p>
           </div>
         </div>
@@ -100,7 +100,7 @@ export default function Login() {
           </h1>
           <p className="text-white/70 mt-4 leading-relaxed">
             Kelola pengurus, berita, kegiatan, galeri, dan keuangan Karang Taruna
-            Desa Sukamaju — cepat, rapi, dan transparan.
+            Mangga Dua Selatan — cepat, rapi, dan transparan.
           </p>
           <ul className="mt-8 space-y-4">
             {benefits.map((b) => (
@@ -114,7 +114,7 @@ export default function Login() {
           </ul>
         </div>
 
-        <p className="relative text-white/40 text-xs">Periode 2025-2027 · Desa Sukamaju</p>
+        <p className="relative text-white/40 text-xs">Periode 2025-2027 · Mangga Dua Selatan</p>
       </div>
 
       {/* ============ Panel kanan: form login ============ */}
@@ -126,7 +126,7 @@ export default function Login() {
               <TreeDeciduous size={24} strokeWidth={1.6} aria-hidden="true" />
             </div>
             <div className="leading-tight">
-              <p className="font-heading font-bold text-text">Karang Taruna Sukamaju</p>
+              <p className="font-heading font-bold text-text">Karang Taruna Mangga Dua Selatan</p>
               <p className="text-xs text-text-muted">Dashboard Pengelolaan</p>
             </div>
           </div>

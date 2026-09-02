@@ -1,5 +1,5 @@
-# robots.txt — Karang Taruna Mekar Jaya
-# https://kt-mekarjaya.vercel.app/robots.txt
+# robots.txt — Karang Taruna Mangga Dua Selatan
+# https://kt-mangga-dua-selatan.vercel.app/robots.txt
 
 User-agent: *
 Allow: /
@@ -8,4 +8,4 @@ Allow: /
 Disallow: /api/
 
 # Sitemaps
-Sitemap: https://kt-mekarjaya.vercel.app/sitemap.xml
+Sitemap: https://kt-mangga-dua-selatan.vercel.app/sitemap.xml
