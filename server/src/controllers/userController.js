@@ -179,7 +179,7 @@ export const remove = asyncHandler(async (req, res) => {
 
   await target.deleteOne();
   return ApiResponse.success(res, null, 'Akun berhasil dihapus.');
-};
+});
 
 // Helper ekspor agar mudah dipakai route guard ObjectId bila diperlukan.
 export const isValidObjectId = (id) => mongoose.isValidObjectId(id);
