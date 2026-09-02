@@ -19,7 +19,15 @@ const articleRules = [
   body('date').optional().isISO8601().withMessage('Tanggal format YYYY-MM-DD'),
   body('excerpt').optional().trim(),
   body('imageAlt').optional().trim(),
-  body('isPublished').optional().isBoolean().withMessage('isPublished harus boolean'),
+  body('isPublished')
+    .optional()
+    .custom((v) => {
+      if (v === undefined || v === null) return true;
+      if (typeof v === 'boolean') return true;
+      const s = String(v).toLowerCase();
+      return s === 'true' || s === 'false' || s === '1' || s === '0';
+    })
+    .withMessage('isPublished harus boolean atau "true"/"false"'),
 ];
 
 /** GET /api/articles — publik */
