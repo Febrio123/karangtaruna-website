@@ -19,7 +19,8 @@ function GalleryItem({ item, onClick }) {
       {/* Image (lazy-loaded Cloudinary) or placeholder */}
       {item.image ? (
         <CloudinaryImage
-          publicId={item.image}
+          publicId={item.media?.public_id ?? item.image}
+          src={item.media?.secure_url ?? null}
           alt={item.imageAlt}
           aspect="square"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"

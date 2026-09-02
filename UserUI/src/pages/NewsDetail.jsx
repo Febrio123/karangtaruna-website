@@ -172,7 +172,8 @@ export default function NewsDetail() {
       {article.image ? (
         <div className="mb-8 rounded-md overflow-hidden">
           <CloudinaryImage
-            publicId={article.image}
+            publicId={article.media?.public_id ?? article.image}
+            src={article.media?.secure_url ?? null}
             alt={article.imageAlt}
             aspect="video"
             eager

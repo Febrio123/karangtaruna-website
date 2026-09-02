@@ -1,13 +1,20 @@
-// controllers/galeriController.js — galeri foto/video + upload Cloudinary
+// controllers/galeriController.js — galeri foto/video
+// CATATAN UJI COBA: media disimpan sebagai data-URI base64 langsung ke MongoDB
+// (tanpa Cloudinary) untuk menghindari 502 di Vercel.
+// Produksi: kembalikan ke Cloudinary / direct upload / Cloudflare R2.
 
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { ApiError } from '../utils/ApiError.js';
 import { Galeri } from '../models/galeri.model.js';
-import { uploadBuffer, destroy } from '../services/cloudinaryService.js';
-import { resourceTypeFromMime } from '../middleware/upload.js';
 
-/** GET /api/galeri — publik; filter ?category=&year=&type=&published=true&page=&limit= */
+// ── helper ──────────────────────────────────────────────────────────
+/** Ubah buffer + mimetype menjadi data-URI base64. */
+function toDataUri(buffer, mimetype) {
+  return `data:${mimetype || 'application/octet-stream'};base64,${buffer.toString('base64')}`;
+}
+
+// ── GET /api/galeri — publik; filter ?category=&year=&type=&published=true&page=&limit= ──
 export const list = asyncHandler(async (req, res) => {
   const { category, year, type } = req.query;
   const filter = {};
@@ -30,7 +37,7 @@ export const list = asyncHandler(async (req, res) => {
   });
 });
 
-/** GET /api/galeri/:id — publik */
+// ── GET /api/galeri/:id — publik ─────────────────────────────────────
 export const getById = asyncHandler(async (req, res) => {
   const data = await Galeri.findById(req.params.id).lean();
   if (!data) throw new ApiError(404, 'Item galeri tidak ditemukan.');
@@ -39,7 +46,7 @@ export const getById = asyncHandler(async (req, res) => {
 
 /**
  * POST /api/galeri — protected (multipart: field `file` + metadata)
- * Upload buffer -> Cloudinary -> simpan {public_id, secure_url}.
+ * Media disimpan sebagai data-URI base64 di field `media.secure_url`.
  */
 export const create = asyncHandler(async (req, res) => {
   if (!req.file) {
@@ -49,30 +56,27 @@ export const create = asyncHandler(async (req, res) => {
   const { title, category, year, type, description, imageAlt, isPublished } = req.body;
   const mediaType = type === 'video' ? 'video' : 'image';
 
-  const media = await uploadBuffer(req.file.buffer, {
-    folder: 'karang-taruna/galeri',
-    resourceType: resourceTypeFromMime(req.file.mimetype),
+  // Simpan buffer sebagai data-URI base64 (ujicoba — produksi pakai Cloudinary/direct upload)
+  const media = {
+    public_id: null,
+    secure_url: toDataUri(req.file.buffer, req.file.mimetype),
+  };
+
+  const doc = await Galeri.create({
+    title,
+    category,
+    year: year || String(new Date().getFullYear()),
+    type: mediaType,
+    description,
+    media,
+    imageAlt,
+    isPublished: isPublished !== undefined ? Boolean(isPublished) : true,
   });
 
-  try {
-    const doc = await Galeri.create({
-      title,
-      category,
-      year: year || String(new Date().getFullYear()),
-      type: mediaType,
-      description,
-      media,
-      imageAlt,
-      isPublished: isPublished !== undefined ? Boolean(isPublished) : true,
-    });
-    return ApiResponse.created(res, doc, 'Item galeri berhasil diunggah.');
-  } catch (err) {
-    await destroy(media.public_id).catch(() => {});
-    throw err;
-  }
+  return ApiResponse.created(res, doc, 'Item galeri berhasil diunggah.');
 });
 
-/** PUT /api/galeri/:id — protected (metadata; opsional ganti file) */
+// ── PUT /api/galeri/:id — protected (metadata; opsional ganti file) ──
 export const update = asyncHandler(async (req, res) => {
   const existing = await Galeri.findById(req.params.id);
   if (!existing) throw new ApiError(404, 'Item galeri tidak ditemukan.');
@@ -82,29 +86,24 @@ export const update = asyncHandler(async (req, res) => {
     if (req.body[field] !== undefined) existing[field] = req.body[field];
   });
 
+  // Jika file baru diunggah, timpa media dengan data-URI baru
   if (req.file) {
-    const oldMedia = existing.media;
-    existing.media = await uploadBuffer(req.file.buffer, {
-      folder: 'karang-taruna/galeri',
-      resourceType: resourceTypeFromMime(req.file.mimetype),
-    });
-    if (oldMedia?.public_id) {
-      await destroy(oldMedia.public_id, oldMedia.resource_type || 'image').catch(() => {});
-    }
+    existing.media = {
+      public_id: null,
+      secure_url: toDataUri(req.file.buffer, req.file.mimetype),
+    };
   }
 
   await existing.save();
   return ApiResponse.success(res, existing, 'Item galeri berhasil diperbarui.');
 });
 
-/** DELETE /api/galeri/:id — protected; destroy aset Cloudinary lalu hapus dokumen */
+// ── DELETE /api/galeri/:id — protected ────────────────────────────────
 export const remove = asyncHandler(async (req, res) => {
   const existing = await Galeri.findById(req.params.id);
   if (!existing) throw new ApiError(404, 'Item galeri tidak ditemukan.');
 
-  if (existing.media?.public_id) {
-    await destroy(existing.media.public_id, existing.type === 'video' ? 'video' : 'image').catch(() => {});
-  }
+  // Ujicoba: tidak perlu destroy aset eksternal, cukup hapus dokumen dari DB
   await existing.deleteOne();
   return ApiResponse.success(res, null, 'Item galeri berhasil dihapus.');
 });

@@ -9,7 +9,8 @@ function TeamMemberCard({ member }) {
       {/* Photo (lazy Cloudinary) or placeholder */}
       {member.photo ? (
         <CloudinaryImage
-          publicId={member.photo}
+          publicId={member.media?.public_id ?? member.photo}
+          src={member.media?.secure_url ?? null}
           alt={member.name}
           aspect="square"
           className="w-24 h-24 rounded-full mb-3 overflow-hidden"

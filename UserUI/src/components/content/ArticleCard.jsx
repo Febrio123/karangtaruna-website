@@ -12,7 +12,8 @@ function ArticleCard({ article }) {
       {/* Image (lazy-loaded Cloudinary) or placeholder */}
       {article.image ? (
         <CloudinaryImage
-          publicId={article.image}
+          publicId={article.media?.public_id ?? article.image}
+          src={article.media?.secure_url ?? null}
           alt={article.imageAlt}
           aspect="video"
           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"

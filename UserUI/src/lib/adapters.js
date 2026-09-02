@@ -39,6 +39,22 @@ export function mediaUrl(media) {
   return media.public_id || media.secure_url || null;
 }
 
+/**
+ * Salin objek media mentah `{public_id, secure_url}` ke struktur frontend.
+ * CloudinaryImage kini dual-source: `publicId` (Cloudinary) ATAU `src`
+ * (URL/data-URI). Media mode uji-coba menyimpan `data:` / URL di
+ * `secure_url` dengan `public_id = null`; produksi Cloudinary memakai
+ * `public_id`. Kita selalu terima keduanya agar komponen memprioritaskan
+ * `src` bila ada dan fallback ke `publicId` bila `secure_url` kosong.
+ */
+export function cloneMedia(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  return {
+    public_id: raw.public_id ?? null,
+    secure_url: raw.secure_url ?? null,
+  };
+}
+
 function keyFor(item, fallback) {
   return item._id || item.id || fallback;
 }
@@ -69,6 +85,7 @@ export function adaptTeamMember(p) {
     period: p.periode,
     phone: p.telepon,
     photo: mediaUrl(p.foto),
+    media: cloneMedia(p.foto),
     photoAlt: `Foto profil ${p.nama} sebagai ${p.jabatan} Karang Taruna`,
   };
 }
@@ -122,6 +139,7 @@ export function adaptArticle(a) {
     excerpt: a.excerpt,
     content: a.content,
     image: mediaUrl(a.cover),
+    media: cloneMedia(a.cover),
     imageAlt: a.imageAlt,
   };
 }
@@ -174,6 +192,7 @@ export function adaptGalleryItem(g) {
     type: g.type || 'image',
     description: g.description,
     image: mediaUrl(g.media),
+    media: cloneMedia(g.media),
     imageAlt: g.imageAlt,
   };
 }

@@ -86,7 +86,8 @@ export default function Lightbox({ item, items, onClose, onNavigate }) {
           {item.image ? (
             <div className="aspect-video bg-bg-alt">
               <CloudinaryImage
-                publicId={item.image}
+                publicId={item.media?.public_id ?? item.image}
+                src={item.media?.secure_url ?? null}
                 alt={item.imageAlt}
                 aspect="video"
                 eager
