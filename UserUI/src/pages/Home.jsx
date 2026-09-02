@@ -231,7 +231,7 @@ export default function Home() {
                     Pemasukan 2026
                   </p>
                   <p className="font-heading text-h3 text-success">
-                    {formatRupiah(budgetSummary.totalIncome)}
+                    {formatRupiah(budgetSummary.totalPemasukan)}
                   </p>
                 </div>
                 <div>
@@ -239,7 +239,7 @@ export default function Home() {
                     Pengeluaran 2026
                   </p>
                   <p className="font-heading text-h3 text-danger">
-                    {formatRupiah(budgetSummary.totalExpenses)}
+                    {formatRupiah(budgetSummary.totalPengeluaran)}
                   </p>
                 </div>
               </div>
