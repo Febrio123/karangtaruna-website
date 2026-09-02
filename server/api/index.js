@@ -2,24 +2,6 @@
 // Vercel Serverless Function — `api/index.js`
 // Menjalankan Express `app` (dari src/app.js) sebagai handler serverless untuk
 // SELURUH request di bawah `/api/*`.
-//
-// Konfigurasi route:
-// - Semua request `/api/*` diteruskan ke fungsi ini via `vercel.json` `rewrites`:
-//     { "source": "/api/:path*", "destination": "/api" }
-//   Ketika Vercel memanggil `api/index.js`, `req.url` TETAP memuat path asli
-//   (mis. `/api/health`, `/api/auth/login`, `/api/prediksi-anggaran/17%20Agustusan`),
-//   sehingga Express `app` yang sudah di-mount di `/api` menangkapnya dengan benar.
-// - File ini sengaja DINAMAI `index.js` (nama modul normal, tanpa karakter
-//   bracket `[ ]`) — berbeda dari pendekatan catch-all `[...slug].js`. Ini
-//   menghilangkan karakter `[`/`]` dari nama modul yang di-parse Vercel sebagai
-//   sumber potensial parse error runtime (`SyntaxError: Invalid or unexpected token`).
-//
-// Catatan penting:
-// - Koneksi MongoDB di-buffer di module level (singleton promise) sehingga antar
-//   warm invocations koneksi di-reuse, bukan dibuka per request.
-// - TIDAK memanggil app.listen / server.js. TIDAK memanggil validateEnv
-//   (env vars di-jaga Vercel; bila env kritis kosong, connectDB akan throw dan
-//   handler merespons 500 generik tanpa bocorkan detail).
 // ============================================================================
 
 import 'dotenv/config';
@@ -32,7 +14,6 @@ let connPromise = null;
 function ensureDb() {
   if (!connPromise) {
     connPromise = connectDB().catch((e) => {
-      // Reset agar request berikutnya mencoba lagi (tidak terjebak promise reject).
       connPromise = null;
       throw e;
     });
@@ -40,13 +21,23 @@ function ensureDb() {
   return connPromise;
 }
 
-// Express app adalah fungsi (req, res) yang valid sebagai Vercel handler.
 export default async function handler(req, res) {
+  // 1. Request OPTIONS (CORS preflight) langsung ditangani oleh Express app
+  //    tanpa perlu menunggu koneksi database.
+  if (req.method === 'OPTIONS') {
+    return app(req, res);
+  }
+
+  // 2. Hubungkan database untuk request metode HTTP lainnya
   try {
     await ensureDb();
   } catch (e) {
-    // Log ke console (Vercel Function Logs) tanpa membocorkan secret/detail.
     console.error('[api] Gagal menghubungkan database:', e.message);
+    // Pastikan header CORS tetap dikirimkan jika terjadi error koneksi database
+    if (req.headers.origin) {
+      res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+    }
     res.status(500).json({ status: 'error', message: 'Gagal menghubungkan database' });
     return;
   }

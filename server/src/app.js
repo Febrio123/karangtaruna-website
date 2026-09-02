@@ -20,54 +20,18 @@ const app = express();
 app.set('trust proxy', 1);
 
 // ============================================================================
-// CORS Configuration
+// CORS: Refleksikan origin request secara dinamis (origin: true) agar
+// selalu menyertakan Access-Control-Allow-Origin & Credentials untuk semua domain.
 // ============================================================================
-const defaultOrigins = [
-  'https://karangtaruna-website-dashboard.vercel.app',
-  'https://karangtaruna-website.vercel.app',
-];
-
-const envOrigins = (process.env.CORS_ORIGIN || '')
-  .split(',')
-  .map((o) => o.trim())
-  .filter(Boolean);
-
-const allowedOrigins = [...new Set([...defaultOrigins, ...envOrigins])];
-
 const corsOptions = {
-  origin(origin, cb) {
-    // Izinkan non-browser request (Postman, curl, server-to-server)
-    if (!origin) return cb(null, true);
-
-    // Izinkan origin yang terdaftar
-    if (allowedOrigins.includes(origin)) {
-      return cb(null, true);
-    }
-
-    // Izinkan localhost pada semua port (development lokal)
-    if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
-      return cb(null, true);
-    }
-
-    // Izinkan semua subdomain .vercel.app milik Karang Taruna
-    if (/^https:\/\/karangtaruna-website.*\.vercel\.app$/.test(origin)) {
-      return cb(null, true);
-    }
-
-    // Untuk environment dev/preview tanpa constraint ketat
-    if (process.env.NODE_ENV !== 'production') {
-      return cb(null, true);
-    }
-
-    return cb(null, false);
-  },
-  credentials: true,
+  origin: true, // Refleksikan req.headers.origin secara otomatis
+  credentials: true, // Izinkan cookie & header autentikasi lintas origin
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   optionsSuccessStatus: 200,
 };
 
-// Pasang CORS middleware paling atas
+// Pasang CORS middleware di posisi paling atas
 app.use(cors(corsOptions));
 
 // --- Compression (gzip) ---
