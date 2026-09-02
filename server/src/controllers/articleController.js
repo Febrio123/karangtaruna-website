@@ -4,9 +4,15 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { ApiError } from '../utils/ApiError.js';
 import { Article } from '../models/article.model.js';
-import { uploadBuffer, destroy } from '../services/cloudinaryService.js';
-import { resourceTypeFromMime } from '../middleware/upload.js';
+import { destroy } from '../services/cloudinaryService.js';
 import { safeSearchRegex, detectDangerousHtml } from '../utils/sanitize.js';
+
+// ── helper ──────────────────────────────────────────────────────────
+/** Ubah buffer + mimetype menjadi data-URI base64. */
+function dataUriFromBuffer(buffer, mimetype) {
+  if (!buffer || !buffer.length) return null
+  return `data:${mimetype || 'image/jpeg'};base64,${buffer.toString('base64')}`
+}
 
 const PAGE_SIZE_DEFAULT = 12;
 
@@ -86,12 +92,13 @@ export const create = asyncHandler(async (req, res) => {
     throw new ApiError(400, `Konten artikel mengandung pola yang tidak diizinkan: ${dangerous.join(', ')}.`, { code: 'XSS_BLOCKED' });
   }
 
+  // Simpan buffer sebagai data-URI base64 (ujicoba — produksi pakai Cloudinary/direct upload)
   let cover = null;
   if (req.file) {
-    cover = await uploadBuffer(req.file.buffer, {
-      folder: 'karang-taruna/articles',
-      resourceType: resourceTypeFromMime(req.file.mimetype),
-    });
+    cover = {
+      public_id: null,
+      secure_url: dataUriFromBuffer(req.file.buffer, req.file.mimetype),
+    };
   }
 
   try {
@@ -133,13 +140,14 @@ export const update = asyncHandler(async (req, res) => {
   });
   if (req.body.isPublished !== undefined) existing.isPublished = parseBool(req.body.isPublished);
 
+  // Simpan buffer sebagai data-URI base64 (ujicoba — produksi pakai Cloudinary/direct upload)
   if (req.file) {
-    const cover = await uploadBuffer(req.file.buffer, {
-      folder: 'karang-taruna/articles',
-      resourceType: resourceTypeFromMime(req.file.mimetype),
-    });
     const oldCover = existing.cover;
-    existing.cover = cover;
+    existing.cover = {
+      public_id: null,
+      secure_url: dataUriFromBuffer(req.file.buffer, req.file.mimetype),
+    };
+    // Kosongkan aset Cloudinary lama bila sebelumnya pakai public_id (kompat).
     if (oldCover?.public_id) await destroy(oldCover.public_id).catch(() => {});
   }
 
