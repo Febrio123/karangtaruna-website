@@ -97,25 +97,36 @@ export default function OrgChart() {
           <div className="absolute top-0 left-[10%] right-[10%] h-0.5 bg-border" />
 
           <div className="flex justify-between px-2 pt-6">
-            {bidang.map((bidang) => (
-              <div
-                key={bidang.name ?? 'bidang'}
-                className="flex flex-col items-center text-center"
-              >
-                <div className="w-12 h-12 rounded-full bg-accent-light flex items-center justify-center mb-1 border-2 border-accent/20">
-                  <User className="w-5 h-5 text-accent" />
+            {bidang.map((bidang) => {
+              // Guard: `members` boleh array nama ATAU number (fallback lama).
+              // Jangan pernah tampilkan "N anggota" — tampilkan daftar nama.
+              const members = Array.isArray(bidang.members)
+                ? bidang.members
+                : bidang.members
+                  ? [bidang.leader]
+                  : [];
+
+              return (
+                <div
+                  key={bidang.name ?? 'bidang'}
+                  className="flex flex-col items-center text-center"
+                >
+                  <div className="w-12 h-12 rounded-full bg-accent-light flex items-center justify-center mb-1 border-2 border-accent/20">
+                    <User className="w-5 h-5 text-accent" />
+                  </div>
+                  <p className="font-heading text-caption font-semibold text-text leading-tight">
+                    {bidang.name ?? '—'}
+                  </p>
+                  <ul className="mt-1 space-y-0.5 text-center">
+                    {members.map((m) => (
+                      <li key={m} className="font-body text-[11px] text-text-muted">
+                        {m}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <p className="font-heading text-caption font-semibold text-text leading-tight">
-                  {bidang.name ?? '—'}
-                </p>
-                <p className="font-body text-[11px] text-text-muted">
-                  {bidang.leader ?? '—'}
-                </p>
-                <p className="font-body text-[11px] text-text-muted">
-                  {bidang.members} anggota
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

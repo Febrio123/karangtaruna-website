@@ -61,6 +61,7 @@ export default function Footer() {
                   alt="Logo Karang Taruna"
                   className="w-12 h-12 rounded-full object-cover border border-border-light shrink-0"
                   loading="lazy"
+                  decoding="async"
                 />
                 <h3 className="font-heading text-h4 font-bold text-text">
                   {siteConfig.name}

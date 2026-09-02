@@ -16,16 +16,8 @@ const intiDivisionMap = {
   bendahara: 'Bendahara',
 };
 
-// --- Dummy member count per bidang (untuk org chart) ---
-const dummyMemberCounts = {
-  Keagamaan: 15,
-  'Sosial & Kemanusiaan': 20,
-  Olahraga: 25,
-  'Seni & Budaya': 18,
-  Pendidikan: 12,
-  Kewirausahaan: 14,
-  Kesehatan: 16,
-};
+// --- Pengelompokan anggota per bidang (untuk org chart) ---
+// Tidak ada dummyMemberCounts — members adalah array nama anggota, bukan angka.
 
 /**
  * teamMembers — daftar pengurus dalam format yang dipakai UserUI.
@@ -54,14 +46,17 @@ function findPengurus(roleValue) {
   return p ? { name: p.nama, position: p.jabatan } : { name: '-', position: '-' };
 }
 
-// Kumpulkan data bidang dari pengurus role 'anggota' (Koordinator Bidang)
-const bidangData = pengurus
-  .filter((p) => p.role === 'anggota' && p.bidang !== '-')
-  .map((p) => ({
-    name: p.bidang,
-    leader: p.nama,
-    members: dummyMemberCounts[p.bidang] || 15,
-  }));
+// Kumpulkan data bidang dari pengurus role 'anggota' — group by bidang unik.
+// `members` = array nama semua anggota di bidang tsb (bukan angka).
+const bidangMembers = pengurus
+  .filter((p) => p.role === 'anggota' && p.bidang && p.bidang !== '-')
+  .reduce((acc, p) => {
+    const b = p.bidang;
+    if (!acc[b]) acc[b] = { name: b, leader: p.nama, members: [] };
+    acc[b].members.push(p.nama);
+    return acc;
+  }, {});
+const bidangData = Object.values(bidangMembers);
 
 export const orgStructure = {
   ketua: findPengurus('ketua'),

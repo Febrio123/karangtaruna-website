@@ -104,13 +104,17 @@ export function adaptOrgStructure(list) {
       : { name: '-', position: '-' };
   };
 
-  const bidang = arr
+  // Group anggota per bidang unik — `members` = array nama, bukan angka.
+  const grouped = arr
     .filter((p) => p.role === 'anggota' && p.bidang && p.bidang !== '-')
-    .map((p) => ({
-      name: p.bidang,
-      leader: p.nama,
-      members: 15, // placeholder jumlah anggota per bidang
-    }));
+    .reduce((acc, p) => {
+      const b = p.bidang;
+      if (!acc[b]) acc[b] = { name: b, leader: p.nama, members: [] };
+      acc[b].members.push(p.nama);
+      return acc;
+    }, {});
+
+  const bidang = Object.values(grouped);
 
   return {
     ketua: find('ketua'),

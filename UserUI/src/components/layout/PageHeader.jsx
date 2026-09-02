@@ -26,7 +26,8 @@ export default function PageHeader({
         src={heroImage}
         alt=""
         className="absolute inset-0 w-full h-full object-cover object-center"
-        loading="lazy"
+        loading="eager"
+        decoding="async"
         aria-hidden="true"
       />
 
