@@ -7,23 +7,51 @@ import {
   Image,
   Calculator,
   TrendingUp,
+  UserCog,
   Info,
   X,
 } from 'lucide-react'
 import logoImg from '../../assets/logo.png'
+import { useAuth } from '../../context/AuthContext.jsx'
 
+const ALL_ROLES = ['ketua', 'wakil-ketua', 'sekretaris', 'bendahara', 'anggota']
+
+/**
+ * navItems — menu yang tampil di sidebar, difilter berdasarkan user.role.
+ *
+ * RBAC:
+ *   ketua       → semua menu
+ *   wakil-ketua → semua menu
+ *   sekretaris  → semua kecuali anggaran & prediksi anggaran
+ *   bendahara   → semua kecuali kelola akun user
+ *   anggota     → dashboard, berita, event, galeri, profil & informasi
+ */
 const navItems = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/pengurus', label: 'Pengurus', icon: Users },
-  { to: '/berita', label: 'Berita', icon: FileText },
-  { to: '/event', label: 'Event & Pengumuman', icon: CalendarDays },
-  { to: '/galeri', label: 'Galeri', icon: Image },
-  { to: '/anggaran', label: 'Anggaran', icon: Calculator },
-  { to: '/prediksi-anggaran', label: 'Prediksi Anggaran', icon: TrendingUp },
-  { to: '/profil', label: 'Profil & Informasi', icon: Info },
+  // —— Semua role ——
+  { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true, roles: ALL_ROLES },
+  // —— Semua kecuali anggota ——
+  { to: '/pengurus', label: 'Kelola Pengurus', icon: Users, roles: ['ketua', 'wakil-ketua', 'sekretaris', 'bendahara'] },
+  // —— Semua role ——
+  { to: '/berita', label: 'Kelola Berita', icon: FileText, roles: ALL_ROLES },
+  { to: '/event', label: 'Event & Pengumuman', icon: CalendarDays, roles: ALL_ROLES },
+  { to: '/galeri', label: 'Kelola Galeri', icon: Image, roles: ALL_ROLES },
+  // —— Ketua, wakil, bendahara (sekretaris & anggota tidak bisa) ——
+  { to: '/anggaran', label: 'Kelola Anggaran', icon: Calculator, roles: ['ketua', 'wakil-ketua', 'bendahara'] },
+  { to: '/prediksi-anggaran', label: 'Prediksi Anggaran', icon: TrendingUp, roles: ['ketua', 'wakil-ketua', 'bendahara'] },
+  // —— Ketua, wakil, sekretaris (bendahara & anggota tidak bisa) ——
+  { to: '/akun', label: 'Kelola Akun User', icon: UserCog, roles: ['ketua', 'wakil-ketua', 'sekretaris'] },
+  // —— Semua role ——
+  { to: '/profil', label: 'Profil & Informasi', icon: Info, roles: ALL_ROLES },
 ]
 
 function SidebarContent({ onNavigate }) {
+  const { user } = useAuth()
+  const currentRole = user?.role
+
+  const visibleItems = navItems.filter((item) =>
+    currentRole ? item.roles.includes(currentRole) : false
+  )
+
   return (
     <div className="flex flex-col h-full">
       {/* Brand */}
@@ -40,7 +68,7 @@ function SidebarContent({ onNavigate }) {
         <p className="px-3 pt-1 pb-2 text-[11px] uppercase tracking-wider text-white/40 font-semibold">
           Menu
         </p>
-        {navItems.map((item) => (
+        {visibleItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}

@@ -232,6 +232,36 @@ export const parameterAdapter = {
 }
 
 // ---------------------------------------------------------------------------
+// User / Akun — backend: {username,email,role,nama,isActive,lastLoginAt,createdAt,pengurusId}
+// ---------------------------------------------------------------------------
+export const userAdapter = {
+  toFrontend(b) {
+    return {
+      id: b._id ?? b.id,
+      username: b.username ?? '',
+      nama: b.nama ?? '',
+      email: b.email ?? '',
+      role: b.role ?? 'anggota',
+      isActive: b.isActive !== false,
+      lastLogin: b.lastLoginAt
+        ? new Date(b.lastLoginAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })
+        : '—',
+      createdAt: b.createdAt || '',
+    }
+  },
+  toBody(f) {
+    const body = {}
+    if (f.username?.trim()) body.username = String(f.username).trim().toLowerCase()
+    if (f.email?.trim()) body.email = String(f.email).trim().toLowerCase()
+    if (f.password) body.password = f.password
+    if (f.role) body.role = f.role
+    if (f.nama !== undefined) body.nama = String(f.nama || '').trim() || null
+    if (f.isActive !== undefined) body.isActive = !!f.isActive
+    return body
+  },
+}
+
+// ---------------------------------------------------------------------------
 // Site Config / Profil — backend doc profil tunggal
 // ---------------------------------------------------------------------------
 export const siteConfigAdapter = {

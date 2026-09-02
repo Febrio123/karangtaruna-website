@@ -2,13 +2,26 @@
 
 export const ROLES = ['ketua', 'wakil-ketua', 'sekretaris', 'bendahara', 'anggota'];
 
-// Matriks izin RBAC (dari fase UML §1.2). Izin paling ketat: pengurus & prediksi.
-export const ROLE_PENGURUS = ['ketua', 'wakil-ketua']; // kelola struktur organisasi
-export const ROLE_CONTENT = ['ketua', 'wakil-ketua', 'sekretaris']; // artikel, event, galeri
-export const ROLE_ANGGARAN = ['ketua', 'wakil-ketua', 'bendahara']; // transaksi kas
-export const ROLE_SITE_CONFIG = ['ketua', 'wakil-ketua', 'sekretaris'];
-export const ROLE_PARAMETER = ['ketua', 'wakil-ketua']; // parameter ekonomi + prediksi/override
-export const ROLE_REGISTER = ['ketua', 'wakil-ketua']; // membuat akun user baru
+// Matriks izin RBAC — PETA AKSES (keputusan owner). Nilai tiap konstanta adalah
+// daftar role yang BOLEH mengakses/menulis area tsb; role lain ditolak (403).
+//
+// | Menu / area                          | ketua | wakil | sekretaris | bendahara | anggota |
+// |--------------------------------------|:-----:|:-----:|:----------:|:---------:|:-------:|
+// | Dashboard (home utama)               |   ✅  |  ✅   |     ✅     |    ✅     |   ✅    |
+// | Kelola Pengurus (struktur)           |   ✅  |  ✅   |     ✅     |    ✅     |   ❌    |
+// | Berita / Event & Pengumuman / Galeri |   ✅  |  ✅   |     ✅     |    ✅     |   ✅    |
+// | Kelola Anggaran (transaksi)          |   ✅  |  ✅   |     ❌     |    ✅     |   ❌    |
+// | Prediksi Anggaran (+ Parameter)      |   ✅  |  ✅   |     ❌     |    ✅     |   ❌    |
+// | Kelola Akun User (users)             |   ✅  |  ✅   |     ✅     |    ❌     |   ❌    |
+// | Profil & Informasi (site-config)     |   ✅  |  ✅   |     ✅     |    ✅     |   ✅    |
+//
+export const ROLE_PENGURUS = ['ketua', 'wakil-ketua', 'sekretaris', 'bendahara']; // kelola struktur organisasi
+export const ROLE_CONTENT = ['ketua', 'wakil-ketua', 'sekretaris', 'bendahara', 'anggota']; // artikel, event, galeri
+export const ROLE_ANGGARAN = ['ketua', 'wakil-ketua', 'bendahara']; // transaksi kas (sekretaris & anggota tidak bisa)
+export const ROLE_SITE_CONFIG = ['ketua', 'wakil-ketua', 'sekretaris', 'bendahara', 'anggota']; // site config / profil
+export const ROLE_PARAMETER = ['ketua', 'wakil-ketua', 'bendahara']; // parameter ekonomi + prediksi/override (sekretaris & anggota tidak bisa)
+export const ROLE_REGISTER = ['ketua', 'wakil-ketua', 'sekretaris']; // membuat akun user baru (via auth/register)
+export const ROLE_USERS = ['ketua', 'wakil-ketua', 'sekretaris']; // kelola akun user: list/create/update/password/remove (bendahara & anggota tidak bisa)
 
 export const EVENT_TYPE = ['event', 'pengumuman'];
 export const EVENT_STATUS = ['Mendatang', 'Selesai'];

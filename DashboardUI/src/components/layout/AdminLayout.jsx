@@ -13,6 +13,7 @@ const titleMap = {
   '/anggaran': 'Kelola Anggaran',
   '/prediksi-anggaran': 'Prediksi Anggaran',
   '/prediksi-anggaran/parameter': 'Parameter Ekonomi',
+  '/akun': 'Kelola Akun User',
   '/profil': 'Profil & Informasi',
 }
 

@@ -10,6 +10,7 @@ import { transaksiRouter, anggaranEventRouter } from './anggaran.routes.js';
 import siteConfigRoutes from './siteConfig.routes.js';
 import parameterRoutes from './parameter.routes.js';
 import prediksiRoutes from './prediksi.routes.js';
+import userRoutes from './users.routes.js';
 
 const router = Router();
 
@@ -35,5 +36,6 @@ router.use('/anggaran-event', anggaranEventRouter);
 router.use('/site-config', siteConfigRoutes);
 router.use('/parameter-ekonomi', parameterRoutes);
 router.use('/prediksi-anggaran', prediksiRoutes);
+router.use('/users', userRoutes);
 
 export default router;
