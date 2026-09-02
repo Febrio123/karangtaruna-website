@@ -121,10 +121,22 @@ async function migrateSiteConfig() {
     changed = true;
   }
 
-  // 3) Alamat — ganti substring "Mekar Jaya" di nama jalan & kelurahan.
-  //    "Kec. Sukmajaya" tidak mengandung "Mekar Jaya" → kecamatan aman.
-  if (hasOld(cfg.address)) {
-    cfg.address = replaceAll(cfg.address);
+  // 3) Alamat — timpa langsung dengan alamat lengkap baru (bukan substring replace).
+  const NEW_ADDRESS = 'Jl. Pisang Batu 29, RT.3/RW.10, Mangga Dua Sel., Kecamatan Sawah Besar, Kota Jakarta Pusat, Daerah Khusus Ibukota Jakarta 10730';
+  if (cfg.address !== NEW_ADDRESS) {
+    cfg.address = NEW_ADDRESS;
+    changed = true;
+  }
+
+  // 3b) Koordinat peta — timpa ke nilai terbaru.
+  const NEW_MAP = { lat: -6.142130, lng: 106.833007, zoom: 16 };
+  const mapChanged =
+    cfg.map?.lat !== NEW_MAP.lat ||
+    cfg.map?.lng !== NEW_MAP.lng ||
+    cfg.map?.zoom !== NEW_MAP.zoom;
+  if (mapChanged) {
+    cfg.map = NEW_MAP;
+    cfg.markModified('map');
     changed = true;
   }
 

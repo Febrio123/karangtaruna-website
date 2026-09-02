@@ -49,7 +49,7 @@ const siteConfigSchema = new mongoose.Schema(
     map: {
       lat: { type: Number, default: null },
       lng: { type: Number, default: null },
-      zoom: { type: Number, default: 15 },
+      zoom: { type: Number, default: 16 },
     },
     stats: {
       members: { type: Number, default: 0 },

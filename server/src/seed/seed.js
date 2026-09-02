@@ -113,14 +113,14 @@ async function seedSiteConfig() {
     name: 'Karang Taruna Mangga Dua Selatan',
     shortName: 'KT Mangga Dua Selatan',
     tagline: 'Membangun generasi muda yang aktif, kreatif, dan bertanggung jawab.',
-    address: 'Jl. Raya Mangga Dua Selatan No. 12, Kel. Mangga Dua Selatan, Kec. Sukmajaya, Kota Depok, Jawa Barat 16411',
+    address: 'Jl. Pisang Batu 29, RT.3/RW.10, Mangga Dua Sel., Kecamatan Sawah Besar, Kota Jakarta Pusat, Daerah Khusus Ibukota Jakarta 10730',
     phone: '0812-3456-7890',
     email: 'kt.mangga-dua-selatan@gmail.com',
     operatingHours: 'Senin - Jumat, 08:00 - 17:00 WIB',
     socialMedia: {
       instagram: 'https://instagram.com/katar010.mds',
     },
-    map: { lat: -6.4025, lng: 106.8525, zoom: 15 },
+    map: { lat: -6.142130, lng: 106.833007, zoom: 16 },
     stats: { members: 150, programs: 12, yearsActive: 8 },
     vision: 'Terwujudnya pemuda yang beriman, bertaqwa, cerdas, kreatif, dan berperan aktif dalam pembangunan masyarakat yang sejahtera dan berkeadilan.',
     mission: [
