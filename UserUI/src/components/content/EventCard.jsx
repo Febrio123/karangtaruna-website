@@ -2,10 +2,11 @@ import { memo } from 'react';
 import { Calendar, Clock, MapPin, Megaphone, Wallet } from 'lucide-react';
 import Card from '../ui/Card';
 import Badge from '../ui/Badge';
+import Reveal from '../ui/Reveal';
 import { formatDateIndonesian } from '../../utils/formatDate';
 import { formatRupiah } from '../../utils/formatCurrency';
 
-function EventCard({ event }) {
+function EventCard({ event, index = 0 }) {
   const statusVariant =
     event.status === 'Mendatang'
       ? 'primary'
@@ -14,7 +15,8 @@ function EventCard({ event }) {
       : 'accent';
 
   return (
-    <Card className="flex flex-col sm:flex-row gap-4">
+    <Reveal delay={Math.min(index * 0.06, 0.3)}>
+      <Card className="flex flex-col sm:flex-row gap-4">
       {/* Date block */}
       <div className="flex-shrink-0 w-full sm:w-20 text-center sm:text-left">
         <div className="inline-flex flex-col items-center sm:items-start p-2 rounded-md bg-primary-light">
@@ -69,7 +71,8 @@ function EventCard({ event }) {
           </div>
         )}
       </div>
-    </Card>
+      </Card>
+    </Reveal>
   );
 }
 

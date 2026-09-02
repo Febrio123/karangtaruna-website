@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
+﻿import { useState, useRef, useEffect, useMemo } from 'react';
 import { clsx } from 'clsx';
 import { ChevronDown } from 'lucide-react';
 import PageHeader from '../components/layout/PageHeader';
@@ -80,7 +80,7 @@ export default function Budget() {
 
   useSeo({
     title: 'Transparansi Keuangan',
-    description: 'Laporan pemasukan dan pengeluaran kas Karang Taruna Mekar Jaya untuk transparansi anggaran organisasi.',
+    description: 'Laporan pemasukan dan pengeluaran kas Karang Taruna Mangga Dua Selatan untuk transparansi anggaran organisasi.',
     path: '/anggaran',
     jsonLd: [
       {

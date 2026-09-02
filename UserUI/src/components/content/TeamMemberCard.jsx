@@ -1,11 +1,13 @@
 import { memo } from 'react';
 import { User } from 'lucide-react';
 import Card from '../ui/Card';
+import Reveal from '../ui/Reveal';
 import CloudinaryImage from './CloudinaryImage';
 
-function TeamMemberCard({ member }) {
+function TeamMemberCard({ member, index = 0 }) {
   return (
-    <Card className="flex flex-col items-center text-center">
+    <Reveal delay={Math.min(index * 0.05, 0.3)} className="h-full">
+      <Card className="flex flex-col items-center text-center h-full">
       {/* Photo (lazy Cloudinary) or placeholder */}
       {member.photo ? (
         <CloudinaryImage
@@ -28,7 +30,8 @@ function TeamMemberCard({ member }) {
         {member.position}
       </p>
       <p className="font-body text-caption text-text-muted">{member.division}</p>
-    </Card>
+      </Card>
+    </Reveal>
   );
 }
 

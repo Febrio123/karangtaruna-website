@@ -5,6 +5,7 @@ import Modal from '../components/ui/Modal.jsx'
 import EmptyState from '../components/ui/EmptyState.jsx'
 import LoadingState from '../components/ui/LoadingState.jsx'
 import InlineNotice from '../components/ui/InlineNotice.jsx'
+import Spinner from '../components/ui/Spinner.jsx'
 import { apiFetch } from '../lib/api'
 import { eventAdapter } from '../lib/adapters.js'
 import { events as initialData, eventCategories } from '../data/event.js'
@@ -31,6 +32,7 @@ export default function Event() {
   const [form, setForm] = useState(emptyForm)
   const [saveError, setSaveError] = useState('')
   const [saving, setSaving] = useState(false)
+  const [deletingId, setDeletingId] = useState(null)
 
   async function loadData() {
     setLoading(true)
@@ -105,11 +107,14 @@ export default function Event() {
 
   async function handleDelete(id, judul) {
     if (!window.confirm(`Hapus event/pengumuman "${judul}"?`)) return
+    setDeletingId(id)
     try {
       await apiFetch(`/events/${id}`, { method: 'DELETE' })
       setEvents((list) => list.filter((ev) => ev.id !== id))
     } catch (err) {
       window.alert(err?.message || 'Gagal menghapus event.')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -194,9 +199,10 @@ export default function Event() {
                     type="button"
                     className="btn-icon w-9 h-9 hover:text-danger hover:bg-[#FBE8E6]"
                     onClick={() => handleDelete(ev.id, ev.judul)}
+                    disabled={deletingId === ev.id}
                     aria-label={`Hapus ${ev.judul}`}
                   >
-                    <Trash2 size={16} />
+                    {deletingId === ev.id ? <Spinner size={15} /> : <Trash2 size={16} />}
                   </button>
                 </div>
               </div>
@@ -280,7 +286,15 @@ export default function Event() {
           <div className="flex items-center justify-end gap-3 pt-2">
             <button type="button" className="btn-secondary" onClick={() => setModalOpen(false)}>Batal</button>
             <button type="submit" className="btn-primary" disabled={saving}>
-              {saving ? 'Menyimpan...' : editingId ? 'Simpan Perubahan' : 'Simpan Event'}
+              {saving ? (
+                <>
+                  <Spinner size={14} /> Menyimpan...
+                </>
+              ) : editingId ? (
+                'Simpan Perubahan'
+              ) : (
+                'Simpan Event'
+              )}
             </button>
           </div>
         </form>

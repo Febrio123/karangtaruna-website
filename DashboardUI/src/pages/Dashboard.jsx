@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import {
   Users,
   FileText,
@@ -64,6 +66,16 @@ const DEFAULT_CHART = {
   labels: fallbackChart.months.map((m) => m.bulan),
   pemasukan: fallbackChart.months.map((m) => m.pemasukan),
   pengeluaran: fallbackChart.months.map((m) => m.pengeluaran),
+}
+
+// Stagger sederhana untuk kartu statistik — durasi pendek + easeOut.
+const statGridVariants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+}
+const statItemVariants = {
+  hidden: { opacity: 0, y: 14 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } },
 }
 
 export default function Dashboard() {
@@ -207,40 +219,51 @@ export default function Dashboard() {
       )}
 
       {/* Stat cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <StatCard
-          icon={Users}
-          label="Total Pengurus"
-          value={stats.totalPengurus}
-          sublabel="pengurus terdaftar"
-          trend="Terhubung API"
-          trendDirection="up"
-        />
-        <StatCard
-          icon={FileText}
-          label="Total Berita"
-          value={stats.totalBerita}
-          sublabel="artikel di website"
-          trend="Terhubung API"
-          trendDirection="up"
-        />
-        <StatCard
-          icon={CalendarDays}
-          label="Total Event"
-          value={stats.totalEvent}
-          sublabel="event & pengumuman"
-          trend="Terhubung API"
-          trendDirection="up"
-        />
-        <StatCard
-          icon={Wallet}
-          label="Saldo Kas"
-          value={formatCurrency(stats.saldoKas)}
-          sublabel="Kas periode berjalan"
-          trend={stats.saldoKas >= 0 ? 'Aman' : 'Defisit'}
-          trendDirection={stats.saldoKas >= 0 ? 'up' : 'down'}
-        />
-      </div>
+      <motion.div
+        variants={statGridVariants}
+        initial="hidden"
+        animate="show"
+        className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4"
+      >
+        {[
+          {
+            icon: Users,
+            label: 'Total Pengurus',
+            value: stats.totalPengurus,
+            sublabel: 'pengurus terdaftar',
+            trend: 'Terhubung API',
+            trendDirection: 'up',
+          },
+          {
+            icon: FileText,
+            label: 'Total Berita',
+            value: stats.totalBerita,
+            sublabel: 'artikel di website',
+            trend: 'Terhubung API',
+            trendDirection: 'up',
+          },
+          {
+            icon: CalendarDays,
+            label: 'Total Event',
+            value: stats.totalEvent,
+            sublabel: 'event & pengumuman',
+            trend: 'Terhubung API',
+            trendDirection: 'up',
+          },
+          {
+            icon: Wallet,
+            label: 'Saldo Kas',
+            value: formatCurrency(stats.saldoKas),
+            sublabel: 'Kas periode berjalan',
+            trend: stats.saldoKas >= 0 ? 'Aman' : 'Defisit',
+            trendDirection: stats.saldoKas >= 0 ? 'up' : 'down',
+          },
+        ].map((s) => (
+          <motion.div key={s.label} variants={statItemVariants} className="min-w-0">
+            <StatCard {...s} />
+          </motion.div>
+        ))}
+      </motion.div>
 
       {/* Chart + activity */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
@@ -284,12 +307,12 @@ export default function Dashboard() {
       <div className="card p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-heading font-semibold text-h3 text-text">Event Mendatang</h3>
-          <button
-            type="button"
+          <Link
+            to="/event"
             className="inline-flex items-center gap-1 text-sm text-primary font-medium hover:text-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm"
           >
             Kelola event <ChevronRight size={16} aria-hidden="true" />
-          </button>
+          </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {upcoming.map((ev) => (

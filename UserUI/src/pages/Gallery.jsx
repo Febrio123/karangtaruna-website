@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+﻿import { useState, useMemo } from 'react';
 import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
 import GalleryItem from '../components/content/GalleryItem';
@@ -19,7 +19,7 @@ export default function Gallery() {
   });
   useSeo({
     title: 'Galeri',
-    description: 'Dokumentasi foto dan video kegiatan Karang Taruna Mekar Jaya — momen kerja bakti, turnamen olahraga, dan program sosial.',
+    description: 'Dokumentasi foto dan video kegiatan Karang Taruna Mangga Dua Selatan — momen kerja bakti, turnamen olahraga, dan program sosial.',
     path: '/galeri',
     jsonLd: [
       {
@@ -47,7 +47,7 @@ export default function Gallery() {
     <>
       <PageHeader
         title="Galeri Kegiatan"
-        description="Dokumentasi foto dan video kegiatan Karang Taruna Mekar Jaya."
+        description="Dokumentasi foto dan video kegiatan Karang Taruna Mangga Dua Selatan."
         breadcrumbs={[{ label: 'Galeri' }]}
       />
 
@@ -69,9 +69,10 @@ export default function Gallery() {
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {filteredItems.map((item) => (
+            {filteredItems.map((item, i) => (
               <GalleryItem
                 key={item.id}
+                index={i}
                 item={item}
                 onClick={setLightboxItem}
               />

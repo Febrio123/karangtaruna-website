@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+﻿import { useState, useMemo } from 'react';
 import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
 import ArticleCard from '../components/content/ArticleCard';
@@ -21,7 +21,7 @@ export default function NewsList() {
   });
   useSeo({
     title: 'Berita & Kegiatan',
-    description: 'Informasi terbaru seputar kegiatan, program kerja, dan acara Karang Taruna Mekar Jaya di Kelurahan Mekar Jaya, Depok.',
+    description: 'Informasi terbaru seputar kegiatan, program kerja, dan acara Karang Taruna Mangga Dua Selatan di Kelurahan Mangga Dua Selatan, Depok.',
     path: '/berita',
     jsonLd: [
       {
@@ -60,7 +60,7 @@ export default function NewsList() {
     <>
       <PageHeader
         title="Berita & Kegiatan"
-        description="Informasi terbaru seputar kegiatan Karang Taruna Mekar Jaya."
+        description="Informasi terbaru seputar kegiatan Karang Taruna Mangga Dua Selatan."
         breadcrumbs={[{ label: 'Berita' }]}
       />
 
@@ -82,8 +82,8 @@ export default function NewsList() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {paginatedArticles.map((article) => (
-              <ArticleCard key={article.id} article={article} />
+            {paginatedArticles.map((article, i) => (
+              <ArticleCard key={article.id} index={i} article={article} />
             ))}
           </div>
         )}

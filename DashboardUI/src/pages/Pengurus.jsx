@@ -5,6 +5,7 @@ import Modal from '../components/ui/Modal.jsx'
 import EmptyState from '../components/ui/EmptyState.jsx'
 import LoadingState from '../components/ui/LoadingState.jsx'
 import InlineNotice from '../components/ui/InlineNotice.jsx'
+import Spinner from '../components/ui/Spinner.jsx'
 import OrgChartAdmin from '../components/ui/OrgChartAdmin.jsx'
 import { apiFetch } from '../lib/api'
 import { pengurusAdapter } from '../lib/adapters.js'
@@ -39,6 +40,7 @@ export default function Pengurus() {
   const [form, setForm] = useState(emptyForm)
   const [saveError, setSaveError] = useState('')
   const [saving, setSaving] = useState(false)
+  const [deletingId, setDeletingId] = useState(null)
 
   async function loadData() {
     setLoading(true)
@@ -115,11 +117,14 @@ export default function Pengurus() {
 
   async function handleDelete(id, nama) {
     if (!window.confirm(`Hapus pengurus "${nama}"?`)) return
+    setDeletingId(id)
     try {
       await apiFetch(`/pengurus/${id}`, { method: 'DELETE' })
       setPengurus((list) => list.filter((p) => p.id !== id))
     } catch (err) {
       window.alert(err?.message || 'Gagal menghapus pengurus.')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -231,9 +236,10 @@ export default function Pengurus() {
                             type="button"
                             className="btn-icon w-9 h-9 hover:text-danger hover:bg-[#FBE8E6]"
                             onClick={() => handleDelete(p.id, p.nama)}
+                            disabled={deletingId === p.id}
                             aria-label={`Hapus ${p.nama}`}
                           >
-                            <Trash2 size={16} />
+                            {deletingId === p.id ? <Spinner size={15} /> : <Trash2 size={16} />}
                           </button>
                         </div>
                       </td>
@@ -374,7 +380,15 @@ export default function Pengurus() {
               Batal
             </button>
             <button type="submit" className="btn-primary" disabled={saving}>
-              {saving ? 'Menyimpan...' : editingId ? 'Simpan Perubahan' : 'Simpan Pengurus'}
+              {saving ? (
+                <>
+                  <Spinner size={14} /> Menyimpan...
+                </>
+              ) : editingId ? (
+                'Simpan Perubahan'
+              ) : (
+                'Simpan Pengurus'
+              )}
             </button>
           </div>
         </form>

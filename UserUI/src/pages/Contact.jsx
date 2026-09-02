@@ -11,7 +11,7 @@ export default function Contact() {
   const { data: siteConfig } = useSiteConfig();
   useSeo({
     title: 'Kontak',
-    description: 'Hubungi Karang Taruna Mekar Jaya — alamat, telepon, email, dan peta lokasi sekretariat di Kelurahan Mekar Jaya, Depok.',
+    description: 'Hubungi Karang Taruna Mangga Dua Selatan — alamat, telepon, email, dan peta lokasi sekretariat di Kelurahan Mangga Dua Selatan, Depok.',
     path: '/kontak',
     jsonLd: [
       {
@@ -123,17 +123,6 @@ export default function Contact() {
                       className="inline-flex items-center gap-1 text-body-base font-body text-text-secondary hover:text-primary transition-colors duration-150"
                     >
                       Instagram
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  )}
-                  {siteConfig.socialMedia.facebook && (
-                    <a
-                      href={siteConfig.socialMedia.facebook}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-body-base font-body text-text-secondary hover:text-primary transition-colors duration-150"
-                    >
-                      Facebook
                       <ExternalLink className="w-3 h-3" />
                     </a>
                   )}

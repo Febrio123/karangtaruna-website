@@ -1,7 +1,7 @@
 {
   "name": "karang-taruna-api",
   "version": "1.0.0",
-  "description": "Backend API Karang Taruna Mekar Jaya — autentikasi JWT + refresh token, CRUD konten publik, transparansi anggaran, prediksi anggaran (WMA + inflasi).",
+  "description": "Backend API Karang Taruna Mangga Dua Selatan — autentikasi JWT + refresh token, CRUD konten publik, transparansi anggaran, prediksi anggaran (WMA + inflasi).",
   "type": "module",
   "main": "src/server.js",
   "scripts": {
@@ -22,7 +22,7 @@
     "cloudinary",
     "wma"
   ],
-  "author": "Karang Taruna Mekar Jaya",
+  "author": "Karang Taruna Mangga Dua Selatan",
   "license": "MIT",
   "engines": {
     "node": ">=18.0.0"

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+﻿import { describe, it, expect, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import App from '../../src/App';
@@ -19,7 +19,7 @@ describe('Routing Integration', () => {
   it('renders Home page on / route', async () => {
     renderApp('/');
     await waitFor(() => {
-      expect(screen.getByText('KT Mekar Jaya')).toBeInTheDocument();
+      expect(screen.getByText('KT Mangga Dua Selatan')).toBeInTheDocument();
     });
   });
 
@@ -32,7 +32,7 @@ describe('Routing Integration', () => {
 
   it('renders Navbar on all pages', async () => {
     renderApp('/');
-    expect(screen.getByText('KT Mekar Jaya')).toBeInTheDocument();
+    expect(screen.getByText('KT Mangga Dua Selatan')).toBeInTheDocument();
   });
 
   it('renders Footer on all pages', async () => {

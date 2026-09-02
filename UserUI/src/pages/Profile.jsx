@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
@@ -11,7 +11,7 @@ export default function Profile() {
   const { data: siteConfig } = useSiteConfig();
   useSeo({
     title: 'Profil',
-    description: 'Mengenal lebih dekat Karang Taruna Mekar Jaya — sejarah, visi, misi, dan struktur organisasi pemuda di Kelurahan Mekar Jaya, Depok.',
+    description: 'Mengenal lebih dekat Karang Taruna Mangga Dua Selatan — sejarah, visi, misi, dan struktur organisasi pemuda di Kelurahan Mangga Dua Selatan, Depok.',
     path: '/profil',
     jsonLd: [
       {
@@ -28,7 +28,7 @@ export default function Profile() {
     <>
       <PageHeader
         title="Tentang Karang Taruna"
-        description="Mengenal lebih dekat organisasi pemuda di Kelurahan Mekar Jaya."
+        description="Mengenal lebih dekat organisasi pemuda di Kelurahan Mangga Dua Selatan."
         breadcrumbs={[{ label: 'Profil' }]}
       />
 

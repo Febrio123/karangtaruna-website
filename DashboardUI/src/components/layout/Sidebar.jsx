@@ -32,7 +32,7 @@ function SidebarContent({ onNavigate }) {
           <TreeDeciduous size={22} strokeWidth={1.6} aria-hidden="true" />
         </div>
         <div className="leading-tight min-w-0">
-          <p className="text-white font-heading font-bold text-base whitespace-nowrap">KT Sukamaju</p>
+          <p className="text-white font-heading font-bold text-base whitespace-nowrap">KT Mangga Dua Selatan</p>
           <p className="text-white/60 text-xs font-body tracking-wide">Kelola Website</p>
         </div>
       </div>
@@ -65,7 +65,7 @@ function SidebarContent({ onNavigate }) {
       {/* Footer */}
       <div className="px-5 py-5 border-t border-white/10">
         <p className="text-white/50 text-xs leading-relaxed">
-          Karang Taruna<br />Desa Sukamaju
+          Karang Taruna<br />Mangga Dua Selatan
         </p>
         <p className="text-white/30 text-[11px] mt-1">Periode 2025-2027</p>
       </div>

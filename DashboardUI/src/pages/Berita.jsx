@@ -5,6 +5,7 @@ import Modal from '../components/ui/Modal.jsx'
 import EmptyState from '../components/ui/EmptyState.jsx'
 import LoadingState from '../components/ui/LoadingState.jsx'
 import InlineNotice from '../components/ui/InlineNotice.jsx'
+import Spinner from '../components/ui/Spinner.jsx'
 import { apiFetch } from '../lib/api'
 import { artikelAdapter } from '../lib/adapters.js'
 import { berita as initialData, beritaKategori } from '../data/berita.js'
@@ -32,6 +33,7 @@ export default function Berita() {
   const [form, setForm] = useState(emptyForm)
   const [saveError, setSaveError] = useState('')
   const [saving, setSaving] = useState(false)
+  const [deletingId, setDeletingId] = useState(null)
 
   async function loadData() {
     setLoading(true)
@@ -119,11 +121,14 @@ export default function Berita() {
 
   async function handleDelete(id, judul) {
     if (!window.confirm(`Hapus berita "${judul}"?`)) return
+    setDeletingId(id)
     try {
       await apiFetch(`/articles/${id}`, { method: 'DELETE' })
       setBerita((list) => list.filter((b) => b.id !== id))
     } catch (err) {
       window.alert(err?.message || 'Gagal menghapus berita.')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -234,9 +239,10 @@ export default function Berita() {
                             type="button"
                             className="btn-icon w-9 h-9 hover:text-danger hover:bg-[#FBE8E6]"
                             onClick={() => handleDelete(b.id, b.judul)}
+                            disabled={deletingId === b.id}
                             aria-label={`Hapus ${b.judul}`}
                           >
-                            <Trash2 size={16} />
+                            {deletingId === b.id ? <Spinner size={15} /> : <Trash2 size={16} />}
                           </button>
                         </div>
                       </td>
@@ -352,7 +358,15 @@ export default function Berita() {
           <div className="flex items-center justify-end gap-3 pt-2">
             <button type="button" className="btn-secondary" onClick={() => setModalOpen(false)}>Batal</button>
             <button type="submit" className="btn-primary" disabled={saving}>
-              {saving ? 'Menyimpan...' : editingId ? 'Simpan Perubahan' : 'Terbitkan Berita'}
+              {saving ? (
+                <>
+                  <Spinner size={14} /> Menyimpan...
+                </>
+              ) : editingId ? (
+                'Simpan Perubahan'
+              ) : (
+                'Terbitkan Berita'
+              )}
             </button>
           </div>
         </form>

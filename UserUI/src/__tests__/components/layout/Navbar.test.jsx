@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+﻿import { describe, it, expect, vi } from 'vitest';
 import { screen } from '@testing-library/react';
 import { renderWithRouter } from '../../../test/test-utils';
 import Navbar from '../../../components/layout/Navbar';
@@ -6,12 +6,12 @@ import Navbar from '../../../components/layout/Navbar';
 describe('Navbar Component', () => {
   it('renders the organization short name', () => {
     renderWithRouter(<Navbar />);
-    expect(screen.getByText('KT Mekar Jaya')).toBeInTheDocument();
+    expect(screen.getByText('KT Mangga Dua Selatan')).toBeInTheDocument();
   });
 
   it('renders all main navigation items', () => {
     renderWithRouter(<Navbar />);
-    expect(screen.getByRole('link', { name: /beranda/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Beranda' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /profil/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /berita/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /galeri/i })).toBeInTheDocument();
@@ -50,14 +50,14 @@ describe('Navbar Component', () => {
 
   it('links to correct routes', () => {
     renderWithRouter(<Navbar />);
-    expect(screen.getByRole('link', { name: /beranda/i })).toHaveAttribute('href', '/');
+    expect(screen.getByRole('link', { name: 'Beranda' })).toHaveAttribute('href', '/');
     expect(screen.getByRole('link', { name: /berita/i })).toHaveAttribute('href', '/berita');
     expect(screen.getByRole('link', { name: /kontak/i })).toHaveAttribute('href', '/kontak');
   });
 
   it('logo links to home page', () => {
     renderWithRouter(<Navbar />);
-    const logoLink = screen.getByText('KT Mekar Jaya').closest('a');
+    const logoLink = screen.getByText('KT Mangga Dua Selatan').closest('a');
     expect(logoLink).toHaveAttribute('href', '/');
   });
 });

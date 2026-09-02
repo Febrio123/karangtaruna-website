@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, ChevronDown } from 'lucide-react';
 import { clsx } from 'clsx';
 import Container from './Container';
 import MobileDrawer from './MobileDrawer';
 import useSiteConfig from '../../hooks/useSiteConfig';
+import logoImg from '../../assets/logo karang taruna.jpg';
 
 const navItems = [
   { label: 'Beranda', href: '/' },
@@ -63,9 +64,18 @@ export default function Navbar() {
             {/* Logo / Nama */}
             <Link
               to="/"
-              className="font-heading text-body-lg md:text-h4 font-bold text-primary hover:text-primary-hover transition-colors duration-150"
+              className="flex items-center gap-2 group"
+              aria-label={`Beranda ${siteConfig.shortName}`}
             >
-              {siteConfig.shortName}
+              <img
+                src={logoImg}
+                alt="Logo Karang Taruna"
+                className="w-9 h-9 md:w-10 md:h-10 rounded-full object-cover border border-border-light shrink-0"
+                loading="eager"
+              />
+              <span className="font-heading text-body-lg md:text-h4 font-bold text-primary group-hover:text-primary-hover transition-colors duration-150">
+                {siteConfig.shortName}
+              </span>
             </Link>
 
             {/* Desktop Navigation */}

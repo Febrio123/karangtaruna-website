@@ -33,8 +33,8 @@ const informationSchema = new mongoose.Schema(
 const siteConfigSchema = new mongoose.Schema(
   {
     _key: { type: String, required: true, default: 'main' },
-    name: { type: String, default: 'Karang Taruna Mekar Jaya' },
-    shortName: { type: String, default: 'KT Mekar Jaya' },
+    name: { type: String, default: 'Karang Taruna Mangga Dua Selatan' },
+    shortName: { type: String, default: 'KT Mangga Dua Selatan' },
     tagline: { type: String, default: null },
     address: { type: String, default: null },
     phone: { type: String, default: null },

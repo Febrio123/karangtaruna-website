@@ -1,4 +1,5 @@
-import { useMemo } from 'react';
+﻿import { useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ChevronRight, Megaphone } from 'lucide-react';
 import HeroSection from '../components/special/HeroSection';
@@ -101,8 +102,8 @@ export default function Home() {
       description: siteConfig.tagline,
       address: {
         '@type': 'PostalAddress',
-        streetAddress: 'Jl. Raya Mekar Jaya No. 12',
-        addressLocality: 'Kel. Mekar Jaya, Kec. Sukmajaya',
+        streetAddress: 'Jl. Raya Mangga Dua Selatan No. 12',
+        addressLocality: 'Kel. Mangga Dua Selatan, Kec. Sukmajaya',
         addressRegion: 'Kota Depok, Jawa Barat',
         postalCode: '16411',
         addressCountry: 'ID',
@@ -115,7 +116,6 @@ export default function Home() {
       },
       sameAs: [
         siteConfig.socialMedia.instagram,
-        siteConfig.socialMedia.facebook,
       ].filter(Boolean),
     },
   ], []);
@@ -129,7 +129,13 @@ export default function Home() {
       {/* Important announcement */}
       {latestEvents.length > 0 && (
         <Section className="!py-0 !pt-6">
-          <div className="bg-accent-light border border-accent/20 rounded-md p-4 flex items-start gap-3">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="bg-accent-light border border-accent/20 rounded-md p-4 flex items-start gap-3"
+          >
             <Megaphone className="w-5 h-5 text-accent shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
               <p className="font-body text-body-base text-text">
@@ -144,16 +150,16 @@ export default function Home() {
               Lihat
               <ChevronRight className="w-4 h-4" />
             </Link>
-          </div>
+          </motion.div>
         </Section>
       )}
 
       {/* Stats */}
       <Section>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <StatsCard value={`${siteConfig.stats.members}+`} label="Anggota Aktif" />
-          <StatsCard value={siteConfig.stats.programs} label="Program Kerja" />
-          <StatsCard value={`${siteConfig.stats.yearsActive} Tahun`} label="Berdiri" />
+          <StatsCard index={0} value={`${siteConfig.stats.members}+`} label="Anggota Aktif" />
+          <StatsCard index={1} value={siteConfig.stats.programs} label="Program Kerja" />
+          <StatsCard index={2} value={`${siteConfig.stats.yearsActive} Tahun`} label="Berdiri" />
         </div>
       </Section>
 
@@ -176,8 +182,8 @@ export default function Home() {
           <LoadingSpinner label="Memuat kegiatan..." />
         ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {latestArticles.map((article) => (
-            <ArticleCard key={article.id} article={article} />
+          {latestArticles.map((article, i) => (
+            <ArticleCard key={article.id} index={i} article={article} />
           ))}
         </div>
         )}
@@ -202,9 +208,9 @@ export default function Home() {
           <LoadingSpinner label="Memuat galeri..." />
         ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          {latestGallery.map((item) => (
+          {latestGallery.map((item, i) => (
             <Link key={item.id} to="/galeri">
-              <GalleryItem item={item} onClick={() => {}} />
+              <GalleryItem index={i} item={item} onClick={() => {}} />
             </Link>
           ))}
         </div>

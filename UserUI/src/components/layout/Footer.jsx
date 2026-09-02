@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, ExternalLink } from 'lucide-react';
+import { motion } from 'framer-motion';
 import Container from './Container';
 import useSiteConfig from '../../hooks/useSiteConfig';
+import logoImg from '../../assets/logo karang taruna.jpg';
 
 const footerLinks = [
   { label: 'Profil', href: '/profil' },
@@ -19,13 +21,27 @@ export default function Footer() {
   return (
     <footer className="bg-bg-alt border-t border-border-light" role="contentinfo">
       <Container>
-        <div className="py-10 md:py-12">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-40px' }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+          className="py-10 md:py-12"
+        >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Organization Info */}
             <div>
-              <h3 className="font-heading text-h4 font-bold text-text mb-3">
-                {siteConfig.name}
-              </h3>
+              <div className="flex items-center gap-3 mb-3">
+                <img
+                  src={logoImg}
+                  alt="Logo Karang Taruna"
+                  className="w-12 h-12 rounded-full object-cover border border-border-light shrink-0"
+                  loading="lazy"
+                />
+                <h3 className="font-heading text-h4 font-bold text-text">
+                  {siteConfig.name}
+                </h3>
+              </div>
               <p className="font-body text-body-base text-text-secondary mb-4">
                 {siteConfig.tagline}
               </p>
@@ -93,21 +109,10 @@ export default function Footer() {
                     <ExternalLink className="w-3 h-3" />
                   </a>
                 )}
-                {siteConfig.socialMedia.facebook && (
-                  <a
-                    href={siteConfig.socialMedia.facebook}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-body text-body-base text-text-secondary hover:text-primary transition-colors duration-150 inline-flex items-center gap-2"
-                  >
-                    Facebook
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                )}
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Copyright */}
         <div className="border-t border-border py-4 text-center">

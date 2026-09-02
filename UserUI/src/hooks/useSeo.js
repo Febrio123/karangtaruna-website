@@ -1,12 +1,12 @@
-import { useEffect } from 'react';
+﻿import { useEffect } from 'react';
 
 /**
  * SEO constants — single source of truth for site-wide metadata.
  */
-const SITE_NAME = 'Karang Taruna Mekar Jaya';
-const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://kt-mekarjaya.vercel.app').replace(/\/+$/, '');
+const SITE_NAME = 'Karang Taruna Mangga Dua Selatan';
+const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://kt-mangga-dua-selatan.vercel.app').replace(/\/+$/, '');
 const DEFAULT_DESCRIPTION =
-  'Website resmi Karang Taruna Mekar Jaya — organisasi pemuda yang aktif, kreatif, dan bertanggung jawab di Kelurahan Mekar Jaya, Depok.';
+  'Website resmi Karang Taruna Mangga Dua Selatan — organisasi pemuda yang aktif, kreatif, dan bertanggung jawab di Kelurahan Mangga Dua Selatan, Depok.';
 
 // ---------------------------------------------------------------------------
 // Helpers

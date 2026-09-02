@@ -13,8 +13,8 @@ const SITE_CONFIG_CACHE_KEY = 'site-config:main';
 
 export const DEFAULT_SITE_CONFIG = {
   _key: 'main',
-  name: 'Karang Taruna Mekar Jaya',
-  shortName: 'KT Mekar Jaya',
+  name: 'Karang Taruna Mangga Dua Selatan',
+  shortName: 'KT Mangga Dua Selatan',
   tagline: 'Membangun generasi muda yang aktif, kreatif, dan bertanggung jawab.',
   address: null,
   phone: null,

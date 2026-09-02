@@ -1,10 +1,12 @@
 import { memo } from 'react';
 import { clsx } from 'clsx';
 import { Play } from 'lucide-react';
+import Reveal from '../ui/Reveal';
 import CloudinaryImage from './CloudinaryImage';
 
-function GalleryItem({ item, onClick }) {
+function GalleryItem({ item, onClick, index = 0 }) {
   return (
+    <Reveal delay={Math.min(index * 0.05, 0.3)} className="h-full">
     <button
       onClick={() => onClick(item)}
       className={clsx(
@@ -12,7 +14,7 @@ function GalleryItem({ item, onClick }) {
         'bg-bg-alt border border-border-light',
         'transition-shadow duration-150 ease-out hover:shadow-md',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
-        'cursor-pointer'
+        'cursor-pointer w-full'
       )}
       aria-label={`Lihat detail: ${item.title}`}
     >
@@ -54,6 +56,7 @@ function GalleryItem({ item, onClick }) {
         </div>
       </div>
     </button>
+    </Reveal>
   );
 }
 

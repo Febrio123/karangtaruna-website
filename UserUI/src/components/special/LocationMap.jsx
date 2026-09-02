@@ -1,4 +1,4 @@
-import useSiteConfig from '../../hooks/useSiteConfig';
+﻿import useSiteConfig from '../../hooks/useSiteConfig';
 import { siteConfig as staticSiteConfig } from '../../data/siteConfig';
 
 export default function LocationMap() {
@@ -23,7 +23,7 @@ export default function LocationMap() {
         style={{ border: 0 }}
         loading="lazy"
         referrerPolicy="no-referrer"
-        title="Lokasi Sekretariat Karang Taruna Mekar Jaya"
+        title="Lokasi Sekretariat Karang Taruna Mangga Dua Selatan"
         sandbox="allow-scripts allow-same-origin"
       />
     </div>

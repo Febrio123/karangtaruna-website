@@ -33,7 +33,7 @@ function levelForRole(role) {
 async function seedAdmin() {
   const username = (process.env.SEED_ADMIN_USERNAME || 'ketua').toLowerCase();
   const password = process.env.SEED_ADMIN_PASSWORD || 'admin123';
-  const email = process.env.SEED_ADMIN_EMAIL || `${username}@ktmekarjaya.local`;
+  const email = process.env.SEED_ADMIN_EMAIL || `${username}@mds.local`;
 
   // Cari sosok pengurus "Ketua" untuk dikaitkan (pengurusId)
   const ketuaPengurus = await Pengurus.findOne({ role: 'ketua' }).lean();
@@ -110,16 +110,15 @@ async function seedSiteConfig() {
   }
   await SiteConfig.create({
     _key: 'main',
-    name: 'Karang Taruna Mekar Jaya',
-    shortName: 'KT Mekar Jaya',
+    name: 'Karang Taruna Mangga Dua Selatan',
+    shortName: 'KT Mangga Dua Selatan',
     tagline: 'Membangun generasi muda yang aktif, kreatif, dan bertanggung jawab.',
-    address: 'Jl. Raya Mekar Jaya No. 12, Kel. Mekar Jaya, Kec. Sukmajaya, Kota Depok, Jawa Barat 16411',
+    address: 'Jl. Raya Mangga Dua Selatan No. 12, Kel. Mangga Dua Selatan, Kec. Sukmajaya, Kota Depok, Jawa Barat 16411',
     phone: '0812-3456-7890',
-    email: 'kt.mekarjaya@gmail.com',
+    email: 'kt.mangga-dua-selatan@gmail.com',
     operatingHours: 'Senin - Jumat, 08:00 - 17:00 WIB',
     socialMedia: {
-      instagram: 'https://instagram.com/kt.mekarjaya',
-      facebook: 'https://facebook.com/kt.mekarjaya',
+      instagram: 'https://instagram.com/katar010.mds',
     },
     map: { lat: -6.4025, lng: 106.8525, zoom: 15 },
     stats: { members: 150, programs: 12, yearsActive: 8 },
@@ -132,7 +131,7 @@ async function seedSiteConfig() {
       'Mendorong partisipasi aktif pemuda dalam pembangunan desa yang inklusif dan berkelanjutan.',
     ],
     history: {
-      summary: 'Karang Taruna Mekar Jaya didirikan pada tahun 2018 oleh sekelompok pemuda pemudi yang memiliki semangat tinggi untuk berkontribusi bagi kemajuan desa.',
+      summary: 'Karang Taruna Mangga Dua Selatan didirikan pada tahun 2018 oleh sekelompok pemuda pemudi yang memiliki semangat tinggi untuk berkontribusi bagi kemajuan desa.',
       timeline: [
         { year: '2018', title: 'Pendirian Karang Taruna', description: 'Berdiri dengan 30 anggota pendiri.' },
         { year: '2022', title: 'Program Lingkungan Hijau', description: 'Penanaman pohon & bank sampah.' },
@@ -201,8 +200,8 @@ async function seedKontenDemo() {
       category: 'Keagamaan',
       date: new Date('2026-03-15'),
       author: 'Ahmad Fauzi',
-      excerpt: 'Karang Taruna Mekar Jaya menggelar pengajian rutin sepanjang bulan Ramadhan dan membagikan takjil gratis.',
-      content: '<p>Karang Taruna Mekar Jaya kembali menggelar pengajian rutin yang diikuti lebih dari 80 peserta.</p>',
+      excerpt: 'Karang Taruna Mangga Dua Selatan menggelar pengajian rutin sepanjang bulan Ramadhan dan membagikan takjil gratis.',
+      content: '<p>Karang Taruna Mangga Dua Selatan kembali menggelar pengajian rutin yang diikuti lebih dari 80 peserta.</p>',
       isPublished: true,
     },
     {
@@ -212,7 +211,7 @@ async function seedKontenDemo() {
       date: new Date('2026-02-20'),
       author: 'Rizki Pratama',
       excerpt: '16 tim berkompetisi memperebutkan piala bergilir Karang Taruna.',
-      content: '<p>Turnamen diikuti oleh 16 tim dari berbagai RT se-Kelurahan Mekar Jaya.</p>',
+      content: '<p>Turnamen diikuti oleh 16 tim dari berbagai RT se-Kelurahan Mangga Dua Selatan.</p>',
       isPublished: true,
     },
     {
@@ -241,7 +240,7 @@ async function seedKontenDemo() {
       type: 'event',
       date: new Date('2026-03-22'),
       time: '14:00 WIB',
-      location: 'Lapangan Futsal Mekar Jaya',
+      location: 'Lapangan Futsal Mangga Dua Selatan',
       status: 'Mendatang',
       description: 'Babak final Turnamen Futsal Piala Karang Taruna 2026.',
       budget: { amount: 5500000, label: 'Total anggaran acara Rp 5.500.000' },

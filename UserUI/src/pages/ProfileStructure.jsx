@@ -1,4 +1,4 @@
-import { User } from 'lucide-react';
+﻿import { User } from 'lucide-react';
 import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
 import OrgChart from '../components/special/OrgChart';
@@ -19,7 +19,7 @@ export default function ProfileStructure() {
   const periode = teamMembers[0]?.period ?? '2025-2027';
   useSeo({
     title: 'Struktur Organisasi',
-    description: `Susunan pengurus Karang Taruna Mekar Jaya periode ${periode} beserta struktur organisasi dan pembagian bidang.`,
+    description: `Susunan pengurus Karang Taruna Mangga Dua Selatan periode ${periode} beserta struktur organisasi dan pembagian bidang.`,
     path: '/profil/struktur-organisasi',
     jsonLd: [
       {
@@ -37,7 +37,7 @@ export default function ProfileStructure() {
     <>
       <PageHeader
         title="Struktur Organisasi"
-        description={`Susunan pengurus Karang Taruna Mekar Jaya periode ${periode}.`}
+        description={`Susunan pengurus Karang Taruna Mangga Dua Selatan periode ${periode}.`}
         breadcrumbs={[
           { label: 'Profil', href: '/profil' },
           { label: 'Struktur Organisasi' },

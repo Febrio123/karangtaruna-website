@@ -14,6 +14,7 @@ import {
 import Badge from '../components/ui/Badge.jsx'
 import LoadingState from '../components/ui/LoadingState.jsx'
 import InlineNotice from '../components/ui/InlineNotice.jsx'
+import Spinner from '../components/ui/Spinner.jsx'
 import {
   historiAnggaranEvent as fallbackHistori,
   parameterEkonomi as fallbackParameter,
@@ -299,7 +300,13 @@ export default function PrediksiEvent() {
                   </div>
                 </div>
                 <button type="submit" className="btn-primary w-full" disabled={savingHistori}>
-                  {savingHistori ? 'Menyimpan...' : 'Simpan Anggaran Historis'}
+                  {savingHistori ? (
+                    <>
+                      <Spinner size={14} /> Menyimpan...
+                    </>
+                  ) : (
+                    'Simpan Anggaran Historis'
+                  )}
                 </button>
               </form>
             )}

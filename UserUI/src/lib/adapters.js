@@ -204,7 +204,7 @@ export function adaptGalleryList(resp) {
 
 // --- Site Config / Profil ----------------------------------------------------
 // Backend: name, shortName, tagline, address, phone, email, operatingHours,
-//          vision, mission[], socialMedia{instagram,facebook,youtube,tiktok},
+//          vision, mission[], socialMedia{instagram}
 //          map{lat,lng,zoom}, stats{members,programs,yearsActive},
 //          history{summary,timeline[]}, information[]
 // Frontend tampilannya identik dgn data statis; kita isi nilai null/undefined

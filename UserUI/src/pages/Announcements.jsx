@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+﻿import { useState, useMemo } from 'react';
 import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
 import EventCard from '../components/content/EventCard';
@@ -20,7 +20,7 @@ export default function Announcements() {
   });
   useSeo({
     title: 'Pengumuman & Event',
-    description: 'Informasi pengumuman, jadwal kegiatan, dan event mendatang dari Karang Taruna Mekar Jaya.',
+    description: 'Informasi pengumuman, jadwal kegiatan, dan event mendatang dari Karang Taruna Mangga Dua Selatan.',
     path: '/pengumuman',
     jsonLd: [
       {
@@ -47,7 +47,7 @@ export default function Announcements() {
     <>
       <PageHeader
         title="Pengumuman & Event"
-        description="Informasi pengumuman dan jadwal kegiatan Karang Taruna Mekar Jaya."
+        description="Informasi pengumuman dan jadwal kegiatan Karang Taruna Mangga Dua Selatan."
         breadcrumbs={[{ label: 'Pengumuman' }]}
       />
 
@@ -69,8 +69,8 @@ export default function Announcements() {
               </p>
             </div>
           ) : (
-            filteredEvents.map((event) => (
-              <EventCard key={event.id} event={event} />
+            filteredEvents.map((event, i) => (
+              <EventCard key={event.id} index={i} event={event} />
             ))
           )}
         </div>

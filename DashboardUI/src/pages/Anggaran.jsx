@@ -5,6 +5,7 @@ import Modal from '../components/ui/Modal.jsx'
 import EmptyState from '../components/ui/EmptyState.jsx'
 import LoadingState from '../components/ui/LoadingState.jsx'
 import InlineNotice from '../components/ui/InlineNotice.jsx'
+import Spinner from '../components/ui/Spinner.jsx'
 import KasChartCard from '../components/ui/KasChartCard.jsx'
 import { apiFetch } from '../lib/api'
 import { transaksiAdapter } from '../lib/adapters.js'
@@ -52,6 +53,7 @@ export default function Anggaran() {
   const [cari, setCari] = useState('')
   const [saveError, setSaveError] = useState('')
   const [saving, setSaving] = useState(false)
+  const [deletingId, setDeletingId] = useState(null)
 
   // Proteksi race condition saat user cepat berpindah tahun.
   const reqSeq = useRef(0)
@@ -151,11 +153,14 @@ export default function Anggaran() {
 
   async function handleDelete(id) {
     if (!window.confirm('Hapus transaksi ini?')) return
+    setDeletingId(id)
     try {
       await apiFetch(`/transaksi-anggaran/${id}`, { method: 'DELETE' })
       await loadTahun(tahun)
     } catch (err) {
       window.alert(err?.message || 'Gagal menghapus transaksi.')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -368,9 +373,10 @@ export default function Anggaran() {
                             type="button"
                             className="btn-icon w-9 h-9 hover:text-danger hover:bg-[#FBE8E6]"
                             onClick={() => handleDelete(item.id)}
+                            disabled={deletingId === item.id}
                             aria-label={`Hapus transaksi ${item.keterangan}`}
                           >
-                            <Trash2 size={16} />
+                            {deletingId === item.id ? <Spinner size={15} /> : <Trash2 size={16} />}
                           </button>
                         </div>
                       </td>
@@ -460,7 +466,15 @@ export default function Anggaran() {
           <div className="flex items-center justify-end gap-3 pt-2">
             <button type="button" className="btn-secondary" onClick={() => setModalOpen(false)}>Batal</button>
             <button type="submit" className="btn-primary" disabled={saving}>
-              {saving ? 'Menyimpan...' : editingId ? 'Simpan Perubahan' : 'Simpan Transaksi'}
+              {saving ? (
+                <>
+                  <Spinner size={14} /> Menyimpan...
+                </>
+              ) : editingId ? (
+                'Simpan Perubahan'
+              ) : (
+                'Simpan Transaksi'
+              )}
             </button>
           </div>
         </form>

@@ -13,6 +13,7 @@ import Modal from '../components/ui/Modal.jsx'
 import EmptyState from '../components/ui/EmptyState.jsx'
 import LoadingState from '../components/ui/LoadingState.jsx'
 import InlineNotice from '../components/ui/InlineNotice.jsx'
+import Spinner from '../components/ui/Spinner.jsx'
 import { apiFetch } from '../lib/api'
 import { parameterAdapter } from '../lib/adapters.js'
 import { parameterEkonomi as dummyParameter } from '../data/prediksi.js'
@@ -31,6 +32,7 @@ export default function ParameterEkonomi() {
   const [successMsg, setSuccessMsg] = useState('')
   const [saveError, setSaveError] = useState('')
   const [saving, setSaving] = useState(false)
+  const [deletingId, setDeletingId] = useState(null)
 
   async function loadData() {
     setLoading(true)
@@ -109,6 +111,7 @@ export default function ParameterEkonomi() {
 
   async function handleDelete(id) {
     if (!window.confirm('Hapus parameter inflasi ini?')) return
+    setDeletingId(id)
     try {
       await apiFetch(`/parameter-ekonomi/${id}`, { method: 'DELETE' })
       setDaftar((d) => d.filter((i) => i.id !== id))
@@ -117,6 +120,8 @@ export default function ParameterEkonomi() {
     } catch (err) {
       setSuccessMsg('')
       window.alert(err?.message || 'Gagal menghapus data inflasi.')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -222,9 +227,10 @@ export default function ParameterEkonomi() {
                             type="button"
                             className="btn-icon w-9 h-9 hover:text-danger hover:bg-[#FBE8E6]"
                             onClick={() => handleDelete(item.id)}
+                            disabled={deletingId === item.id}
                             aria-label={`Hapus inflasi tahun ${item.tahun}`}
                           >
-                            <Trash2 size={16} />
+                            {deletingId === item.id ? <Spinner size={15} /> : <Trash2 size={16} />}
                           </button>
                         </div>
                       </td>
@@ -292,7 +298,15 @@ export default function ParameterEkonomi() {
           <div className="flex items-center justify-end gap-3 pt-2">
             <button type="button" className="btn-secondary" onClick={() => setModalOpen(false)}>Batal</button>
             <button type="submit" className="btn-primary" disabled={saving}>
-              {saving ? 'Menyimpan...' : editingId ? 'Simpan Perubahan' : 'Simpan'}
+              {saving ? (
+                <>
+                  <Spinner size={14} /> Menyimpan...
+                </>
+              ) : editingId ? (
+                'Simpan Perubahan'
+              ) : (
+                'Simpan'
+              )}
             </button>
           </div>
         </form>

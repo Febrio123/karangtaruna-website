@@ -7,6 +7,7 @@ import {
   Eye,
   EyeOff,
   LogIn,
+  Loader2,
   TreeDeciduous,
   ShieldCheck,
   Wallet,
@@ -218,8 +219,15 @@ export default function Login() {
             </div>
 
             <button type="submit" disabled={loading} className="btn-primary w-full !min-h-[48px]">
-              <LogIn size={18} aria-hidden="true" />
-              {loading ? 'Memproses...' : 'Masuk'}
+              {loading ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" aria-hidden="true" /> Memproses...
+                </>
+              ) : (
+                <>
+                  <LogIn size={18} aria-hidden="true" /> Masuk
+                </>
+              )}
             </button>
           </form>
 

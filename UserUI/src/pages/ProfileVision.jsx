@@ -1,4 +1,4 @@
-import PageHeader from '../components/layout/PageHeader';
+﻿import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
 import Card from '../components/ui/Card';
 import useSiteConfig from '../hooks/useSiteConfig';
@@ -8,7 +8,7 @@ export default function ProfileVision() {
   const { data: siteConfig } = useSiteConfig();
   useSeo({
     title: 'Visi & Misi',
-    description: 'Visi dan misi Karang Taruna Mekar Jaya dalam membangun pemuda yang beriman, kreatif, dan bertanggung jawab bagi masyarakat.',
+    description: 'Visi dan misi Karang Taruna Mangga Dua Selatan dalam membangun pemuda yang beriman, kreatif, dan bertanggung jawab bagi masyarakat.',
     path: '/profil/visi-misi',
     jsonLd: [
       {
@@ -26,7 +26,7 @@ export default function ProfileVision() {
     <>
       <PageHeader
         title="Visi & Misi"
-        description="Arah dan tujuan organisasi Karang Taruna Mekar Jaya."
+        description="Arah dan tujuan organisasi Karang Taruna Mangga Dua Selatan."
         breadcrumbs={[
           { label: 'Profil', href: '/profil' },
           { label: 'Visi & Misi' },

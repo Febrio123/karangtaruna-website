@@ -5,6 +5,7 @@ import Modal from '../components/ui/Modal.jsx'
 import EmptyState from '../components/ui/EmptyState.jsx'
 import LoadingState from '../components/ui/LoadingState.jsx'
 import InlineNotice from '../components/ui/InlineNotice.jsx'
+import Spinner from '../components/ui/Spinner.jsx'
 import { apiFetch } from '../lib/api'
 import { galeriAdapter } from '../lib/adapters.js'
 import { galeri as initialData, galeriKategori } from '../data/galeri.js'
@@ -36,6 +37,7 @@ export default function Galeri() {
   const [preview, setPreview] = useState('')
   const [saveError, setSaveError] = useState('')
   const [uploading, setUploading] = useState(false)
+  const [deletingId, setDeletingId] = useState(null)
   const [successMsg, setSuccessMsg] = useState('')
   const [lightbox, setLightbox] = useState(null)
 
@@ -149,11 +151,14 @@ export default function Galeri() {
 
   async function handleDelete(id, judul) {
     if (!window.confirm(`Hapus media "${judul}" dari galeri?`)) return
+    setDeletingId(id)
     try {
       await apiFetch(`/galeri/${id}`, { method: 'DELETE' })
       setGaleri((list) => list.filter((g) => g.id !== id))
     } catch (err) {
       window.alert(err?.message || 'Gagal menghapus media.')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -254,10 +259,11 @@ export default function Galeri() {
               <button
                 type="button"
                 onClick={() => handleDelete(g.id, g.judul)}
-                className="absolute top-2 right-2 w-8 h-8 rounded-md bg-black/40 text-white flex items-center justify-center hover:bg-danger opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                disabled={deletingId === g.id}
+                className="absolute top-2 right-2 w-8 h-8 rounded-md bg-black/40 text-white flex items-center justify-center hover:bg-danger opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:opacity-70"
                 aria-label={`Hapus ${g.judul}`}
               >
-                <Trash2 size={15} />
+                {deletingId === g.id ? <Spinner size={14} className="text-white" /> : <Trash2 size={15} />}
               </button>
 
               {/* Caption */}
@@ -337,7 +343,13 @@ export default function Galeri() {
           <div className="flex items-center justify-end gap-3 pt-2">
             <button type="button" className="btn-secondary" onClick={() => setModalOpen(false)}>Batal</button>
             <button type="submit" className="btn-primary" disabled={uploading}>
-              {uploading ? 'Mengunggah...' : 'Simpan Media'}
+              {uploading ? (
+                <>
+                  <Spinner size={14} /> Mengunggah...
+                </>
+              ) : (
+                'Simpan Media'
+              )}
             </button>
           </div>
         </form>

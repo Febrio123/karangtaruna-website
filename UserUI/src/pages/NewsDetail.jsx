@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+﻿import { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Calendar, User, ChevronRight } from 'lucide-react';
 import DOMPurify from 'dompurify';
@@ -50,7 +50,7 @@ export default function NewsDetail() {
         },
         publisher: {
           '@type': 'Organization',
-          name: 'Karang Taruna Mekar Jaya',
+          name: 'Karang Taruna Mangga Dua Selatan',
           logo: {
             '@type': 'ImageObject',
             url: `${SITE_URL}/favicon.svg`,
@@ -76,7 +76,7 @@ export default function NewsDetail() {
 
   useSeo({
     title: article ? article.title : 'Artikel Tidak Ditemukan',
-    description: article ? article.excerpt : 'Artikel yang Anda cari tidak ditemukan di Karang Taruna Mekar Jaya.',
+    description: article ? article.excerpt : 'Artikel yang Anda cari tidak ditemukan di Karang Taruna Mangga Dua Selatan.',
     path: article ? `/berita/${article.slug}` : '/berita',
     type: 'article',
     noindex: !article,

@@ -20,6 +20,7 @@ import Modal from '../components/ui/Modal.jsx'
 import EmptyState from '../components/ui/EmptyState.jsx'
 import LoadingState from '../components/ui/LoadingState.jsx'
 import InlineNotice from '../components/ui/InlineNotice.jsx'
+import Spinner from '../components/ui/Spinner.jsx'
 import { apiFetch } from '../lib/api'
 import { siteConfigAdapter } from '../lib/adapters.js'
 import { profil as initialProfil, socialLinks as initialSocial, statsProfil, infoUmum as initialInfo } from '../data/profil.js'
@@ -235,7 +236,15 @@ export default function Profil() {
         </div>
         <div className="flex justify-end">
           <button type="submit" className="btn-primary" disabled={saving}>
-            <Save size={17} aria-hidden="true" /> {saving ? 'Menyimpan...' : 'Simpan Profil'}
+            {saving ? (
+              <>
+                <Spinner size={14} /> Menyimpan...
+              </>
+            ) : (
+              <>
+                <Save size={17} aria-hidden="true" /> Simpan Profil
+              </>
+            )}
           </button>
         </div>
       </form>
@@ -287,7 +296,15 @@ export default function Profil() {
         </div>
         <div className="flex justify-end">
           <button type="submit" className="btn-primary" disabled={saving}>
-            <Save size={17} aria-hidden="true" /> {saving ? 'Menyimpan...' : 'Simpan Kontak'}
+            {saving ? (
+              <>
+                <Spinner size={14} /> Menyimpan...
+              </>
+            ) : (
+              <>
+                <Save size={17} aria-hidden="true" /> Simpan Kontak
+              </>
+            )}
           </button>
         </div>
       </form>

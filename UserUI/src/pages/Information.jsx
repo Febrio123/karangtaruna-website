@@ -20,7 +20,7 @@ export default function Information() {
       : staticSiteConfig.information;
   useSeo({
     title: 'Informasi Umum',
-    description: 'Berbagai informasi penting tentang keanggotaan, AD/ART, program kerja, dan layanan masyarakat Karang Taruna Mekar Jaya.',
+    description: 'Berbagai informasi penting tentang keanggotaan, AD/ART, program kerja, dan layanan masyarakat Karang Taruna Mangga Dua Selatan.',
     path: '/informasi',
     jsonLd: [
       {
@@ -43,7 +43,7 @@ export default function Information() {
     <>
       <PageHeader
         title="Informasi Umum"
-        description="Berbagai informasi penting tentang Karang Taruna Mekar Jaya."
+        description="Berbagai informasi penting tentang Karang Taruna Mangga Dua Selatan."
         breadcrumbs={[{ label: 'Informasi' }]}
       />
 

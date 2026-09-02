@@ -1,4 +1,4 @@
-export const galleryCategories = ["Semua", "2026", "2025", "Keagamaan", "Olahraga", "Sosial", "Lingkungan"];
+﻿export const galleryCategories = ["Semua", "2026", "2025", "Keagamaan", "Olahraga", "Sosial", "Lingkungan"];
 
 export const galleryItems = [
   {
@@ -17,7 +17,7 @@ export const galleryItems = [
     category: "Keagamaan",
     year: "2026",
     type: "image",
-    description: "Pembagian 200 bungkus takjil gratis kepada pengguna jalan di perempatan Jl. Raya Mekar Jaya.",
+    description: "Pembagian 200 bungkus takjil gratis kepada pengguna jalan di perempatan Jl. Raya Mangga Dua Selatan.",
     image: null,
     imageAlt: "Anggota Karang Taruna membagikan takjil kepada pengguna jalan",
   },
@@ -27,7 +27,7 @@ export const galleryItems = [
     category: "Olahraga",
     year: "2026",
     type: "image",
-    description: "Pertandingan perdana Turnamen Futsal Piala Karang Taruna antar-RT se-Kelurahan Mekar Jaya.",
+    description: "Pertandingan perdana Turnamen Futsal Piala Karang Taruna antar-RT se-Kelurahan Mangga Dua Selatan.",
     image: null,
     imageAlt: "Pertandingan futsal seru antara tim RT 03 dan RT 07",
   },
@@ -37,7 +37,7 @@ export const galleryItems = [
     category: "Sosial",
     year: "2026",
     type: "image",
-    description: "Pembagian 100 paket sembako kepada warga kurang mampu di Kelurahan Mekar Jaya.",
+    description: "Pembagian 100 paket sembako kepada warga kurang mampu di Kelurahan Mangga Dua Selatan.",
     image: null,
     imageAlt: "Pengurus Karang Taruna menyerahkan paket sembako kepada warga",
   },
@@ -47,7 +47,7 @@ export const galleryItems = [
     category: "Keorganisasian",
     year: "2026",
     type: "image",
-    description: "Musyawarah Besar Karang Taruna Mekar Jaya periode 2026-2028 di Aula Kelurahan.",
+    description: "Musyawarah Besar Karang Taruna Mangga Dua Selatan periode 2026-2028 di Aula Kelurahan.",
     image: null,
     imageAlt: "Suasana Musyawarah Besar Karang Taruna dengan seluruh anggota",
   },

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Menu, Bell, ChevronDown, Search, LogOut } from 'lucide-react'
+import { Menu, ChevronDown, LogOut } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { getInitials } from '../../utils/format.js'
 import { roles } from '../../data/pengurus.js'
@@ -31,26 +31,9 @@ export default function Topbar({ onMenuClick, pageTitle }) {
 
         {/* Page title */}
         <div className="flex-1 min-w-0">
-          <p className="text-overline text-text-muted uppercase hidden sm:block">Karang Taruna Sukamaju</p>
+          <p className="text-overline text-text-muted uppercase hidden sm:block">Karang Taruna Mangga Dua Selatan</p>
           <h1 className="font-heading font-bold text-lg sm:text-h2 truncate">{pageTitle}</h1>
         </div>
-
-        {/* Search (hidden on small) */}
-        <div className="hidden md:flex items-center gap-2 bg-bg rounded-md px-3 border border-transparent focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
-          <Search size={17} className="text-text-muted" aria-hidden="true" />
-          <input
-            type="search"
-            className="bg-transparent py-2 outline-none w-44 text-sm placeholder:text-text-muted"
-            placeholder="Cari..."
-            aria-label="Cari di dashboard"
-          />
-        </div>
-
-        {/* Notification */}
-        <button type="button" className="btn-icon relative" aria-label="Notifikasi">
-          <Bell size={19} />
-          <span className="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-accent" aria-hidden="true" />
-        </button>
 
         {/* User menu + logout */}
         <div className="relative">
@@ -91,7 +74,7 @@ export default function Topbar({ onMenuClick, pageTitle }) {
                 <div className="px-4 py-3 border-b border-border-light">
                   <p className="text-sm font-medium text-text truncate">{displayName}</p>
                   <p className="text-xs text-text-muted mt-0.5 truncate">
-                    {roleLabel} Karang Taruna Sukamaju
+                    {roleLabel} Karang Taruna Mangga Dua Selatan
                   </p>
                 </div>
                 <button

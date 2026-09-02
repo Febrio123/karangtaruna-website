@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
 import Button from '../components/ui/Button';
 import Container from '../components/layout/Container';
 import useSeo from '../hooks/useSeo';
@@ -6,7 +6,7 @@ import useSeo from '../hooks/useSeo';
 export default function NotFound() {
   useSeo({
     title: 'Halaman Tidak Ditemukan',
-    description: 'Halaman yang Anda cari tidak ditemukan di website Karang Taruna Mekar Jaya.',
+    description: 'Halaman yang Anda cari tidak ditemukan di website Karang Taruna Mangga Dua Selatan.',
     path: '/404',
     noindex: true,
   });

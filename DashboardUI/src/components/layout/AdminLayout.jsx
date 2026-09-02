@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, Outlet } from 'react-router-dom'
+import { AnimatePresence, motion, MotionConfig } from 'framer-motion'
 import Sidebar from './Sidebar.jsx'
 import Topbar from './Topbar.jsx'
-import { Outlet } from 'react-router-dom'
 
 const titleMap = {
   '/': 'Dashboard',
@@ -29,7 +29,19 @@ export default function AdminLayout() {
         <Topbar onMenuClick={() => setSidebarOpen(true)} pageTitle={pageTitle} />
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
           <div className="max-w-6xl mx-auto">
-            <Outlet />
+            <MotionConfig reducedMotion="user">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={location.pathname}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.25, ease: 'easeOut' }}
+                >
+                  <Outlet />
+                </motion.div>
+              </AnimatePresence>
+            </MotionConfig>
           </div>
         </main>
       </div>

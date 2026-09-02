@@ -1,4 +1,4 @@
-export const categories = [
+﻿export const categories = [
   "Semua",
   "Keagamaan",
   "Olahraga",
@@ -15,10 +15,10 @@ export const articles = [
     category: "Keagamaan",
     date: "2026-03-15",
     author: "Ahmad Fauzi",
-    excerpt: "Karang Taruna Mekar Jaya menggelar pengajian rutin sepanjang bulan Ramadhan dan membagikan takjil gratis kepada masyarakat sekitar.",
-    content: `<p>Di bulan yang penuh berkah ini, Karang Taruna Mekar Jaya kembali menggelar pengajian rutin yang diadakan setiap hari Jumat dan Sabtu malam di Mushola Al-Ikhlas. Kegiatan ini diikuti oleh lebih dari 80 peserta dari berbagai kalangan usia.</p>
+    excerpt: "Karang Taruna Mangga Dua Selatan menggelar pengajian rutin sepanjang bulan Ramadhan dan membagikan takjil gratis kepada masyarakat sekitar.",
+    content: `<p>Di bulan yang penuh berkah ini, Karang Taruna Mangga Dua Selatan kembali menggelar pengajian rutin yang diadakan setiap hari Jumat dan Sabtu malam di Mushola Al-Ikhlas. Kegiatan ini diikuti oleh lebih dari 80 peserta dari berbagai kalangan usia.</p>
 
-<p>Selain pengajian rutin, kegiatan paling ditunggu adalah pembagian takjil gratis di perempatan Jl. Raya Mekar Jaya. Setiap hari Jumat sore, sekitar 200 bungkus takjil dibagikan kepada pengguna jalan dan pedagang kaki lima.</p>
+<p>Selain pengajian rutin, kegiatan paling ditunggu adalah pembagian takjil gratis di perempatan Jl. Raya Mangga Dua Selatan. Setiap hari Jumat sore, sekitar 200 bungkus takjil dibagikan kepada pengguna jalan dan pedagang kaki lima.</p>
 
 <h3>Kegiatan Berbagi</h3>
 
@@ -39,10 +39,10 @@ export const articles = [
     category: "Olahraga",
     date: "2026-02-20",
     author: "Rizki Pratama",
-    excerpt: "Turnamen futsal antar-RT se-Kelurahan Mekar Jaya resmi dibuka. 16 tim akan berkompetisi memperebutkan piala bergilir Karang Taruna.",
-    content: `<p>Karang Taruna Mekar Jaya resmi membuka Turnamen Futsal Piala Karang Taruna 2026 yang diadakan di Lapangan Futsal Mekar Jaya. Turnamen ini diikuti oleh 16 tim dari berbagai RT se-Kelurahan Mekar Jaya dan sekitarnya.</p>
+    excerpt: "Turnamen futsal antar-RT se-Kelurahan Mangga Dua Selatan resmi dibuka. 16 tim akan berkompetisi memperebutkan piala bergilir Karang Taruna.",
+    content: `<p>Karang Taruna Mangga Dua Selatan resmi membuka Turnamen Futsal Piala Karang Taruna 2026 yang diadakan di Lapangan Futsal Mangga Dua Selatan. Turnamen ini diikuti oleh 16 tim dari berbagai RT se-Kelurahan Mangga Dua Selatan dan sekitarnya.</p>
 
-<p>Pembukaan turnamen dihadiri oleh Lurah Mekar Jaya, perangkat kelurahan, tokoh masyarakat, dan ratusan penonton yang memadati area lapangan. Turnamen ini menjadi ajang silaturahmi sekaligus pengembangan bakat olahraga pemuda di lingkungan.</p>
+<p>Pembukaan turnamen dihadiri oleh Lurah Mangga Dua Selatan, perangkat kelurahan, tokoh masyarakat, dan ratusan penonton yang memadati area lapangan. Turnamen ini menjadi ajang silaturahmi sekaligus pengembangan bakat olahraga pemuda di lingkungan.</p>
 
 <h3>Format Kompetisi</h3>
 
@@ -63,8 +63,8 @@ export const articles = [
     category: "Sosial",
     date: "2026-02-05",
     author: "Siti Nurhaliza",
-    excerpt: "Karang Taruna membagikan 100 paket sembako kepada warga kurang mampu di Kelurahan Mekar Jaya sebagai bentuk kepedulian organisasi.",
-    content: `<p>Sebagai wujud kepedulian terhadap sesama, Karang Taruna Mekar Jaya menggelar bakti sosial pembagian paket sembako kepada warga kurang mampu di Kelurahan Mekar Jaya. Kegiatan ini dilaksanakan di halaman sekretariat Karang Taruna pada hari Sabtu, 5 Februari 2026.</p>
+    excerpt: "Karang Taruna membagikan 100 paket sembako kepada warga kurang mampu di Kelurahan Mangga Dua Selatan sebagai bentuk kepedulian organisasi.",
+    content: `<p>Sebagai wujud kepedulian terhadap sesama, Karang Taruna Mangga Dua Selatan menggelar bakti sosial pembagian paket sembako kepada warga kurang mampu di Kelurahan Mangga Dua Selatan. Kegiatan ini dilaksanakan di halaman sekretariat Karang Taruna pada hari Sabtu, 5 Februari 2026.</p>
 
 <p>Sebanyak 100 paket sembako yang berisi beras, minyak goreng, gula, dan kebutuhan pokok lainnya disalurkan kepada warga yang telah terdata melalui koordinator RT masing-masing. Proses distribusi berjalan lancar dan tertib berkat koordinasi yang baik antar pengurus.</p>
 
@@ -76,7 +76,7 @@ export const articles = [
 
 <h3>Dampak Positif</h3>
 
-<p>Kegiatan bakti sosial ini mendapat sambutan hangat dari warga dan apresiasi dari pemerintah kelurahan. Lurah Mekar Jaya menyampaikan bahwa kegiatan seperti ini perlu dilestarikan dan menjadi contoh bagi organisasi pemuda lainnya.</p>`,
+<p>Kegiatan bakti sosial ini mendapat sambutan hangat dari warga dan apresiasi dari pemerintah kelurahan. Lurah Mangga Dua Selatan menyampaikan bahwa kegiatan seperti ini perlu dilestarikan dan menjadi contoh bagi organisasi pemuda lainnya.</p>`,
     image: null,
     imageAlt: "Pengurus Karang Taruna menyerahkan paket sembako kepada warga",
   },
@@ -87,8 +87,8 @@ export const articles = [
     category: "Keorganisasian",
     date: "2026-01-10",
     author: "Dewi Lestari",
-    excerpt: "Musyawarah Besar Karang Taruna Mekar Jaya berhasil memilih pengurus baru periode 2026-2028 dengan semangat baru dan program kerja yang lebih inovatif.",
-    content: `<p>Musyawarah Besar (Mubes) Karang Taruna Mekar Jaya telah sukses dilaksanakan pada hari Minggu, 10 Januari 2026 di Aula Kelurahan Mekar Jaya. Mubes ini dihadiri oleh seluruh anggota aktif dan membahas laporan pertanggungjawaban pengurus lama sekaligus pemilihan pengurus baru.</p>
+    excerpt: "Musyawarah Besar Karang Taruna Mangga Dua Selatan berhasil memilih pengurus baru periode 2026-2028 dengan semangat baru dan program kerja yang lebih inovatif.",
+    content: `<p>Musyawarah Besar (Mubes) Karang Taruna Mangga Dua Selatan telah sukses dilaksanakan pada hari Minggu, 10 Januari 2026 di Aula Kelurahan Mangga Dua Selatan. Mubes ini dihadiri oleh seluruh anggota aktif dan membahas laporan pertanggungjawaban pengurus lama sekaligus pemilihan pengurus baru.</p>
 
 <p>Budi Santoso terpilih secara aklamasi sebagai ketua periode 2026-2028 didampingi oleh Dian Kartika sebagai wakil ketua, Ratna Sari sebagai sekretaris, dan Hendra Wijaya sebagai bendahara. Struktur kepengurusan baru ini dilengkapi dengan 5 bidang kerja yang lebih terfokus.</p>
 
@@ -100,9 +100,9 @@ export const articles = [
 
 <h3>Harapan ke Depan</h3>
 
-<p>Ketua terpilih menyampaikan visinya untuk menjadikan Karang Taruna Mekar Jaya sebagai organisasi yang lebih profesional, transparan, dan berdampak nyata bagi masyarakat. "Kami akan bekerja lebih keras dan lebih cerdas untuk memenuhi harapan seluruh anggota dan masyarakat," tegasnya.</p>`,
+<p>Ketua terpilih menyampaikan visinya untuk menjadikan Karang Taruna Mangga Dua Selatan sebagai organisasi yang lebih profesional, transparan, dan berdampak nyata bagi masyarakat. "Kami akan bekerja lebih keras dan lebih cerdas untuk memenuhi harapan seluruh anggota dan masyarakat," tegasnya.</p>`,
     image: null,
-    imageAlt: "Suasana Musyawarah Besar Karang Taruna Mekar Jaya",
+    imageAlt: "Suasana Musyawarah Besar Karang Taruna Mangga Dua Selatan",
   },
   {
     id: 5,
@@ -112,7 +112,7 @@ export const articles = [
     date: "2025-12-15",
     author: "Rizki Pratama",
     excerpt: "Karang Taruna berhasil menanam 500 pohon tambahan dalam program Seribu Pohon untuk menjaga kelestarian lingkungan desa.",
-    content: `<p>Program Seribu Pohon yang diluncurkan oleh Karang Taruna Mekar Jaya terus menunjukkan kemajuan positif. Dalam tahun 2025, sebanyak 500 pohon tambahan telah ditanam di sepanjang jalan desa, area publik, dan lahan kosong milik warga.</p>
+    content: `<p>Program Seribu Pohon yang diluncurkan oleh Karang Taruna Mangga Dua Selatan terus menunjukkan kemajuan positif. Dalam tahun 2025, sebanyak 500 pohon tambahan telah ditanam di sepanjang jalan desa, area publik, dan lahan kosong milik warga.</p>
 
 <p>Jenis pohon yang ditanam meliputi pohon buah-buahan seperti mangga, jambu, dan kelengkeng, serta pohon pelindung seperti ketapang kencana dan trembesi. Setiap pohon dipasangi nama penanam dan tanggal penanaman sebagai bentuk dokumentasi.</p>
 
@@ -136,7 +136,7 @@ export const articles = [
     date: "2025-11-20",
     author: "Siti Nurhaliza",
     excerpt: "Program bimbingan belajar gratis untuk anak-anak usia dini yang dikelola Karang Taruna kini melayani 50 peserta aktif dari berbagai RT.",
-    content: `<p>Program bimbingan belajar gratis yang dikelola oleh Karang Taruna Mekar Jaya terus menunjukkan peningkatan yang signifikan. Saat ini, program ini melayani 50 peserta aktif anak-anak usia 6-12 tahun dari berbagai RT di Kelurahan Mekar Jaya.</p>
+    content: `<p>Program bimbingan belajar gratis yang dikelola oleh Karang Taruna Mangga Dua Selatan terus menunjukkan peningkatan yang signifikan. Saat ini, program ini melayani 50 peserta aktif anak-anak usia 6-12 tahun dari berbagai RT di Kelurahan Mangga Dua Selatan.</p>
 
 <p>Kegiatan bimbingan belajar diadakan setiap hari Senin dan Rabu pukul 15:00-17:00 WIB di sekretariat Karang Taruna. Materi yang diajarkan meliputi pelajaran sekolah dasar, membaca, menulis, dan berhitung, serta kegiatan kreatif seperti menggambar dan kerajinan tangan.</p>
 

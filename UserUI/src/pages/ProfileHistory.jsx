@@ -1,4 +1,4 @@
-import PageHeader from '../components/layout/PageHeader';
+﻿import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
 import TimelineItem from '../components/content/TimelineItem';
 import useSiteConfig from '../hooks/useSiteConfig';
@@ -8,7 +8,7 @@ export default function ProfileHistory() {
   const { data: siteConfig } = useSiteConfig();
   useSeo({
     title: 'Sejarah',
-    description: 'Perjalanan Karang Taruna Mekar Jaya dari awal berdiri pada tahun 2018 hingga saat ini. Organisasi pemuda yang terus berkembang.',
+    description: 'Perjalanan Karang Taruna Mangga Dua Selatan dari awal berdiri pada tahun 2018 hingga saat ini. Organisasi pemuda yang terus berkembang.',
     path: '/profil/sejarah',
     jsonLd: [
       {
@@ -26,7 +26,7 @@ export default function ProfileHistory() {
     <>
       <PageHeader
         title="Sejarah Karang Taruna"
-        description="Perjalanan Karang Taruna Mekar Jaya dari awal berdiri hingga saat ini."
+        description="Perjalanan Karang Taruna Mangga Dua Selatan dari awal berdiri hingga saat ini."
         breadcrumbs={[
           { label: 'Profil', href: '/profil' },
           { label: 'Sejarah' },
@@ -43,6 +43,7 @@ export default function ProfileHistory() {
             {siteConfig.history.timeline.map((item, index) => (
               <TimelineItem
                 key={index}
+                index={index}
                 item={item}
                 isLast={index === siteConfig.history.timeline.length - 1}
               />

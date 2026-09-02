@@ -1,14 +1,13 @@
 export const siteConfig = {
-  name: "Karang Taruna Mekar Jaya",
-  shortName: "KT Mekar Jaya",
+  name: "Karang Taruna Mangga Dua Selatan",
+  shortName: "KT Mangga Dua Selatan",
   tagline: "Membangun generasi muda yang aktif, kreatif, dan bertanggung jawab.",
-  address: "Jl. Raya Mekar Jaya No. 12, Kel. Mekar Jaya, Kec. Sukmajaya, Kota Depok, Jawa Barat 16411",
+  address: "Jl. Raya Mangga Dua Selatan No. 12, Kel. Mangga Dua Selatan, Kec. Sukmajaya, Kota Depok, Jawa Barat 16411",
   phone: "0812-3456-7890",
   email: "kt.mekarjaya@gmail.com",
   operatingHours: "Senin - Jumat, 08:00 - 17:00 WIB",
   socialMedia: {
-    instagram: "https://instagram.com/kt.mekarjaya",
-    facebook: "https://facebook.com/kt.mekarjaya",
+    instagram: "https://instagram.com/katar010.mds",
   },
   map: {
     lat: -6.4025,
@@ -29,12 +28,12 @@ export const siteConfig = {
     "Mendorong partisipasi aktif pemuda dalam pembangunan desa yang inklusif dan berkelanjutan.",
   ],
   history: {
-    summary: "Karang Taruna Mekar Jaya didirikan pada tahun 2018 oleh sekelompok pemuda pemudi yang memiliki semangat tinggi untuk berkontribusi bagi kemajuan desa. Bermula dari kegiatan sederhana seperti kerja bakti dan pengajian rutin, organisasi ini terus berkembang menjadi wadah pengembangan diri pemuda yang diakui oleh masyarakat.",
+    summary: "Karang Taruna Mangga Dua Selatan didirikan pada tahun 2018 oleh sekelompok pemuda pemudi yang memiliki semangat tinggi untuk berkontribusi bagi kemajuan desa. Bermula dari kegiatan sederhana seperti kerja bakti dan pengajian rutin, organisasi ini terus berkembang menjadi wadah pengembangan diri pemuda yang diakui oleh masyarakat.",
     timeline: [
       {
         year: "2018",
         title: "Pendirian Karang Taruna",
-        description: "Karang Taruna Mekar Jaya resmi didirikan dengan 30 anggota pendiri. Kegiatan pertama berupa kerja bakti membersihkan lingkungan dan pengajian mingguan di mushola desa."
+        description: "Karang Taruna Mangga Dua Selatan resmi didirikan dengan 30 anggota pendiri. Kegiatan pertama berupa kerja bakti membersihkan lingkungan dan pengajian mingguan di mushola desa."
       },
       {
         year: "2019",
@@ -78,10 +77,10 @@ export const siteConfig = {
       id: "keanggotaan",
       title: "Keanggotaan",
       icon: "Users",
-      description: "Informasi tentang tata cara menjadi anggota, syarat, dan manfaat keanggotaan Karang Taruna Mekar Jaya.",
-      content: "Setiap pemuda pemudi usia 15-30 tahun yang bertempat tinggal di Kelurahan Mekar Jaya dapat menjadi anggota Karang Taruna. Pendaftaran dapat dilakukan secara langsung di sekretariat atau melalui koordinator RT masing-masing. Setiap anggota berhak mengikuti seluruh kegiatan, memberikan masukan, dan ikut serta dalam proses pengambilan keputusan organisasi. Iuran anggota sebesar Rp 10.000 per bulan yang digunakan untuk operasional kegiatan.",
+      description: "Informasi tentang tata cara menjadi anggota, syarat, dan manfaat keanggotaan Karang Taruna Mangga Dua Selatan.",
+      content: "Setiap pemuda pemudi usia 15-30 tahun yang bertempat tinggal di Kelurahan Mangga Dua Selatan dapat menjadi anggota Karang Taruna. Pendaftaran dapat dilakukan secara langsung di sekretariat atau melalui koordinator RT masing-masing. Setiap anggota berhak mengikuti seluruh kegiatan, memberikan masukan, dan ikut serta dalam proses pengambilan keputusan organisasi. Iuran anggota sebesar Rp 10.000 per bulan yang digunakan untuk operasional kegiatan.",
       requirements: [
-        "Warga Kelurahan Mekar Jaya berusia 15-30 tahun",
+        "Warga Kelurahan Mangga Dua Selatan berusia 15-30 tahun",
         "Mengisi formulir pendaftaran",
         "Membayar iuran bulanan sebesar Rp 10.000",
         "Berkomitmen mengikuti kegiatan minimal 1 kali per bulan",
@@ -92,7 +91,7 @@ export const siteConfig = {
       title: "AD/ART & Regulasi",
       icon: "FileText",
       description: "Anggaran Dasar dan Anggaran Rumah Tangga organisasi sebagai pedoman pelaksanaan kegiatan.",
-      content: "AD/ART Karang Taruna Mekar Jaya disusun berdasarkan AD/ART Karang Taruna Nasional yang telah disahkan oleh Kementerian Sosial RI. Dokumen ini menjadi pedukan utama dalam setiap aspek pengelolaan organisasi.",
+      content: "AD/ART Karang Taruna Mangga Dua Selatan disusun berdasarkan AD/ART Karang Taruna Nasional yang telah disahkan oleh Kementerian Sosial RI. Dokumen ini menjadi pedukan utama dalam setiap aspek pengelolaan organisasi.",
       articles: [
         "Pasal 1: Ketentuan Umum",
         "Pasal 2: Hak dan Kewajiban Anggota",
@@ -122,7 +121,7 @@ export const siteConfig = {
       title: "Layanan Masyarakat",
       icon: "Phone",
       description: "Program layanan untuk masyarakat sekitar yang dikelola oleh Karang Taruna.",
-      content: "Karang Taruna Mekar Jaya menyediakan berbagai layanan untuk masyarakat sekitar, termasuk bimbingan belajar anak, bakti sosial, dan posko relawan. Layanan ini terbuka untuk seluruh warga Kelurahan Mekar Jaya.",
+      content: "Karang Taruna Mangga Dua Selatan menyediakan berbagai layanan untuk masyarakat sekitar, termasuk bimbingan belajar anak, bakti sosial, dan posko relawan. Layanan ini terbuka untuk seluruh warga Kelurahan Mangga Dua Selatan.",
       services: [
         { name: "Bimbingan Belajar Anak Usia Dini", location: "Sekretariat KT", schedule: "Senin & Rabu, 15:00-17:00" },
         { name: "Bank Sampah", location: "Halaman Mushola", schedule: "Sabtu, 08:00-11:00" },
