@@ -1,4 +1,5 @@
-﻿import PageHeader from '../components/layout/PageHeader';
+﻿import heroImg from '../assets/hero3.jpg';
+import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
 import TimelineItem from '../components/content/TimelineItem';
 import useSiteConfig from '../hooks/useSiteConfig';
@@ -31,6 +32,7 @@ export default function ProfileHistory() {
           { label: 'Profil', href: '/profil' },
           { label: 'Sejarah' },
         ]}
+        image={heroImg}
       />
 
       <Section>

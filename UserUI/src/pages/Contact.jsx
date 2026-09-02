@@ -1,4 +1,5 @@
 import { Mail, Phone, MapPin, Clock, ExternalLink, Music2 } from 'lucide-react';
+import heroImg from '../assets/hero2.png';
 import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
 import Card from '../components/ui/Card';
@@ -60,6 +61,7 @@ export default function Contact() {
         title="Hubungi Kami"
         description="Kami siap mendengar dari Anda."
         breadcrumbs={[{ label: 'Kontak' }]}
+        image={heroImg}
       />
 
       <Section>

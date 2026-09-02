@@ -1,8 +1,10 @@
 ﻿import { useState, useMemo } from 'react';
+import heroImg from '../assets/hero7.jpg';
 import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
 import GalleryItem from '../components/content/GalleryItem';
 import CategoryFilter from '../components/ui/CategoryFilter';
+import EmptyState from '../components/ui/EmptyState';
 import Lightbox from '../components/special/Lightbox';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import ErrorBanner from '../components/ui/ErrorBanner';
@@ -49,6 +51,7 @@ export default function Gallery() {
         title="Galeri Kegiatan"
         description="Dokumentasi foto dan video kegiatan Karang Taruna Mangga Dua Selatan."
         breadcrumbs={[{ label: 'Galeri' }]}
+        image={heroImg}
       />
 
       <Section>
@@ -62,11 +65,10 @@ export default function Gallery() {
         {loading ? (
           <LoadingSpinner label="Memuat galeri..." />
         ) : filteredItems.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="font-body text-body-lg text-text-muted">
-              Tidak ada item galeri dalam kategori ini.
-            </p>
-          </div>
+          <EmptyState
+            title="Belum ada galeri"
+            description="Belum ada foto atau video pada kategori ini."
+          />
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {filteredItems.map((item, i) => (

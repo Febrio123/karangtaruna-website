@@ -1,9 +1,11 @@
 ﻿import { useState } from 'react';
 import { clsx } from 'clsx';
 import { Users, FileText, Calendar, Phone, ChevronRight, ChevronDown } from 'lucide-react';
+import heroImg from '../assets/hero1.png';
 import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
 import Card from '../components/ui/Card';
+import EmptyState from '../components/ui/EmptyState';
 import useSiteConfig from '../hooks/useSiteConfig';
 import { siteConfig as staticSiteConfig } from '../data/siteConfig';
 import useSeo from '../hooks/useSeo';
@@ -45,9 +47,16 @@ export default function Information() {
         title="Informasi Umum"
         description="Berbagai informasi penting tentang Karang Taruna Mangga Dua Selatan."
         breadcrumbs={[{ label: 'Informasi' }]}
+        image={heroImg}
       />
 
       <Section>
+        {information.length === 0 ? (
+          <EmptyState
+            title="Belum ada informasi"
+            description="Belum ada informasi yang dapat ditampilkan saat ini."
+          />
+        ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {information.map((info) => {
             const Icon = iconMap[info.icon] || FileText;
@@ -181,6 +190,7 @@ export default function Information() {
             );
           })}
         </div>
+        )}
       </Section>
     </>
   );

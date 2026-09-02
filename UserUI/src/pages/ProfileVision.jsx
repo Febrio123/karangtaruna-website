@@ -1,4 +1,5 @@
-﻿import PageHeader from '../components/layout/PageHeader';
+﻿import heroImg from '../assets/hero4.jpg';
+import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
 import Card from '../components/ui/Card';
 import useSiteConfig from '../hooks/useSiteConfig';
@@ -31,6 +32,7 @@ export default function ProfileVision() {
           { label: 'Profil', href: '/profil' },
           { label: 'Visi & Misi' },
         ]}
+        image={heroImg}
       />
 
       <Section>

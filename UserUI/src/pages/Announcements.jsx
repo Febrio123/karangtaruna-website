@@ -1,8 +1,10 @@
 ﻿import { useState, useMemo } from 'react';
+import heroImg from '../assets/hero8.jpg';
 import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
 import EventCard from '../components/content/EventCard';
 import CategoryFilter from '../components/ui/CategoryFilter';
+import EmptyState from '../components/ui/EmptyState';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import ErrorBanner from '../components/ui/ErrorBanner';
 import useApiData from '../hooks/useApiData';
@@ -49,6 +51,7 @@ export default function Announcements() {
         title="Pengumuman & Event"
         description="Informasi pengumuman dan jadwal kegiatan Karang Taruna Mangga Dua Selatan."
         breadcrumbs={[{ label: 'Pengumuman' }]}
+        image={heroImg}
       />
 
       <Section>
@@ -63,11 +66,10 @@ export default function Announcements() {
           {loading ? (
             <LoadingSpinner label="Memuat pengumuman..." />
           ) : filteredEvents.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="font-body text-body-lg text-text-muted">
-                Tidak ada pengumuman dalam kategori ini.
-              </p>
-            </div>
+            <EmptyState
+              title="Belum ada pengumuman"
+              description="Belum ada pengumuman atau event pada kategori ini."
+            />
           ) : (
             filteredEvents.map((event, i) => (
               <EventCard key={event.id} index={i} event={event} />

@@ -1,4 +1,5 @@
 ﻿import { User } from 'lucide-react';
+import heroImg from '../assets/hero5.jpg';
 import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
 import OrgChart from '../components/special/OrgChart';
@@ -16,7 +17,11 @@ export default function ProfileStructure() {
     fallback: staticTeam,
     adapter: adaptTeamList,
   });
-  const periode = teamMembers[0]?.period ?? '2025-2027';
+  // Defensif: `data` bisa null saat render pertama (sebelum fetch selesai)
+  // atau saat API gagal/fallback non-array. Jangan pernah memanggil
+  // `teamMembers.map` / `teamMembers[0]` langsung.
+  const members = Array.isArray(teamMembers) ? teamMembers : [];
+  const periode = members.length ? (members[0]?.period ?? '2025-2027') : '2025-2027';
   useSeo({
     title: 'Struktur Organisasi',
     description: `Susunan pengurus Karang Taruna Mangga Dua Selatan periode ${periode} beserta struktur organisasi dan pembagian bidang.`,
@@ -42,6 +47,7 @@ export default function ProfileStructure() {
           { label: 'Profil', href: '/profil' },
           { label: 'Struktur Organisasi' },
         ]}
+        image={heroImg}
       />
 
       {/* Org Chart */}
@@ -56,6 +62,12 @@ export default function ProfileStructure() {
         {error && <ErrorBanner message={error} onRetry={retry} className="mb-4" />}
         {loading ? (
           <LoadingSpinner label="Memuat daftar pengurus..." />
+        ) : members.length === 0 ? (
+          <div className="rounded-md border border-dashed border-border bg-bg px-6 py-10 text-center">
+            <p className="font-body text-body-base text-text-secondary">
+              Belum ada data pengurus / struktur organisasi.
+            </p>
+          </div>
         ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-left">
@@ -76,7 +88,7 @@ export default function ProfileStructure() {
               </tr>
             </thead>
             <tbody>
-              {teamMembers.map((member) => (
+              {members.map((member) => (
                 <tr
                   key={member.id}
                   className="border-b border-border-light hover:bg-bg transition-colors duration-150"

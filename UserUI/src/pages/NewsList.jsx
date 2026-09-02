@@ -1,8 +1,10 @@
 ﻿import { useState, useMemo } from 'react';
+import heroImg from '../assets/hero6.jpg';
 import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
 import ArticleCard from '../components/content/ArticleCard';
 import CategoryFilter from '../components/ui/CategoryFilter';
+import EmptyState from '../components/ui/EmptyState';
 import Pagination from '../components/ui/Pagination';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import ErrorBanner from '../components/ui/ErrorBanner';
@@ -62,6 +64,7 @@ export default function NewsList() {
         title="Berita & Kegiatan"
         description="Informasi terbaru seputar kegiatan Karang Taruna Mangga Dua Selatan."
         breadcrumbs={[{ label: 'Berita' }]}
+        image={heroImg}
       />
 
       <Section>
@@ -75,11 +78,10 @@ export default function NewsList() {
         {loading ? (
           <LoadingSpinner label="Memuat berita..." />
         ) : paginatedArticles.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="font-body text-body-lg text-text-muted">
-              Tidak ada berita dalam kategori ini.
-            </p>
-          </div>
+          <EmptyState
+            title="Belum ada berita"
+            description="Belum ada artikel atau kegiatan yang dipublikasikan saat ini."
+          />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {paginatedArticles.map((article, i) => (

@@ -1,12 +1,14 @@
 ﻿import { useState, useRef, useEffect, useMemo } from 'react';
 import { clsx } from 'clsx';
 import { ChevronDown } from 'lucide-react';
+import heroImg from '../assets/hero1.png';
 import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
 import BudgetSummary from '../components/special/BudgetSummary';
 import BudgetTable from '../components/content/BudgetTable';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import ErrorBanner from '../components/ui/ErrorBanner';
+import EmptyState from '../components/ui/EmptyState';
 import useApiData from '../hooks/useApiData';
 import { adaptBudgetSummaryRaw, adaptTransaksiToBudget } from '../lib/adapters';
 import { budgetData as staticBudget } from '../data/budget';
@@ -158,6 +160,7 @@ export default function Budget() {
         title="Transparansi Keuangan"
         description="Laporan pemasukan dan pengeluaran kas organisasi."
         breadcrumbs={[{ label: 'Anggaran' }]}
+        image={heroImg}
       />
 
       <Section>
@@ -274,7 +277,19 @@ export default function Budget() {
             {/* Table */}
             <div className="bg-surface rounded-md border border-border-light overflow-hidden">
               {activeTab === 'income' ? (
-                <BudgetTable data={yearData.income} type="income" />
+                yearData.income.length === 0 ? (
+                  <EmptyState
+                    title="Belum ada transaksi"
+                    description={`Belum ada data transaksi untuk tahun ${selectedYear}.`}
+                  />
+                ) : (
+                  <BudgetTable data={yearData.income} type="income" />
+                )
+              ) : yearData.expenses.length === 0 ? (
+                <EmptyState
+                  title="Belum ada transaksi"
+                  description={`Belum ada data transaksi untuk tahun ${selectedYear}.`}
+                />
               ) : (
                 <BudgetTable data={yearData.expenses} type="expense" />
               )}

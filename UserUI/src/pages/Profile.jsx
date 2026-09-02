@@ -1,5 +1,6 @@
 ﻿import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
+import heroImg from '../assets/hero2.png';
 import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
 import TimelineItem from '../components/content/TimelineItem';
@@ -30,6 +31,7 @@ export default function Profile() {
         title="Tentang Karang Taruna"
         description="Mengenal lebih dekat organisasi pemuda di Kelurahan Mangga Dua Selatan."
         breadcrumbs={[{ label: 'Profil' }]}
+        image={heroImg}
       />
 
       {/* Sejarah Ringkas */}
