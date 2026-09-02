@@ -1,11 +1,11 @@
 # robots.txt — Karang Taruna Mangga Dua Selatan
-# https://kt-mangga-dua-selatan.vercel.app/robots.txt
+# https://karangtaruna-website.vercel.app/robots.txt
 
 User-agent: *
 Allow: /
 
-# Disallow non-public routes (if any are added in the future)
+# Disallow non-public routes / API endpoints
 Disallow: /api/
 
 # Sitemaps
-Sitemap: https://kt-mangga-dua-selatan.vercel.app/sitemap.xml
+Sitemap: https://karangtaruna-website.vercel.app/sitemap.xml
