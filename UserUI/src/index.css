@@ -85,3 +85,99 @@ h1, h2, h3, h4, h5, h6 {
 .lightbox-content {
   animation: lightboxScaleIn 200ms ease-out;
 }
+
+/* ==========================================================================
+   LocationMap — Leaflet custom marker, popup & tooltip
+   ========================================================================== */
+
+/* Leaflet container must fill its parent wrapper */
+.leaflet-container {
+  height: 100% !important;
+  width: 100% !important;
+  background-color: #EDECEA;
+}
+
+/* Reset Leaflet default icon class */
+.location-map-marker-icon {
+  background: none !important;
+  border: none !important;
+}
+
+/* Wrapper — relative + absolute fill, lalu inner div tanpa ukuran default */
+.location-map-marker {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Dot utama — lingkaran solid */
+.location-map-marker-dot {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background-color: #1B5E3B;
+  border: 2.5px solid #FFFFFF;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  z-index: 2;
+}
+
+/* Pulse ring — animasi ping */
+.location-map-marker-pulse {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(27, 94, 59, 0.25);
+  border-radius: 50%;
+  animation: mapMarkerPing 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  z-index: 1;
+}
+
+@keyframes mapMarkerPing {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.8;
+  }
+  75%,
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+/* Popup custom — sesuai desain system */
+.location-map-popup .leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  padding: 0;
+}
+
+.location-map-popup .leaflet-popup-content {
+  margin: 12px 14px;
+  line-height: 1.5;
+}
+
+.location-map-popup .leaflet-popup-tip {
+  background-color: #FFFFFF;
+  box-shadow: none;
+}
+
+/* Tooltip custom */
+.location-map-tooltip {
+  background-color: #1A1A1A !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  border-radius: 6px !important;
+  font-family: 'Work Sans', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  padding: 6px 10px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+}
+
+.location-map-tooltip::before {
+  border-top-color: #1A1A1A !important;
+}
