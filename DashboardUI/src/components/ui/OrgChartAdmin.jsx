@@ -5,7 +5,7 @@
 // Struktur 3 level:
 //   Level 1 : Ketua
 //   Level 2 : Wakil Ketua, Sekretaris, Bendahara
-//   Level 3 : Koordinator Bidang (satu kartu per bidang unik)
+//   Level 3 : Bidang — satu kartu per bidang, menampilkan semua anggota
 
 import { Crown, Users, User } from 'lucide-react'
 import Badge from './Badge.jsx'
@@ -57,16 +57,22 @@ function NodeCard({ pengurus, accent = 'primary', icon: Icon }) {
   )
 }
 
-function BidangCard({ nama, koordinator }) {
+function BidangCard({ nama, members = [] }) {
   return (
     <div className="flex flex-col items-center text-center">
       <div className="w-14 h-14 rounded-full bg-primary-light border border-primary/20 flex items-center justify-center mb-2">
         <Users size={22} className="text-primary" aria-hidden="true" />
       </div>
       <p className="font-heading font-semibold text-xs text-text leading-tight">{nama}</p>
-      <p className="font-body text-[11px] text-text-muted mt-0.5">
-        Koordinator: <span className="font-medium text-text-secondary">{koordinator || '-'}</span>
-      </p>
+      <div className="text-[11px] text-text-muted mt-1 space-y-0.5">
+        {members.length > 0 ? (
+          members.map((name) => (
+            <p key={name} className="font-medium text-text-secondary">{name}</p>
+          ))
+        ) : (
+          <p className="text-text-muted">—</p>
+        )}
+      </div>
     </div>
   )
 }
@@ -80,12 +86,12 @@ export default function OrgChartAdmin({ pengurus = [] }) {
   const inti = intiRoles.map((role) => pengurus.find((p) => p.role === role))
 
   // Level 3 — Satu kartu per bidang (bidangList sebagai referensi),
-  // koordinator = pengurus role 'anggota' dengan bidang yang cocok.
+  // members = semua pengurus role 'anggota' dengan bidang yang cocok.
   const level3 = bidangList.map((bidang) => ({
     nama: bidang,
-    koordinator: pengurus.find(
-      (p) => p.role === 'anggota' && p.bidang === bidang
-    )?.nama,
+    members: pengurus
+      .filter((p) => p.role === 'anggota' && p.bidang === bidang)
+      .map((p) => p.nama),
   }))
 
   return (
@@ -118,7 +124,7 @@ export default function OrgChartAdmin({ pengurus = [] }) {
           <div className="absolute top-0 left-[7.14%] right-[7.14%] h-0.5 bg-border" />
           <div className="flex justify-between gap-2 px-1 pt-5">
             {level3.map((b) => (
-              <BidangCard key={b.nama} nama={b.nama} koordinator={b.koordinator} />
+              <BidangCard key={b.nama} nama={b.nama} members={b.members} />
             ))}
           </div>
         </div>
