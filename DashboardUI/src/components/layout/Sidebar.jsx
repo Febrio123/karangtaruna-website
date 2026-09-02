@@ -9,8 +9,8 @@ import {
   TrendingUp,
   Info,
   X,
-  TreeDeciduous,
 } from 'lucide-react'
+import logoImg from '../../assets/logo.png'
 
 const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -28,9 +28,7 @@ function SidebarContent({ onNavigate }) {
     <div className="flex flex-col h-full">
       {/* Brand */}
       <div className="flex items-center gap-3 px-5 pt-6 pb-7">
-        <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white shrink-0">
-          <TreeDeciduous size={22} strokeWidth={1.6} aria-hidden="true" />
-        </div>
+        <img src={logoImg} alt="Logo Karang Taruna" className="w-10 h-10 rounded-lg object-cover shrink-0" />
         <div className="leading-tight min-w-0">
           <p className="text-white font-heading font-bold text-base whitespace-nowrap">KT Mangga Dua Selatan</p>
           <p className="text-white/60 text-xs font-body tracking-wide">Kelola Website</p>

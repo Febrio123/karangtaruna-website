@@ -1,9 +1,33 @@
 import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, ExternalLink } from 'lucide-react';
+import { Mail, Phone, MapPin, ExternalLink, Music2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Container from './Container';
 import useSiteConfig from '../../hooks/useSiteConfig';
 import logoImg from '../../assets/logo karang taruna.jpg';
+
+// Brand icons (Instagram/Facebook/YouTube) tidak lagi tersedia di lucide-react
+// versi terbaru, jadi didefinisikan sebagai icon SVG khusus agar tetap dinamis.
+const Instagram = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+  </svg>
+);
+const Facebook = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+  </svg>
+);
+const Youtube = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+    <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" />
+    <path d="m10 15 5-3-5-3z" />
+  </svg>
+);
+
+const socialIcon = { Instagram, TikTok: Music2, Facebook, Youtube };
+const socialLabel = { instagram: 'Instagram', tiktok: 'TikTok', facebook: 'Facebook', youtube: 'YouTube' };
 
 const footerLinks = [
   { label: 'Profil', href: '/profil' },
@@ -50,15 +74,17 @@ export default function Footer() {
                   <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-text-muted" />
                   <span>{siteConfig.address}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 shrink-0 text-text-muted" />
-                  <a
-                    href={`tel:${siteConfig.phone.replace(/-/g, '')}`}
-                    className="hover:text-primary transition-colors duration-150"
-                  >
-                    {siteConfig.phone}
-                  </a>
-                </div>
+                {siteConfig.phone && (
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-4 h-4 shrink-0 text-text-muted" />
+                    <a
+                      href={`tel:${siteConfig.phone.replace(/-/g, '')}`}
+                      className="hover:text-primary transition-colors duration-150"
+                    >
+                      {siteConfig.phone}
+                    </a>
+                  </div>
+                )}
                 <div className="flex items-center gap-2">
                   <Mail className="w-4 h-4 shrink-0 text-text-muted" />
                   <a
@@ -98,17 +124,24 @@ export default function Footer() {
                 Media Sosial
               </h3>
               <div className="flex flex-col gap-2">
-                {siteConfig.socialMedia.instagram && (
-                  <a
-                    href={siteConfig.socialMedia.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-body text-body-base text-text-secondary hover:text-primary transition-colors duration-150 inline-flex items-center gap-2"
-                  >
-                    Instagram
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                )}
+                {Object.entries(siteConfig.socialMedia)
+                  .filter(([, url]) => url)
+                  .map(([key, url]) => {
+                    const Icon = socialIcon[key.charAt(0).toUpperCase() + key.slice(1)] || ExternalLink;
+                    return (
+                      <a
+                        key={key}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-body text-body-base text-text-secondary hover:text-primary transition-colors duration-150 inline-flex items-center gap-2"
+                      >
+                        <Icon className="w-4 h-4" />
+                        {socialLabel[key] || key}
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    );
+                  })}
               </div>
             </div>
           </div>

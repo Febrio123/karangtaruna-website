@@ -8,13 +8,13 @@ import {
   EyeOff,
   LogIn,
   Loader2,
-  TreeDeciduous,
   ShieldCheck,
   Wallet,
   CalendarDays,
   Users,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
+import logoImg from '../assets/logo.png'
 
 const benefits = [
   { icon: ShieldCheck, text: 'Akses aman & terbatas untuk pengurus organisasi' },
@@ -84,9 +84,7 @@ export default function Login() {
 
         {/* Brand */}
         <div className="relative flex items-center gap-3">
-          <div className="w-11 h-11 rounded-lg bg-primary flex items-center justify-center text-white shrink-0 shadow-lg">
-            <TreeDeciduous size={24} strokeWidth={1.6} aria-hidden="true" />
-          </div>
+          <img src={logoImg} alt="Logo Karang Taruna" className="w-11 h-11 rounded-lg object-cover shrink-0 shadow-lg" />
           <div className="leading-tight">
             <p className="text-white font-heading font-bold text-lg">Karang Taruna Mangga Dua Selatan</p>
             <p className="text-white/50 text-xs tracking-wide">Dashboard Pengelolaan</p>
@@ -122,9 +120,7 @@ export default function Login() {
         <div className="w-full max-w-md">
           {/* Brand mobile */}
           <div className="lg:hidden flex items-center gap-3 mb-8">
-            <div className="w-11 h-11 rounded-lg bg-primary flex items-center justify-center text-white shrink-0">
-              <TreeDeciduous size={24} strokeWidth={1.6} aria-hidden="true" />
-            </div>
+            <img src={logoImg} alt="Logo Karang Taruna" className="w-11 h-11 rounded-lg object-cover shrink-0" />
             <div className="leading-tight">
               <p className="font-heading font-bold text-text">Karang Taruna Mangga Dua Selatan</p>
               <p className="text-xs text-text-muted">Dashboard Pengelolaan</p>

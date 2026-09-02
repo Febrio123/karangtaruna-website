@@ -3,6 +3,7 @@ import { Menu, ChevronDown, LogOut } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { getInitials } from '../../utils/format.js'
 import { roles } from '../../data/pengurus.js'
+import logoImg from '../../assets/logo.png'
 
 export default function Topbar({ onMenuClick, pageTitle }) {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -31,7 +32,10 @@ export default function Topbar({ onMenuClick, pageTitle }) {
 
         {/* Page title */}
         <div className="flex-1 min-w-0">
-          <p className="text-overline text-text-muted uppercase hidden sm:block">Karang Taruna Mangga Dua Selatan</p>
+          <div className="items-center gap-2 hidden sm:flex">
+            <img src={logoImg} alt="Logo Karang Taruna" className="w-7 h-7 rounded-full object-cover shrink-0" />
+            <p className="text-overline text-text-muted uppercase">Karang Taruna Mangga Dua Selatan</p>
+          </div>
           <h1 className="font-heading font-bold text-lg sm:text-h2 truncate">{pageTitle}</h1>
         </div>
 
