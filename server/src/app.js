@@ -19,35 +19,58 @@ const app = express();
 // --- trust proxy (rate-limit butuh IP yang benar di belakang reverse proxy) ---
 app.set('trust proxy', 1);
 
-// --- CORS: daftar origin dari env (koma) ---
-// Di production, CORS_ORIGIN WAJIB diisi (fail-closed); tanpa daftar origin,
-// default development mengizinkan semua (untuk convenience lokal saja).
-const origins = (process.env.CORS_ORIGIN || '')
+// ============================================================================
+// CORS Configuration
+// ============================================================================
+const defaultOrigins = [
+  'https://karangtaruna-website-dashboard.vercel.app',
+  'https://karangtaruna-website.vercel.app',
+];
+
+const envOrigins = (process.env.CORS_ORIGIN || '')
   .split(',')
   .map((o) => o.trim())
   .filter(Boolean);
 
+const allowedOrigins = [...new Set([...defaultOrigins, ...envOrigins])];
+
 const corsOptions = {
   origin(origin, cb) {
-    if (!origin) return cb(null, true); // non-browser / curl
-    if (origins.length === 0) {
-      // CORS_ORIGIN belum diset di env → izinkan semua (dev mode / Vercel tanpa env)
+    // Izinkan non-browser request (Postman, curl, server-to-server)
+    if (!origin) return cb(null, true);
+
+    // Izinkan origin yang terdaftar
+    if (allowedOrigins.includes(origin)) {
       return cb(null, true);
     }
-    if (origins.includes(origin)) return cb(null, true);
-    // Error CORS diteruskan ke errorHandler terpusat (menjadi 403).
-    const e = new Error('Origin tidak diizinkan oleh kebijakan CORS.');
-    e.statusCode = 403;
-    return cb(e);
+
+    // Izinkan localhost pada semua port (development lokal)
+    if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+      return cb(null, true);
+    }
+
+    // Izinkan semua subdomain .vercel.app milik Karang Taruna
+    if (/^https:\/\/karangtaruna-website.*\.vercel\.app$/.test(origin)) {
+      return cb(null, true);
+    }
+
+    // Untuk environment dev/preview tanpa constraint ketat
+    if (process.env.NODE_ENV !== 'production') {
+      return cb(null, true);
+    }
+
+    return cb(null, false);
   },
-  credentials: true, // penting: cookie httpOnly lintas origin
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200,
 };
 
-// Preflight OPTIONS dijawab SEBELUM middleware lain (helmet, rate-limit, dsb.)
-app.options('*', cors(corsOptions));
+// Pasang CORS middleware paling atas
 app.use(cors(corsOptions));
 
-// --- Compression (gzip) — kurangi ukuran respons JSON/teks hingga ~70% ---
+// --- Compression (gzip) ---
 app.use(compression());
 
 // --- Security headers ---
