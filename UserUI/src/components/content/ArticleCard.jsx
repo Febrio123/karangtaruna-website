@@ -50,7 +50,7 @@ function ArticleCard({ article, index = 0 }) {
           </h3>
 
           {/* Excerpt */}
-          <p className="font-body text-body-base text-text-secondary mb-4 line-clamp-3 flex-1">
+          <p className="font-body text-body-base text-text-secondary mb-4 line-clamp-3 flex-1 text-justify">
             {article.excerpt}
           </p>
 

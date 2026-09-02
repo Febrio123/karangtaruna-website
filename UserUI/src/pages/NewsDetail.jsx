@@ -1,4 +1,4 @@
-﻿import { useMemo } from 'react';
+import { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Calendar, User, ChevronRight } from 'lucide-react';
 import DOMPurify from 'dompurify';
@@ -191,12 +191,12 @@ export default function NewsDetail() {
 
       {/* Content */}
           <div
-            className="font-body text-body-base text-text-secondary leading-relaxed prose max-w-none
+            className="font-body text-body-base text-text-secondary leading-relaxed prose max-w-none text-justify
               [&_h3]:font-heading [&_h3]:text-h3 [&_h3]:text-text [&_h3]:mt-8 [&_h3]:mb-4
-              [&_p]:mb-4
+              [&_p]:mb-4 [&_p]:text-justify [&_p]:leading-relaxed
               [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:mb-4
               [&_ol]:list-decimal [&_ol]:ml-6 [&_ol]:mb-4
-              [&_li]:mb-1
+              [&_li]:mb-1 [&_li]:text-justify
               [&_strong]:text-text [&_strong]:font-semibold"
             dangerouslySetInnerHTML={{ __html: sanitizedContent }}
           />
