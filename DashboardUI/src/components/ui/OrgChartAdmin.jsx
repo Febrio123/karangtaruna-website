@@ -5,27 +5,48 @@
 import { User } from 'lucide-react'
 import { bidangList } from '../../data/pengurus.js'
 
-function OrgNode({ name, position, isTop = false }) {
+function OrgNode({ people, defaultTitle, isTop = false }) {
+  const items = Array.isArray(people)
+    ? people.filter(Boolean)
+    : people && typeof people === 'object' && (people.nama || people.name || people.jabatan || people.position)
+    ? [people]
+    : []
+
+  const list =
+    items.length > 0
+      ? items
+      : [{ nama: '—', jabatan: defaultTitle || '—' }]
+
   return (
-    <div className={`flex flex-col items-center ${isTop ? 'mb-2' : ''}`}>
-      <div className="w-16 h-16 rounded-full bg-primary-light flex items-center justify-center mb-1 border-2 border-primary/20">
+    <div className={`flex flex-col items-center text-center ${isTop ? 'mb-2' : ''}`}>
+      <div className="w-16 h-16 rounded-full bg-primary-light flex items-center justify-center mb-1.5 border-2 border-primary/20 shrink-0">
         <User className="w-7 h-7 text-primary" />
       </div>
-      <p className="font-heading text-body-base font-semibold text-text text-center leading-tight">
-        {name}
-      </p>
-      <p className="font-body text-caption text-primary text-center">{position}</p>
+      <div className="flex flex-col items-center gap-1.5 max-w-[160px]">
+        {list.map((item, idx) => (
+          <div key={item.id || item.nama || item.name || idx} className="flex flex-col items-center w-full">
+            {idx > 0 && <div className="w-10 h-px bg-border/60 my-1" />}
+            <p className="font-heading text-body-base font-semibold text-text leading-tight">
+              {item.nama || item.name || '—'}
+            </p>
+            <p className="font-body text-caption text-primary leading-tight">
+              {item.jabatan || item.position || defaultTitle || '—'}
+            </p>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
 
 export default function OrgChartAdmin({ pengurus = [] }) {
   // Level 1 — Ketua (role 'ketua')
-  const ketua = pengurus.find((p) => p.role === 'ketua')
+  const ketuaList = pengurus.filter((p) => p.role === 'ketua')
 
   // Level 2 — Wakil, Sekretaris, Bendahara
-  const intiRoles = ['wakil-ketua', 'sekretaris', 'bendahara']
-  const inti = intiRoles.map((role) => pengurus.find((p) => p.role === role))
+  const wakilList = pengurus.filter((p) => p.role === 'wakil-ketua')
+  const sekretarisList = pengurus.filter((p) => p.role === 'sekretaris')
+  const bendaharaList = pengurus.filter((p) => p.role === 'bendahara')
 
   // Level 3 — Satu kartu per bidang, members = nama anggota
   const level3 = bidangList.map((bidang) => ({
@@ -40,8 +61,8 @@ export default function OrgChartAdmin({ pengurus = [] }) {
       <div className="min-w-[640px] flex flex-col items-center">
         {/* Level 1: Ketua */}
         <OrgNode
-          name={ketua?.nama || '—'}
-          position={ketua?.jabatan || '—'}
+          people={ketuaList}
+          defaultTitle="Ketua"
           isTop
         />
 
@@ -49,25 +70,31 @@ export default function OrgChartAdmin({ pengurus = [] }) {
         <div className="w-0.5 h-6 bg-border" />
 
         {/* Level 2: Wakil, Sekretaris, Bendahara */}
-        <div className="relative w-full max-w-lg">
+        <div className="relative w-full max-w-xl">
           {/* Horizontal line */}
-          <div className="absolute top-0 left-[20%] right-[20%] h-0.5 bg-border" />
+          <div className="absolute top-0 left-[18%] right-[18%] h-0.5 bg-border" />
 
-          <div className="flex justify-between px-4 pt-6">
-            {inti.map((p) => (
-              <OrgNode
-                key={p?.role ?? Math.random()}
-                name={p?.nama || '—'}
-                position={p?.jabatan || '—'}
-              />
-            ))}
+          <div className="flex justify-between px-2 pt-6 items-start">
+            <OrgNode
+              people={wakilList}
+              defaultTitle="Wakil Ketua"
+            />
+            <OrgNode
+              people={sekretarisList}
+              defaultTitle="Sekretaris"
+            />
+            <OrgNode
+              people={bendaharaList}
+              defaultTitle="Bendahara"
+            />
           </div>
 
           {/* Vertical lines down */}
-          <div className="absolute top-0 left-[20%] w-0.5 h-6 bg-border" />
+          <div className="absolute top-0 left-[18%] w-0.5 h-6 bg-border" />
           <div className="absolute top-0 left-1/2 w-0.5 h-6 bg-border -translate-x-0.5" />
-          <div className="absolute top-0 right-[20%] w-0.5 h-6 bg-border" />
+          <div className="absolute top-0 right-[18%] w-0.5 h-6 bg-border" />
         </div>
+
 
         {/* Vertical lines to bidang */}
         <div className="w-0.5 h-6 bg-border" />

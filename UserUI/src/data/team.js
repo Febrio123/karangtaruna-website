@@ -41,9 +41,9 @@ export const teamMembers = pengurus.map((p) => ({
  * Field: ketua, wakil, sekretaris, bendahara (masing-masing {name, position}),
  *        bidang (array of {name, leader, members})
  */
-function findPengurus(roleValue) {
-  const p = pengurus.find((item) => item.role === roleValue);
-  return p ? { name: p.nama, position: p.jabatan } : { name: '-', position: '-' };
+function findPengurusList(roleValue) {
+  const items = pengurus.filter((item) => item.role === roleValue);
+  return items.map((p) => ({ id: p.id, name: p.nama, position: p.jabatan }));
 }
 
 // Kumpulkan data bidang dari pengurus role 'anggota' — group by bidang unik.
@@ -59,9 +59,10 @@ const bidangMembers = pengurus
 const bidangData = Object.values(bidangMembers);
 
 export const orgStructure = {
-  ketua: findPengurus('ketua'),
-  wakil: findPengurus('wakil-ketua'),
-  sekretaris: findPengurus('sekretaris'),
-  bendahara: findPengurus('bendahara'),
+  ketua: findPengurusList('ketua'),
+  wakil: findPengurusList('wakil-ketua'),
+  sekretaris: findPengurusList('sekretaris'),
+  bendahara: findPengurusList('bendahara'),
   bidang: bidangData,
 };
+

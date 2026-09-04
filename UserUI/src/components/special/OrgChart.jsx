@@ -3,16 +3,36 @@ import useApiData from '../../hooks/useApiData';
 import { orgStructure as staticOrgStructure } from '../../data/team';
 import { adaptOrgStructure } from '../../lib/adapters';
 
-function OrgNode({ name, position, isTop = false }) {
+function OrgNode({ people, defaultTitle, isTop = false }) {
+  const items = Array.isArray(people)
+    ? people.filter(Boolean)
+    : people && typeof people === 'object' && (people.name || people.position)
+    ? [people]
+    : [];
+
+  const list =
+    items.length > 0
+      ? items
+      : [{ name: '—', position: defaultTitle || '—' }];
+
   return (
-    <div className={`flex flex-col items-center ${isTop ? 'mb-2' : ''}`}>
-      <div className="w-16 h-16 rounded-full bg-primary-light flex items-center justify-center mb-1 border-2 border-primary/20">
+    <div className={`flex flex-col items-center text-center ${isTop ? 'mb-2' : ''}`}>
+      <div className="w-16 h-16 rounded-full bg-primary-light flex items-center justify-center mb-1.5 border-2 border-primary/20 shrink-0">
         <User className="w-7 h-7 text-primary" />
       </div>
-      <p className="font-heading text-body-base font-semibold text-text text-center leading-tight">
-        {name}
-      </p>
-      <p className="font-body text-caption text-primary text-center">{position}</p>
+      <div className="flex flex-col items-center gap-1.5 max-w-[160px]">
+        {list.map((item, idx) => (
+          <div key={item.id || item.name || idx} className="flex flex-col items-center w-full">
+            {idx > 0 && <div className="w-10 h-px bg-border/60 my-1" />}
+            <p className="font-heading text-body-base font-semibold text-text leading-tight">
+              {item.name ?? '—'}
+            </p>
+            <p className="font-body text-caption text-primary leading-tight">
+              {item.position ?? defaultTitle ?? '—'}
+            </p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -31,14 +51,25 @@ export default function OrgChart() {
   // selesai. Akses semua level dengan optional chaining agar halaman tidak
   // pernah blank/throw walau data kosong.
   const structure = orgStructure && typeof orgStructure === 'object' ? orgStructure : {};
-  const ketua = structure.ketua || {};
-  const wakil = structure.wakil || {};
-  const sekretaris = structure.sekretaris || {};
-  const bendahara = structure.bendahara || {};
+
+  const toPeopleArray = (item, defaultPos) => {
+    if (Array.isArray(item)) return item;
+    if (item && typeof item === 'object' && (item.name || item.position)) return [item];
+    return [];
+  };
+
+  const ketuaList = toPeopleArray(structure.ketua, 'Ketua');
+  const wakilList = toPeopleArray(structure.wakil, 'Wakil Ketua');
+  const sekretarisList = toPeopleArray(structure.sekretaris, 'Sekretaris');
+  const bendaharaList = toPeopleArray(structure.bendahara, 'Bendahara');
   const bidang = Array.isArray(structure.bidang) ? structure.bidang : [];
 
   const empty =
-    !ketua.name && !wakil.name && !sekretaris.name && !bendahara.name && bidang.length === 0;
+    ketuaList.length === 0 &&
+    wakilList.length === 0 &&
+    sekretarisList.length === 0 &&
+    bendaharaList.length === 0 &&
+    bidang.length === 0;
 
   if (empty) {
     return (
@@ -55,8 +86,8 @@ export default function OrgChart() {
       <div className="min-w-[640px] flex flex-col items-center">
         {/* Ketua */}
         <OrgNode
-          name={ketua.name ?? '—'}
-          position={ketua.position ?? '—'}
+          people={ketuaList}
+          defaultTitle="Ketua"
           isTop
         />
 
@@ -64,30 +95,31 @@ export default function OrgChart() {
         <div className="w-0.5 h-6 bg-border" />
 
         {/* Level 2: Wakil, Sekretaris, Bendahara */}
-        <div className="relative w-full max-w-lg">
+        <div className="relative w-full max-w-xl">
           {/* Horizontal line */}
-          <div className="absolute top-0 left-[20%] right-[20%] h-0.5 bg-border" />
+          <div className="absolute top-0 left-[18%] right-[18%] h-0.5 bg-border" />
 
-          <div className="flex justify-between px-4 pt-6">
+          <div className="flex justify-between px-2 pt-6 items-start">
             <OrgNode
-              name={wakil.name ?? '—'}
-              position={wakil.position ?? '—'}
+              people={wakilList}
+              defaultTitle="Wakil Ketua"
             />
             <OrgNode
-              name={sekretaris.name ?? '—'}
-              position={sekretaris.position ?? '—'}
+              people={sekretarisList}
+              defaultTitle="Sekretaris"
             />
             <OrgNode
-              name={bendahara.name ?? '—'}
-              position={bendahara.position ?? '—'}
+              people={bendaharaList}
+              defaultTitle="Bendahara"
             />
           </div>
 
           {/* Vertical lines down */}
-          <div className="absolute top-0 left-[20%] w-0.5 h-6 bg-border" />
+          <div className="absolute top-0 left-[18%] w-0.5 h-6 bg-border" />
           <div className="absolute top-0 left-1/2 w-0.5 h-6 bg-border -translate-x-0.5" />
-          <div className="absolute top-0 right-[20%] w-0.5 h-6 bg-border" />
+          <div className="absolute top-0 right-[18%] w-0.5 h-6 bg-border" />
         </div>
+
 
         {/* Vertical lines to bidang */}
         <div className="w-0.5 h-6 bg-border" />

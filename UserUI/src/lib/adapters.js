@@ -97,11 +97,12 @@ export function adaptTeamList(list) {
 /** Bangun orgStructure (bagan) dari daftar pengurus backend. */
 export function adaptOrgStructure(list) {
   const arr = list || [];
-  const find = (roleVal) => {
-    const p = arr.find((x) => x.role === roleVal);
-    return p
-      ? { name: adaptTeamMember(p).name, position: adaptTeamMember(p).position }
-      : { name: '-', position: '-' };
+  const findAll = (roleVal) => {
+    const matched = arr.filter((x) => x.role === roleVal);
+    return matched.map((p) => {
+      const adapted = adaptTeamMember(p);
+      return { id: adapted.id, name: adapted.name, position: adapted.position };
+    });
   };
 
   // Group anggota per bidang unik — `members` = array nama, bukan angka.
@@ -117,13 +118,14 @@ export function adaptOrgStructure(list) {
   const bidang = Object.values(grouped);
 
   return {
-    ketua: find('ketua'),
-    wakil: find('wakil-ketua'),
-    sekretaris: find('sekretaris'),
-    bendahara: find('bendahara'),
+    ketua: findAll('ketua'),
+    wakil: findAll('wakil-ketua'),
+    sekretaris: findAll('sekretaris'),
+    bendahara: findAll('bendahara'),
     bidang,
   };
 }
+
 
 // --- Artikel / Berita --------------------------------------------------------
 // Backend list fields: _id, slug, title, category, date, author, excerpt,

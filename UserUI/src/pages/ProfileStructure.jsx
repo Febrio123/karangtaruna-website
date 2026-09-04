@@ -1,9 +1,8 @@
-﻿import { User } from 'lucide-react';
+import { User } from 'lucide-react';
 import heroImg from '../assets/hero5.jpg';
 import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
 import OrgChart from '../components/special/OrgChart';
-import Card from '../components/ui/Card';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import ErrorBanner from '../components/ui/ErrorBanner';
 import useApiData from '../hooks/useApiData';

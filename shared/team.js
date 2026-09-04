@@ -46,11 +46,14 @@ export const bidangList = [
 export const pengurus = [
   { id: 1, nama: 'Ahmad Fauzi', jabatan: 'Ketua', bidang: '-', periode: '2025-2027', role: 'ketua', telepon: '0812-3456-7890' },
   { id: 2, nama: 'Siti Rahmawati', jabatan: 'Wakil Ketua', bidang: '-', periode: '2025-2027', role: 'wakil-ketua', telepon: '0813-2211-3344' },
-  { id: 3, nama: 'Budi Santoso', jabatan: 'Sekretaris', bidang: '-', periode: '2025-2027', role: 'sekretaris', telepon: '0812-9988-7766' },
-  { id: 4, nama: 'Dewi Anggraini', jabatan: 'Bendahara', bidang: '-', periode: '2025-2027', role: 'bendahara', telepon: '0857-1122-3344' },
-  { id: 5, nama: 'Rudi Hartono', jabatan: 'Koordinator Bidang', bidang: 'Keagamaan', periode: '2025-2027', role: 'anggota', telepon: '0822-4455-6677' },
-  { id: 6, nama: 'Rina Maharani', jabatan: 'Koordinator Bidang', bidang: 'Sosial & Kemanusiaan', periode: '2025-2027', role: 'anggota', telepon: '0811-5566-7788' },
-  { id: 7, nama: 'Joko Prasetyo', jabatan: 'Koordinator Bidang', bidang: 'Olahraga', periode: '2025-2027', role: 'anggota', telepon: '0856-2233-4455' },
-  { id: 8, nama: 'Lestari Putri', jabatan: 'Koordinator Bidang', bidang: 'Seni & Budaya', periode: '2025-2027', role: 'anggota', telepon: '0821-3344-5566' },
-  { id: 9, nama: 'Andi Firmansyah', jabatan: 'Koordinator Bidang', bidang: 'Pendidikan', periode: '2025-2027', role: 'anggota', telepon: '0819-8877-6655' },
+  { id: 3, nama: 'Budi Santoso', jabatan: 'Sekretaris 1', bidang: '-', periode: '2025-2027', role: 'sekretaris', telepon: '0812-9988-7766' },
+  { id: 4, nama: 'Dewi Anggraini', jabatan: 'Bendahara 1', bidang: '-', periode: '2025-2027', role: 'bendahara', telepon: '0857-1122-3344' },
+  { id: 5, nama: 'Nuria Maulida', jabatan: 'Sekretaris 2', bidang: '-', periode: '2025-2027', role: 'sekretaris', telepon: '0812-1111-2222' },
+  { id: 6, nama: 'Bayu Pratama', jabatan: 'Bendahara 2', bidang: '-', periode: '2025-2027', role: 'bendahara', telepon: '0857-3333-4444' },
+  { id: 7, nama: 'Rudi Hartono', jabatan: 'Koordinator Bidang', bidang: 'Keagamaan', periode: '2025-2027', role: 'anggota', telepon: '0822-4455-6677' },
+  { id: 8, nama: 'Rina Maharani', jabatan: 'Koordinator Bidang', bidang: 'Sosial & Kemanusiaan', periode: '2025-2027', role: 'anggota', telepon: '0811-5566-7788' },
+  { id: 9, nama: 'Joko Prasetyo', jabatan: 'Koordinator Bidang', bidang: 'Olahraga', periode: '2025-2027', role: 'anggota', telepon: '0856-2233-4455' },
+  { id: 10, nama: 'Lestari Putri', jabatan: 'Koordinator Bidang', bidang: 'Seni & Budaya', periode: '2025-2027', role: 'anggota', telepon: '0821-3344-5566' },
+  { id: 11, nama: 'Andi Firmansyah', jabatan: 'Koordinator Bidang', bidang: 'Pendidikan', periode: '2025-2027', role: 'anggota', telepon: '0819-8877-6655' },
 ];
+
