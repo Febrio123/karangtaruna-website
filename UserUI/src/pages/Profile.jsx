@@ -1,4 +1,4 @@
-﻿import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import heroImg from '../assets/hero2.png';
 import PageHeader from '../components/layout/PageHeader';
@@ -12,7 +12,7 @@ export default function Profile() {
   const { data: siteConfig } = useSiteConfig();
   useSeo({
     title: 'Profil',
-    description: 'Mengenal lebih dekat Karang Taruna Mangga Dua Selatan — sejarah, visi, misi, dan struktur organisasi pemuda di Kelurahan Mangga Dua Selatan, Depok.',
+    description: 'Mengenal lebih dekat Karang Taruna Mangga Dua Selatan — sejarah, visi, misi, dan struktur organisasi pemuda di Kelurahan Mangga Dua Selatan, Jakarta Pusat.',
     path: '/profil',
     jsonLd: [
       {

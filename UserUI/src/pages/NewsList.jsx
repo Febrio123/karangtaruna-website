@@ -1,4 +1,4 @@
-﻿import { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import heroImg from '../assets/hero6.jpg';
 import PageHeader from '../components/layout/PageHeader';
 import Section from '../components/layout/Section';
@@ -23,7 +23,7 @@ export default function NewsList() {
   });
   useSeo({
     title: 'Berita & Kegiatan',
-    description: 'Informasi terbaru seputar kegiatan, program kerja, dan acara Karang Taruna Mangga Dua Selatan di Kelurahan Mangga Dua Selatan, Depok.',
+    description: 'Informasi terbaru seputar kegiatan, program kerja, dan acara Karang Taruna Mangga Dua Selatan di Kelurahan Mangga Dua Selatan, Jakarta Pusat.',
     path: '/berita',
     jsonLd: [
       {

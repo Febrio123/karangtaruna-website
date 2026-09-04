@@ -33,7 +33,7 @@ export default function Contact() {
   const { data: siteConfig } = useSiteConfig();
   useSeo({
     title: 'Kontak',
-    description: 'Hubungi Karang Taruna Mangga Dua Selatan — alamat, telepon, email, dan peta lokasi sekretariat di Kelurahan Mangga Dua Selatan, Depok.',
+    description: 'Hubungi Karang Taruna Mangga Dua Selatan — alamat, telepon, email, dan peta lokasi sekretariat di Kelurahan Mangga Dua Selatan, Jakarta Pusat.',
     path: '/kontak',
     jsonLd: [
       {

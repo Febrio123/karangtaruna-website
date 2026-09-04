@@ -104,10 +104,10 @@ export default function Home() {
       description: siteConfig.tagline,
       address: {
         '@type': 'PostalAddress',
-        streetAddress: 'Jl. Raya Mangga Dua Selatan No. 12',
-        addressLocality: 'Kel. Mangga Dua Selatan, Kec. Sukmajaya',
-        addressRegion: 'Kota Depok, Jawa Barat',
-        postalCode: '16411',
+        streetAddress: 'Jl. Pisang Batu No. 29, RT.3/RW.10',
+        addressLocality: 'Kel. Mangga Dua Selatan, Kec. Sawah Besar',
+        addressRegion: 'Kota Jakarta Pusat, DKI Jakarta',
+        postalCode: '10730',
         addressCountry: 'ID',
       },
       contactPoint: {
