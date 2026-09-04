@@ -12,32 +12,40 @@ function OrgNode({ people, defaultTitle, isTop = false }) {
     ? [people]
     : []
 
-  const list =
-    items.length > 0
-      ? items
-      : [{ nama: '—', jabatan: defaultTitle || '—' }]
-
   return (
     <div className={`flex flex-col items-center text-center ${isTop ? 'mb-2' : ''}`}>
-      <div className="w-16 h-16 rounded-full bg-primary-light flex items-center justify-center mb-1.5 border-2 border-primary/20 shrink-0">
+      <div className="w-16 h-16 rounded-full bg-primary-light flex items-center justify-center mb-1 border-2 border-primary/20 shrink-0">
         <User className="w-7 h-7 text-primary" />
       </div>
-      <div className="flex flex-col items-center gap-1.5 max-w-[160px]">
-        {list.map((item, idx) => (
-          <div key={item.id || item.nama || item.name || idx} className="flex flex-col items-center w-full">
-            {idx > 0 && <div className="w-10 h-px bg-border/60 my-1" />}
-            <p className="font-heading text-body-base font-semibold text-text leading-tight">
-              {item.nama || item.name || '—'}
-            </p>
-            <p className="font-body text-caption text-primary leading-tight">
-              {item.jabatan || item.position || defaultTitle || '—'}
-            </p>
-          </div>
-        ))}
-      </div>
+      <p className="font-heading text-body-base font-semibold text-text text-center leading-tight">
+        {defaultTitle}
+      </p>
+      <ul className="mt-1 space-y-1 text-center max-w-[160px]">
+        {items.length > 0 ? (
+          items.map((item, idx) => {
+            const name = item.nama || item.name || '—'
+            const pos = item.jabatan || item.position
+            const hasDetail = pos && pos !== defaultTitle && pos !== '—'
+
+            return (
+              <li key={item.id || name || idx} className="font-body text-caption text-text font-medium leading-tight">
+                <span>{name}</span>
+                {hasDetail && (
+                  <span className="block text-[11px] text-text-muted font-normal mt-0.5">
+                    {pos}
+                  </span>
+                )}
+              </li>
+            )
+          })
+        ) : (
+          <li className="font-body text-caption text-text-muted">—</li>
+        )}
+      </ul>
     </div>
   )
 }
+
 
 export default function OrgChartAdmin({ pengurus = [] }) {
   // Level 1 — Ketua (role 'ketua')
